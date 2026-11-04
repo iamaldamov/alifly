@@ -137,6 +137,56 @@ function readCompletedLessons(): number[] {
 }
 
 
+type Mistake = { id: string; lessonId: number; lessonTitle: string; question: Question };
+
+function readMistakes(): Mistake[] {
+  try {
+    const saved = localStorage.getItem("alifly-mistakes");
+    if (!saved) return [];
+    const parsed: unknown = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is Mistake =>
+      item !== null &&
+      typeof item === "object" &&
+      typeof item.id === "string" &&
+      Number.isInteger(item.lessonId) &&
+      typeof item.lessonTitle === "string" &&
+      item.question !== null &&
+      typeof item.question === "object" &&
+      typeof item.question.prompt === "string" &&
+      Array.isArray(item.question.options) &&
+      typeof item.question.correct === "string" &&
+      typeof item.question.explanation === "string"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function readNumber(key: string): number {
+  try {
+    const value = Number(localStorage.getItem(key) || 0);
+    return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function readLastStudyDate(): string {
+  try {
+    return localStorage.getItem("alifly-last-study-date") || "";
+  } catch {
+    return "";
+  }
+}
+
+function localDateKey(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 type TutorMessage = { role: "user" | "assistant"; content: string };
 
 function AiTutor() {
@@ -217,10 +267,32 @@ export default function App() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [lessonFinished, setLessonFinished] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(readCompletedLessons);
+  const [mistakes, setMistakes] = useState<Mistake[]>(readMistakes);
+  const [xp, setXp] = useState<number>(() => readNumber("alifly-xp"));
+  const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
+  const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [reviewMistakeIds, setReviewMistakeIds] = useState<string[]>([]);
 
   useEffect(() => {
     localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds));
   }, [completedLessonIds]);
+
+  useEffect(() => {
+    localStorage.setItem("alifly-mistakes", JSON.stringify(mistakes));
+  }, [mistakes]);
+
+  useEffect(() => {
+    localStorage.setItem("alifly-xp", String(xp));
+  }, [xp]);
+
+  useEffect(() => {
+    localStorage.setItem("alifly-streak", String(streak));
+  }, [streak]);
+
+  useEffect(() => {
+    localStorage.setItem("alifly-last-study-date", lastStudyDate);
+  }, [lastStudyDate]);
 
   const closeStage = () => {
     setSelectedStage(null);
@@ -229,6 +301,8 @@ export default function App() {
     setSelectedAnswer(null);
     setCorrectAnswers(0);
     setLessonFinished(false);
+    setReviewMode(false);
+    setReviewMistakeIds([]);
   };
 
   const startLesson = (lesson: Lesson) => {
@@ -237,25 +311,68 @@ export default function App() {
     setSelectedAnswer(null);
     setCorrectAnswers(0);
     setLessonFinished(false);
+    setReviewMode(false);
+    setReviewMistakeIds([]);
   };
 
   const answerQuestion = (answer: string) => {
     if (selectedAnswer !== null || !selectedLesson) return;
     setSelectedAnswer(answer);
-    if (answer === selectedLesson.questions[questionIndex].correct) {
+    const question = selectedLesson.questions[questionIndex];
+    const mistakeId = reviewMode
+      ? reviewMistakeIds[questionIndex]
+      : `${selectedLesson.id}:${question.prompt}`;
+
+    if (answer === question.correct) {
       setCorrectAnswers((count) => count + 1);
+      setXp((current) => current + 10);
+      if (mistakeId) {
+        setMistakes((current) => current.filter((item) => item.id !== mistakeId));
+      }
+    } else if (!reviewMode) {
+      setMistakes((current) => current.some((item) => item.id === mistakeId)
+        ? current
+        : [...current, { id: mistakeId, lessonId: selectedLesson.id, lessonTitle: selectedLesson.title, question }]);
     }
   };
 
   const nextQuestion = () => {
     if (!selectedLesson) return;
     if (questionIndex === selectedLesson.questions.length - 1) {
-      setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
+      if (!reviewMode) {
+        setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
+        setXp((current) => current + 15);
+        const today = localDateKey();
+        if (lastStudyDate !== today) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          setStreak((current) => lastStudyDate === localDateKey(yesterday) ? current + 1 : 1);
+          setLastStudyDate(today);
+        }
+      }
       setLessonFinished(true);
       return;
     }
     setQuestionIndex((index) => index + 1);
     setSelectedAnswer(null);
+  };
+
+  const startReview = () => {
+    if (mistakes.length === 0) return;
+    setSelectedStage(stages[0]);
+    setSelectedLesson({
+      id: 0,
+      title: "Повторение ошибок",
+      goal: "Спокойно повтори вопросы, в которых ошибался.",
+      letters: [],
+      questions: mistakes.map((item) => item.question),
+    });
+    setReviewMistakeIds(mistakes.map((item) => item.id));
+    setQuestionIndex(0);
+    setSelectedAnswer(null);
+    setCorrectAnswers(0);
+    setLessonFinished(false);
+    setReviewMode(true);
   };
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
@@ -270,7 +387,8 @@ export default function App() {
         </a>
         <div className="topbar-right">
           <span className="language">RU · Русский</span>
-          <span className="streak" aria-label="Серия занятий">🔥 0</span>
+          <span className="xp-counter" aria-label="Баллы опыта">✦ {xp} XP</span>
+          <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
         </div>
       </header>
 
@@ -303,6 +421,11 @@ export default function App() {
           <div className="progress-info"><span>{completedLessonIds.length} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
           <p>{completedLessonIds.length === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          {mistakes.length > 0 && (
+            <button className="review-button" type="button" onClick={startReview}>
+              Повторить ошибки · {mistakes.length}
+            </button>
+          )}
         </div>
       </section>
 
@@ -367,12 +490,12 @@ export default function App() {
             ) : lessonFinished ? (
               <div className="lesson-result">
                 <div className="result-symbol">✦</div>
-                <span className="section-label">УРОК ЗАВЕРШЁН</span>
-                <h2 id="stage-modal-title">Отличная работа!</h2>
+                <span className="section-label">{reviewMode ? "ПОВТОРЕНИЕ ЗАВЕРШЕНО" : "УРОК ЗАВЕРШЁН"}</span>
+                <h2 id="stage-modal-title">{reviewMode ? "Ошибки разобраны!" : "Отличная работа!"}</h2>
                 <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
                 <div className="result-score">{correctAnswers}/{selectedLesson.questions.length}</div>
-                <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : "Хорошее начало. Повтори буквы и попробуй ещё раз."}</p>
-                <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); }}>К списку уроков</button>
+                <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : reviewMode ? "Некоторые вопросы ещё требуют практики. Они останутся в списке повторения." : "Хорошее начало. Повтори буквы и попробуй ещё раз."}</p>
+                <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); setReviewMode(false); setReviewMistakeIds([]); }}>К списку уроков</button>
               </div>
             ) : currentQuestion ? (
               <>
