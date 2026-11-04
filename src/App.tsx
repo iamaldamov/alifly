@@ -361,7 +361,7 @@ export default function App() {
     if (!selectedLesson) return;
     if (questionIndex === selectedLesson.questions.length - 1) {
       if (examMode) {
-        if (correctAnswers + (selectedAnswer === currentQuestion?.correct ? 1 : 0) >= 8 && !examPassed) {
+        if (correctAnswers >= 8 && !examPassed) {
           setExamPassed(true);
           setXp((current) => current + 30);
         }
