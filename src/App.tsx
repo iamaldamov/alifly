@@ -124,6 +124,19 @@ const lessons: Lesson[] = [
   },
 ];
 
+const examQuestions: Question[] = [
+  { prompt: "Какая буква называется «алиф»?", options: ["ا", "ب", "ت"], correct: "ا", explanation: "Алиф — ا. Она выглядит как вертикальная линия." },
+  { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Ба — ب. У неё одна точка снизу." },
+  { prompt: "Найди букву «та» с двумя точками сверху.", options: ["ث", "ت", "ج"], correct: "ت", explanation: "Та — ت. У неё две точки сверху." },
+  { prompt: "Какая буква имеет три точки сверху?", options: ["ب", "ش", "س"], correct: "ش", explanation: "Шин — ش. Её отличают три точки сверху." },
+  { prompt: "Найди букву «джим».", options: ["ح", "خ", "ج"], correct: "ج", explanation: "Джим — ج. У неё одна точка снизу." },
+  { prompt: "Какая буква называется «даль»?", options: ["ذ", "د", "ر"], correct: "د", explanation: "Даль — د. Она пишется без точки." },
+  { prompt: "Найди букву «зай».", options: ["ز", "ر", "س"], correct: "ز", explanation: "Зай — ز. У неё одна точка сверху." },
+  { prompt: "Какая буква называется «айн»?", options: ["غ", "ع", "ض"], correct: "ع", explanation: "Айн — ع. Это гортанный звук, которому нужна отдельная практика." },
+  { prompt: "Найди букву «фа».", options: ["ق", "ف", "ك"], correct: "ف", explanation: "Фа — ف. В этой учебной форме у неё одна точка сверху." },
+  { prompt: "Какая буква называется «мим»?", options: ["ن", "م", "ل"], correct: "م", explanation: "Мим — م." },
+];
+
 function readCompletedLessons(): number[] {
   try {
     const saved = localStorage.getItem("alifly-completed-lessons");
@@ -273,6 +286,8 @@ export default function App() {
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewMistakeIds, setReviewMistakeIds] = useState<string[]>([]);
+  const [examMode, setExamMode] = useState(false);
+  const [examPassed, setExamPassed] = useState<boolean>(() => localStorage.getItem("alifly-stage-1-exam-passed") === "true");
 
   useEffect(() => {
     localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds));
@@ -294,6 +309,10 @@ export default function App() {
     localStorage.setItem("alifly-last-study-date", lastStudyDate);
   }, [lastStudyDate]);
 
+  useEffect(() => {
+    localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed));
+  }, [examPassed]);
+
   const closeStage = () => {
     setSelectedStage(null);
     setSelectedLesson(null);
@@ -303,6 +322,7 @@ export default function App() {
     setLessonFinished(false);
     setReviewMode(false);
     setReviewMistakeIds([]);
+    setExamMode(false);
   };
 
   const startLesson = (lesson: Lesson) => {
@@ -313,6 +333,7 @@ export default function App() {
     setLessonFinished(false);
     setReviewMode(false);
     setReviewMistakeIds([]);
+    setExamMode(false);
   };
 
   const answerQuestion = (answer: string) => {
@@ -339,9 +360,16 @@ export default function App() {
   const nextQuestion = () => {
     if (!selectedLesson) return;
     if (questionIndex === selectedLesson.questions.length - 1) {
-      if (!reviewMode) {
+      if (examMode) {
+        if (correctAnswers + (selectedAnswer === currentQuestion?.correct ? 1 : 0) >= 8 && !examPassed) {
+          setExamPassed(true);
+          setXp((current) => current + 30);
+        }
+      } else if (!reviewMode) {
         setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
         setXp((current) => current + 15);
+      }
+      if (!reviewMode) {
         const today = localDateKey();
         if (lastStudyDate !== today) {
           const yesterday = new Date();
@@ -355,6 +383,25 @@ export default function App() {
     }
     setQuestionIndex((index) => index + 1);
     setSelectedAnswer(null);
+  };
+
+  const startExam = () => {
+    if (completedLessonIds.length < lessons.length) return;
+    setSelectedStage(stages[0]);
+    setSelectedLesson({
+      id: 99,
+      title: "Итоговый экзамен",
+      goal: "Проверь, насколько хорошо ты запомнил буквы первого этапа.",
+      letters: [],
+      questions: examQuestions,
+    });
+    setQuestionIndex(0);
+    setSelectedAnswer(null);
+    setCorrectAnswers(0);
+    setLessonFinished(false);
+    setReviewMode(false);
+    setReviewMistakeIds([]);
+    setExamMode(true);
   };
 
   const startReview = () => {
@@ -377,6 +424,7 @@ export default function App() {
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
   const progressPercent = Math.round((completedLessonIds.length / lessons.length) * 100);
+  const stageTwoUnlocked = examPassed;
 
   return (
     <main className="app">
@@ -435,18 +483,21 @@ export default function App() {
           <span className="stage-count">6 этапов</span>
         </div>
         <div className="stage-list">
-          {stages.map((stage) => (
-            <button className={`stage-card ${stage.status === "locked" ? "stage-locked" : ""}`} key={stage.id} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
-              <span className="stage-icon">{stage.icon}</span>
-              <span className="stage-info">
-                <span className="stage-number">ЭТАП {stage.id}</span>
-                <strong>{stage.title}</strong>
-                <span className="stage-description">{stage.description}</span>
-                <span className="lesson-count">{stage.id === 1 ? `${completedLessonIds.length}/5 бесплатных уроков` : `${stage.lessons} уроков`}</span>
-              </span>
-              <span className="stage-arrow">{stage.status === "available" ? "→" : "🔒"}</span>
-            </button>
-          ))}
+          {stages.map((stage) => {
+            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked);
+            return (
+              <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
+                <span className="stage-icon">{stage.icon}</span>
+                <span className="stage-info">
+                  <span className="stage-number">ЭТАП {stage.id}</span>
+                  <strong>{stage.title}</strong>
+                  <span className="stage-description">{stage.description}</span>
+                  <span className="lesson-count">{stage.id === 1 ? `${completedLessonIds.length}/5 бесплатных уроков` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
+                </span>
+                <span className="stage-arrow">{unlocked ? "→" : "🔒"}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -467,7 +518,14 @@ export default function App() {
                 <span className="section-label">ЭТАП {selectedStage.id}</span>
                 <h2 id="stage-modal-title">{selectedStage.title}</h2>
                 <p>{selectedStage.description}</p>
-                {selectedStage.id === 1 ? (
+                {selectedStage.id === 2 && stageTwoUnlocked ? (
+                  <div className="unlocked-stage-panel">
+                    <div className="unlocked-stage-mark">✓</div>
+                    <strong>Этап открыт!</strong>
+                    <p>Ты успешно прошёл итоговый экзамен первого этапа. Следующая тема — огласовки: фатха, кясра и дамма.</p>
+                    <p className="local-progress-note">Уроки второго этапа будут добавлены следующим обновлением.</p>
+                  </div>
+                ) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
                     <p className="modal-note">Пять первых уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
                     {lessons.map((lesson) => {
@@ -481,6 +539,11 @@ export default function App() {
                         </button>
                       );
                     })}
+                    <button className={`exam-pick ${examPassed ? "exam-pick-passed" : ""}`} type="button" onClick={startExam} disabled={completedLessonIds.length < lessons.length}>
+                      <span className="exam-pick-mark">{examPassed ? "✓" : "10"}</span>
+                      <span className="lesson-pick-text"><strong>Итоговый экзамен</strong><small>{examPassed ? "Экзамен успешно сдан" : "10 вопросов · нужно 8 правильных"}</small></span>
+                      <span className="lesson-pick-state">{examPassed ? "Пройден" : completedLessonIds.length === lessons.length ? "Начать →" : "Сначала 5 уроков"}</span>
+                    </button>
                     <p className="local-progress-note">Прогресс сохраняется в этом браузере на устройстве.</p>
                   </div>
                 ) : (
@@ -489,24 +552,41 @@ export default function App() {
               </>
             ) : lessonFinished ? (
               <div className="lesson-result">
+                {examMode ? (
+                  <>
+                    <div className="result-symbol">{correctAnswers >= 8 ? "✓" : "↻"}</div>
+                    <span className="section-label">ИТОГОВЫЙ ЭКЗАМЕН</span>
+                    <h2 id="stage-modal-title">{correctAnswers >= 8 ? "Этап пройден!" : "Попробуй ещё раз"}</h2>
+                    <p>Твой результат: {correctAnswers} из 10 правильных ответов.</p>
+                    <div className="result-score">{correctAnswers}/10</div>
+                    <p>{correctAnswers >= 8 ? "Ма ша Аллах! Ты открыл следующий этап — «Огласовки»." : "Для открытия следующего этапа нужно набрать не менее 8 правильных ответов. Повтори уроки и возвращайся."}</p>
+                    {correctAnswers >= 8 ? (
+                      <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); setExamMode(false); setSelectedStage(stages[1]); }}>Открыть этап 2 →</button>
+                    ) : (
+                      <button className="primary-button modal-button" onClick={startExam}>Пересдать экзамен</button>
+                    )}
+                  </>
+                ) : (
                 <div className="result-symbol">✦</div>
                 <span className="section-label">{reviewMode ? "ПОВТОРЕНИЕ ЗАВЕРШЕНО" : "УРОК ЗАВЕРШЁН"}</span>
                 <h2 id="stage-modal-title">{reviewMode ? "Ошибки разобраны!" : "Отличная работа!"}</h2>
                 <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
                 <div className="result-score">{correctAnswers}/{selectedLesson.questions.length}</div>
                 <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : reviewMode ? "Некоторые вопросы ещё требуют практики. Они останутся в списке повторения." : "Хорошее начало. Повтори буквы и попробуй ещё раз."}</p>
-                <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); setReviewMode(false); setReviewMistakeIds([]); }}>К списку уроков</button>
+                <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); setReviewMode(false); setReviewMistakeIds([]); setExamMode(false); }}>К списку уроков</button>
+                </>
+                )}
               </div>
             ) : currentQuestion ? (
               <>
                 <div className="lesson-topline">
-                  <span className="section-label">УРОК {selectedLesson.id} · АЛФАВИТ</span>
+                  <span className="section-label">{examMode ? "ЭКЗАМЕН · ЭТАП 1" : `УРОК ${selectedLesson.id} · АЛФАВИТ`}</span>
                   <span className="lesson-step">{questionIndex + 1} из {selectedLesson.questions.length}</span>
                 </div>
                 <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / selectedLesson.questions.length) * 100}%` }} /></div>
                 <h2 id="stage-modal-title">{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
-                <div className="letter-intro lesson-letters">
+                {selectedLesson.letters.length > 0 && <div className="letter-intro lesson-letters">
                   {selectedLesson.letters.map((letter) => (
                     <div key={letter.character}>
                       <strong lang="ar" dir="rtl">{letter.character}</strong>
@@ -514,7 +594,7 @@ export default function App() {
                       {letter.note && <small>{letter.note}</small>}
                     </div>
                   ))}
-                </div>
+                </div>}
                 <div className="question-block">
                   <span className="question-label">ПРОВЕРЬ СЕБЯ</span>
                   <h3>{currentQuestion.prompt}</h3>
