@@ -74,6 +74,7 @@ export default function App() {
 
   const nextQuestion = () => {
     if (questionIndex === questions.length - 1) {
+      setLessonCompleted(true);
       setLessonFinished(true);
       return;
     }
@@ -123,9 +124,9 @@ export default function App() {
           <h2>Каждый шаг важен</h2>
         </div>
         <div className="progress-card">
-          <div className="progress-info"><span>Начало пути</span><strong>0%</strong></div>
-          <div className="progress-track"><div className="progress-fill" /></div>
-          <p>Пройди первый урок, чтобы начать свой путь.</p>
+          <div className="progress-info"><span>{lessonCompleted ? "Первый урок пройден" : "Начало пути"}</span><strong>{lessonCompleted ? "12%" : "0%"}</strong></div>
+          <div className="progress-track"><div className="progress-fill" style={{ width: lessonCompleted ? "12.5%" : "0%" }} /></div>
+          <p>{lessonCompleted ? "Отличное начало! Продолжай изучение алфавита." : "Пройди первый урок, чтобы начать свой путь."}</p>
         </div>
       </section>
 
