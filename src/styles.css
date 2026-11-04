@@ -137,3 +137,24 @@ button:focus-visible, a:focus-visible { outline: 3px solid #c59a4a; outline-offs
   .answer-option { min-height: 68px; font-size: 34px; }
   .letter-intro { gap: 7px; }
 }
+
+.lesson-picker { display: flex; flex-direction: column; gap: 9px; max-height: 52vh; overflow-y: auto; padding-right: 2px; text-align: left; }
+.lesson-picker > .modal-note { margin: 3px 0 8px; text-align: center; }
+.lesson-pick { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 66px; padding: 10px 12px; border: 1px solid #e5e9df; border-radius: 14px; background: #fffefa; color: #294437; text-align: left; cursor: pointer; }
+.lesson-pick:disabled { background: #f2f3ed; color: #9aa197; cursor: not-allowed; }
+.lesson-pick-done { border-color: #cbdcc9; background: #f0f6ed; }
+.lesson-pick-number { display: grid; flex: 0 0 34px; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: #edf2e9; color: #356448; font-size: 12px; font-weight: 850; }
+.lesson-pick-text { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; }
+.lesson-pick-text strong { color: #30483a; font-size: 12px; line-height: 1.35; }
+.lesson-pick-text small { color: #8a958b; font-size: 10px; }
+.lesson-pick-state { color: #66816a; font-size: 10px; font-weight: 750; white-space: nowrap; }
+.lesson-pick:disabled .lesson-pick-state { color: #a1a89f; }
+.local-progress-note { margin: 7px 0 0; color: #929a90; font-size: 10px; text-align: center; }
+.lesson-letters { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 240px; overflow-y: auto; padding: 2px 2px 7px; }
+.lesson-letters > div { min-width: 0; }
+.lesson-letters small { color: #89938a; font-size: 9px; line-height: 1.35; text-align: center; }
+@media (max-width: 480px) {
+  .lesson-picker { max-height: 55vh; }
+  .lesson-letters { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; max-height: 210px; }
+  .lesson-letters strong { font-size: 36px; }
+}
