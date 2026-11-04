@@ -45,7 +45,7 @@ export default function App() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [lessonFinished, setLessonFinished] = useState(false);
+  const [lessonFinished, setLessonFinished] = useState(false);\n  const [lessonCompleted, setLessonCompleted] = useState(false);
 
   const closeStage = () => {
     setSelectedStage(null);
