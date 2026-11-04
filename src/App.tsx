@@ -26,7 +26,7 @@ type Lesson = {
 
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 5, status: "available" },
-  { id: 2, title: "Огласовки", description: "Фатха, кясра, дамма и другие знаки", icon: "َ", lessons: 8, status: "locked" },
+  { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
   { id: 3, title: "Первые слова", description: "Изучаем простые слова и выражения", icon: "ك", lessons: 10, status: "locked" },
   { id: 4, title: "Основы грамматики", description: "Строим простые предложения", icon: "ن", lessons: 10, status: "locked" },
   { id: 5, title: "Разговорный арабский", description: "Знакомство и повседневные диалоги", icon: "ح", lessons: 10, status: "locked" },
@@ -124,6 +124,55 @@ const lessons: Lesson[] = [
   },
 ];
 
+
+const stageTwoLessons: Lesson[] = [
+  {
+    id: 6,
+    title: "Фатха — короткий звук «а»",
+    goal: "Узнай знак фатха и научись читать простые сочетания с ним.",
+    letters: [
+      { character: "بَ", name: "ба", note: "Фатха над буквой даёт короткий звук «а»." },
+      { character: "تَ", name: "та", note: "Та с фатхой читается как «та»." },
+      { character: "مَ", name: "ма", note: "Мим с фатхой читается как «ма»." },
+    ],
+    questions: [
+      { prompt: "Как называется знак над буквой, который даёт короткий звук «а»?", options: ["Фатха", "Кясра", "Дамма"], correct: "Фатха", explanation: "Фатха — короткая диагональная черта над буквой. Например: بَ — «ба»." },
+      { prompt: "Как читается сочетание بَ?", options: ["би", "бу", "ба"], correct: "ба", explanation: "Буква ба с фатхой читается «ба»." },
+      { prompt: "Где находится фатха?", options: ["Под буквой", "Над буквой", "После буквы"], correct: "Над буквой", explanation: "Фатха ставится над согласной буквой." },
+    ],
+  },
+  {
+    id: 7,
+    title: "Кясра — короткий звук «и»",
+    goal: "Научись замечать кясру под буквой и читать сочетания с ней.",
+    letters: [
+      { character: "بِ", name: "би", note: "Кясра под буквой даёт короткий звук «и»." },
+      { character: "تِ", name: "ти", note: "Та с кясрой читается как «ти»." },
+      { character: "مِ", name: "ми", note: "Мим с кясрой читается как «ми»." },
+    ],
+    questions: [
+      { prompt: "Как называется короткая черта под буквой?", options: ["Дамма", "Фатха", "Кясра"], correct: "Кясра", explanation: "Кясра — короткая черта под буквой. Она обозначает короткий звук «и»." },
+      { prompt: "Как читается сочетание بِ?", options: ["ба", "би", "бу"], correct: "би", explanation: "Ба с кясрой читается «би»." },
+      { prompt: "Где ставится кясра?", options: ["Под буквой", "Над буквой", "Слева от буквы"], correct: "Под буквой", explanation: "Кясра располагается под согласной буквой." },
+    ],
+  },
+  {
+    id: 8,
+    title: "Дамма — короткий звук «у»",
+    goal: "Познакомься с даммой и сравни три основные огласовки.",
+    letters: [
+      { character: "بُ", name: "бу", note: "Дамма над буквой даёт короткий звук «у»." },
+      { character: "تُ", name: "ту", note: "Та с даммой читается как «ту»." },
+      { character: "مُ", name: "му", note: "Мим с даммой читается как «му»." },
+    ],
+    questions: [
+      { prompt: "Как называется знак, похожий на маленькую запятую над буквой?", options: ["Кясра", "Дамма", "Фатха"], correct: "Дамма", explanation: "Дамма ставится над буквой и обозначает короткий звук «у»." },
+      { prompt: "Как читается сочетание بُ?", options: ["бу", "би", "ба"], correct: "бу", explanation: "Ба с даммой читается «бу»." },
+      { prompt: "Какое соответствие верное?", options: ["Фатха — «и»", "Кясра — «у»", "Дамма — «у»"], correct: "Дамма — «у»", explanation: "Запомни: фатха — короткое «а», кясра — короткое «и», дамма — короткое «у»." },
+    ],
+  },
+];
+
 const examQuestions: Question[] = [
   { prompt: "Какая буква называется «алиф»?", options: ["ا", "ب", "ت"], correct: "ا", explanation: "Алиф — ا. Она выглядит как вертикальная линия." },
   { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Ба — ب. У неё одна точка снизу." },
@@ -143,7 +192,7 @@ function readCompletedLessons(): number[] {
     if (!saved) return [];
     const parsed: unknown = JSON.parse(saved);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((value): value is number => Number.isInteger(value) && value >= 1 && value <= 5);
+    return parsed.filter((value): value is number => Number.isInteger(value) && value >= 1 && value <= 8);
   } catch {
     return [];
   }
@@ -519,11 +568,20 @@ export default function App() {
                 <h2 id="stage-modal-title">{selectedStage.title}</h2>
                 <p>{selectedStage.description}</p>
                 {selectedStage.id === 2 && stageTwoUnlocked ? (
-                  <div className="unlocked-stage-panel">
-                    <div className="unlocked-stage-mark">✓</div>
-                    <strong>Этап открыт!</strong>
-                    <p>Ты успешно прошёл итоговый экзамен первого этапа. Следующая тема — огласовки: фатха, кясра и дамма.</p>
-                    <p className="local-progress-note">Уроки второго этапа будут добавлены следующим обновлением.</p>
+                  <div className="lesson-picker">
+                    <p className="modal-note">Отличная работа! Теперь изучи три основные огласовки. Уроки открываются по порядку.</p>
+                    {stageTwoLessons.map((lesson) => {
+                      const isOpen = lesson.id === 6 || completedLessonIds.includes(lesson.id - 1);
+                      const isCompleted = completedLessonIds.includes(lesson.id);
+                      return (
+                        <button key={lesson.id} className={isCompleted ? "lesson-pick lesson-pick-done" : "lesson-pick"} disabled={!isOpen} onClick={() => startLesson(lesson)}>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(lesson.id - 5).padStart(2, "0")}</span>
+                          <span className="lesson-pick-text"><strong>{lesson.title}</strong><small>{lesson.letters.length} примера · 3 задания</small></span>
+                          <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
+                        </button>
+                      );
+                    })}
+                    <p className="local-progress-note">Прогресс сохраняется в этом браузере на устройстве.</p>
                   </div>
                 ) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
