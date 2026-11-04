@@ -567,6 +567,7 @@ export default function App() {
                     )}
                   </>
                 ) : (
+                  <>
                 <div className="result-symbol">✦</div>
                 <span className="section-label">{reviewMode ? "ПОВТОРЕНИЕ ЗАВЕРШЕНО" : "УРОК ЗАВЕРШЁН"}</span>
                 <h2 id="stage-modal-title">{reviewMode ? "Ошибки разобраны!" : "Отличная работа!"}</h2>
