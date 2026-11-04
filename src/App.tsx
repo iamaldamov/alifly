@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Stage = {
   id: number;
@@ -9,55 +9,157 @@ type Stage = {
   status: "available" | "locked";
 };
 
+type Question = {
+  prompt: string;
+  options: string[];
+  correct: string;
+  explanation: string;
+};
+
+type Lesson = {
+  id: number;
+  title: string;
+  goal: string;
+  letters: { character: string; name: string; note?: string }[];
+  questions: Question[];
+};
+
 const stages: Stage[] = [
-  { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 8, status: "available" },
-  { id: 2, title: "Огласовки", description: "Учимся правильно читать арабские буквы", icon: "َ", lessons: 8, status: "locked" },
+  { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 5, status: "available" },
+  { id: 2, title: "Огласовки", description: "Фатха, кясра, дамма и другие знаки", icon: "َ", lessons: 8, status: "locked" },
   { id: 3, title: "Первые слова", description: "Изучаем простые слова и выражения", icon: "ك", lessons: 10, status: "locked" },
   { id: 4, title: "Основы грамматики", description: "Строим простые предложения", icon: "ن", lessons: 10, status: "locked" },
   { id: 5, title: "Разговорный арабский", description: "Знакомство и повседневные диалоги", icon: "ح", lessons: 10, status: "locked" },
   { id: 6, title: "Чтение и понимание", description: "Читаем небольшие тексты", icon: "ق", lessons: 10, status: "locked" },
 ];
 
-const questions = [
+const lessons: Lesson[] = [
   {
-    prompt: "Найди букву «алиф»",
-    options: ["ب", "ا", "ت"],
-    correct: "ا",
-    explanation: "Верно! Это алиф — первая буква арабского алфавита.",
+    id: 1,
+    title: "Первые четыре буквы",
+    goal: "Научись узнавать алиф, ба, та и са.",
+    letters: [
+      { character: "ا", name: "алиф", note: "Прямая вертикальная форма." },
+      { character: "ب", name: "ба", note: "Одна точка снизу." },
+      { character: "ت", name: "та", note: "Две точки сверху." },
+      { character: "ث", name: "са", note: "Три точки сверху; звук произносится между зубами." },
+    ],
+    questions: [
+      { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Это ба — ب. У неё одна точка под буквой." },
+      { prompt: "Найди букву «та».", options: ["ث", "ا", "ت"], correct: "ت", explanation: "Это та — ت. У неё две точки сверху." },
+      { prompt: "Узнай алиф.", options: ["ا", "ب", "ث"], correct: "ا", explanation: "Это алиф — ا. Он выглядит как вертикальная линия." },
+    ],
   },
   {
-    prompt: "Найди букву «ба»",
-    options: ["ت", "ث", "ب"],
-    correct: "ب",
-    explanation: "Верно! У буквы ба одна точка под основной формой.",
+    id: 2,
+    title: "Буквы с одной, двумя и тремя точками",
+    goal: "Познакомься с джим, ха, ха, даль и заль.",
+    letters: [
+      { character: "ج", name: "джим", note: "Одна точка снизу." },
+      { character: "ح", name: "ха", note: "Без точек." },
+      { character: "خ", name: "ха", note: "Одна точка сверху." },
+      { character: "د", name: "даль", note: "Без точек." },
+      { character: "ذ", name: "заль", note: "Одна точка сверху." },
+    ],
+    questions: [
+      { prompt: "Найди джим — букву с точкой снизу.", options: ["ح", "ج", "خ"], correct: "ج", explanation: "Это джим — ج. Её отличительный знак — точка снизу." },
+      { prompt: "Какая буква не имеет точек?", options: ["خ", "ذ", "ح"], correct: "ح", explanation: "Это ха — ح. У неё нет точек." },
+      { prompt: "Найди даль.", options: ["د", "ذ", "ج"], correct: "د", explanation: "Это даль — د. Она пишется без точки." },
+    ],
   },
   {
-    prompt: "Найди букву «та»",
-    options: ["ن", "ب", "ت"],
-    correct: "ت",
-    explanation: "Верно! У буквы та две точки над основной формой.",
+    id: 3,
+    title: "Буквы ра, зай, син и шин",
+    goal: "Научись различать четыре новые буквы.",
+    letters: [
+      { character: "ر", name: "ра" },
+      { character: "ز", name: "зай", note: "Одна точка сверху." },
+      { character: "س", name: "син", note: "Три зубца, без точек." },
+      { character: "ش", name: "шин", note: "Три точки сверху." },
+    ],
+    questions: [
+      { prompt: "Найди букву «зай».", options: ["ر", "ز", "س"], correct: "ز", explanation: "Это зай — ز. У неё одна точка сверху." },
+      { prompt: "Какая буква имеет три точки сверху?", options: ["ش", "س", "ر"], correct: "ش", explanation: "Это шин — ش. Три точки отличают её от син — س." },
+      { prompt: "Найди син без точек.", options: ["ز", "ش", "س"], correct: "س", explanation: "Это син — س. У неё три зубца и нет точек." },
+    ],
+  },
+  {
+    id: 4,
+    title: "Буквы с особым произношением",
+    goal: "Познакомься с буквами сад, дад, та, за, айн и гайн.",
+    letters: [
+      { character: "ص", name: "сад" },
+      { character: "ض", name: "дад" },
+      { character: "ط", name: "та" },
+      { character: "ظ", name: "за" },
+      { character: "ع", name: "айн", note: "Глубокий гортанный звук, без точного аналога в русском." },
+      { character: "غ", name: "гайн", note: "Звонкий звук, образуется в глубине горла." },
+    ],
+    questions: [
+      { prompt: "Найди букву «айн».", options: ["غ", "ع", "ط"], correct: "ع", explanation: "Это айн — ع. Её произношение требует отдельной практики." },
+      { prompt: "Какая буква имеет одну точку сверху и относится к этой группе?", options: ["ص", "ض", "ظ"], correct: "ظ", explanation: "Это за — ظ. У неё одна точка сверху." },
+      { prompt: "Найди гайн.", options: ["ع", "غ", "ص"], correct: "غ", explanation: "Это гайн — غ. У неё одна точка сверху." },
+    ],
+  },
+  {
+    id: 5,
+    title: "Последние буквы алфавита",
+    goal: "Познакомься с оставшимися буквами и заверши первый блок.",
+    letters: [
+      { character: "ف", name: "фа" },
+      { character: "ق", name: "къаф" },
+      { character: "ك", name: "каф" },
+      { character: "ل", name: "лям" },
+      { character: "م", name: "мим" },
+      { character: "ن", name: "нун" },
+      { character: "ه", name: "ха" },
+      { character: "و", name: "уау" },
+      { character: "ي", name: "йа" },
+    ],
+    questions: [
+      { prompt: "Найди букву «фа».", options: ["ق", "ف", "ك"], correct: "ف", explanation: "Это фа — ف. У неё одна точка сверху." },
+      { prompt: "Найди букву «мим».", options: ["ن", "م", "ل"], correct: "م", explanation: "Это мим — م." },
+      { prompt: "Какая буква называется «йа»?", options: ["و", "ه", "ي"], correct: "ي", explanation: "Это йа — ي." },
+    ],
   },
 ];
 
+function readCompletedLessons(): number[] {
+  try {
+    const saved = localStorage.getItem("alifly-completed-lessons");
+    if (!saved) return [];
+    const parsed: unknown = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((value): value is number => Number.isInteger(value) && value >= 1 && value <= 5);
+  } catch {
+    return [];
+  }
+}
+
 export default function App() {
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
-  const [lessonStarted, setLessonStarted] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [lessonFinished, setLessonFinished] = useState(false);\n  const [lessonCompleted, setLessonCompleted] = useState(false);
+  const [lessonFinished, setLessonFinished] = useState(false);
+  const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(readCompletedLessons);
+
+  useEffect(() => {
+    localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds));
+  }, [completedLessonIds]);
 
   const closeStage = () => {
     setSelectedStage(null);
-    setLessonStarted(false);
+    setSelectedLesson(null);
     setQuestionIndex(0);
     setSelectedAnswer(null);
     setCorrectAnswers(0);
     setLessonFinished(false);
   };
 
-  const startLesson = () => {
-    setLessonStarted(true);
+  const startLesson = (lesson: Lesson) => {
+    setSelectedLesson(lesson);
     setQuestionIndex(0);
     setSelectedAnswer(null);
     setCorrectAnswers(0);
@@ -65,16 +167,17 @@ export default function App() {
   };
 
   const answerQuestion = (answer: string) => {
-    if (selectedAnswer !== null) return;
+    if (selectedAnswer !== null || !selectedLesson) return;
     setSelectedAnswer(answer);
-    if (answer === questions[questionIndex].correct) {
+    if (answer === selectedLesson.questions[questionIndex].correct) {
       setCorrectAnswers((count) => count + 1);
     }
   };
 
   const nextQuestion = () => {
-    if (questionIndex === questions.length - 1) {
-      setLessonCompleted(true);
+    if (!selectedLesson) return;
+    if (questionIndex === selectedLesson.questions.length - 1) {
+      setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
       setLessonFinished(true);
       return;
     }
@@ -82,7 +185,8 @@ export default function App() {
     setSelectedAnswer(null);
   };
 
-  const currentQuestion = questions[questionIndex];
+  const currentQuestion = selectedLesson?.questions[questionIndex];
+  const progressPercent = Math.round((completedLessonIds.length / lessons.length) * 100);
 
   return (
     <main className="app">
@@ -102,10 +206,7 @@ export default function App() {
           <span className="eyebrow">ТВОЙ ПУТЬ К ЗНАНИЯМ</span>
           <h1>Арабский язык <span>с нуля</span></h1>
           <p>Начни изучать современный литературный арабский постепенно. Маленькие уроки — большие достижения.</p>
-          <button
-            className="primary-button"
-            onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}
-          >
+          <button className="primary-button" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
             Начать обучение <span>→</span>
           </button>
           <div className="hero-note"><span>✦</span> Первые 5 уроков бесплатно</div>
@@ -124,9 +225,9 @@ export default function App() {
           <h2>Каждый шаг важен</h2>
         </div>
         <div className="progress-card">
-          <div className="progress-info"><span>{lessonCompleted ? "Первый урок пройден" : "Начало пути"}</span><strong>{lessonCompleted ? "12%" : "0%"}</strong></div>
-          <div className="progress-track"><div className="progress-fill" style={{ width: lessonCompleted ? "12.5%" : "0%" }} /></div>
-          <p>{lessonCompleted ? "Отличное начало! Продолжай изучение алфавита." : "Пройди первый урок, чтобы начать свой путь."}</p>
+          <div className="progress-info"><span>{completedLessonIds.length} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
+          <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
+          <p>{completedLessonIds.length === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
         </div>
       </section>
 
@@ -137,18 +238,13 @@ export default function App() {
         </div>
         <div className="stage-list">
           {stages.map((stage) => (
-            <button
-              className={`stage-card ${stage.status === "locked" ? "stage-locked" : ""}`}
-              key={stage.id}
-              onClick={() => setSelectedStage(stage)}
-              aria-label={`Этап ${stage.id}: ${stage.title}`}
-            >
+            <button className={`stage-card ${stage.status === "locked" ? "stage-locked" : ""}`} key={stage.id} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
               <span className="stage-icon">{stage.icon}</span>
               <span className="stage-info">
                 <span className="stage-number">ЭТАП {stage.id}</span>
                 <strong>{stage.title}</strong>
                 <span className="stage-description">{stage.description}</span>
-                <span className="lesson-count">{stage.lessons} уроков</span>
+                <span className="lesson-count">{stage.id === 1 ? `${completedLessonIds.length}/5 бесплатных уроков` : `${stage.lessons} уроков`}</span>
               </span>
               <span className="stage-arrow">{stage.status === "available" ? "→" : "🔒"}</span>
             </button>
@@ -164,52 +260,62 @@ export default function App() {
 
       {selectedStage && (
         <div className="modal-backdrop" onClick={closeStage}>
-          <section
-            className={`stage-modal ${lessonStarted ? "lesson-modal" : ""}`}
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="stage-modal-title"
-          >
+          <section className={`stage-modal ${selectedLesson ? "lesson-modal" : ""}`} onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="stage-modal-title">
             <button className="modal-close" onClick={closeStage} aria-label="Закрыть">×</button>
 
-            {!lessonStarted ? (
+            {!selectedLesson ? (
               <>
                 <div className="modal-icon">{selectedStage.icon}</div>
                 <span className="section-label">ЭТАП {selectedStage.id}</span>
                 <h2 id="stage-modal-title">{selectedStage.title}</h2>
                 <p>{selectedStage.description}</p>
-                {selectedStage.status === "available" ? (
-                  <>
-                    <p className="modal-note">Начнём с простых букв и постепенно научимся узнавать их в словах.</p>
-                    <button className="primary-button modal-button" onClick={startLesson}>Открыть первый урок →</button>
-                  </>
+                {selectedStage.id === 1 ? (
+                  <div className="lesson-picker">
+                    <p className="modal-note">Пять первых уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
+                    {lessons.map((lesson) => {
+                      const isOpen = lesson.id === 1 || completedLessonIds.includes(lesson.id - 1);
+                      const isCompleted = completedLessonIds.includes(lesson.id);
+                      return (
+                        <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(lesson.id).padStart(2, "0")}</span>
+                          <span className="lesson-pick-text"><strong>{lesson.title}</strong><small>{lesson.letters.length} букв · 3 задания</small></span>
+                          <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
+                        </button>
+                      );
+                    })}
+                    <p className="local-progress-note">Прогресс сохраняется в этом браузере на устройстве.</p>
+                  </div>
                 ) : (
-                  <p className="locked-message">🔒 Этот этап откроется после прохождения предыдущего.</p>
+                  <p className="locked-message">🔒 Этот этап пока закрыт. Сначала пройди предыдущие уроки.</p>
                 )}
               </>
             ) : lessonFinished ? (
               <div className="lesson-result">
                 <div className="result-symbol">✦</div>
                 <span className="section-label">УРОК ЗАВЕРШЁН</span>
-                <h2 id="stage-modal-title">Отличное начало!</h2>
-                <p>Ты ответил правильно на {correctAnswers} из {questions.length} вопросов.</p>
-                <div className="result-score">{correctAnswers}/{questions.length}</div>
-                <button className="primary-button modal-button" onClick={closeStage}>Вернуться к программе</button>
+                <h2 id="stage-modal-title">Отличная работа!</h2>
+                <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
+                <div className="result-score">{correctAnswers}/{selectedLesson.questions.length}</div>
+                <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : "Хорошее начало. Повтори буквы и попробуй ещё раз."}</p>
+                <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); }}>К списку уроков</button>
               </div>
-            ) : (
+            ) : currentQuestion ? (
               <>
                 <div className="lesson-topline">
-                  <span className="section-label">ЭТАП 1 · УРОК 1</span>
-                  <span className="lesson-step">{questionIndex + 1} из {questions.length}</span>
+                  <span className="section-label">УРОК {selectedLesson.id} · АЛФАВИТ</span>
+                  <span className="lesson-step">{questionIndex + 1} из {selectedLesson.questions.length}</span>
                 </div>
-                <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / questions.length) * 100}%` }} /></div>
-                <h2 id="stage-modal-title">Первые буквы</h2>
-                <p className="lesson-intro">Запомни, как выглядят три первые буквы арабского алфавита.</p>
-                <div className="letter-intro">
-                  <div><strong lang="ar" dir="rtl">ا</strong><span>алиф</span></div>
-                  <div><strong lang="ar" dir="rtl">ب</strong><span>ба</span></div>
-                  <div><strong lang="ar" dir="rtl">ت</strong><span>та</span></div>
+                <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / selectedLesson.questions.length) * 100}%` }} /></div>
+                <h2 id="stage-modal-title">{selectedLesson.title}</h2>
+                <p className="lesson-intro">{selectedLesson.goal}</p>
+                <div className="letter-intro lesson-letters">
+                  {selectedLesson.letters.map((letter) => (
+                    <div key={letter.character}>
+                      <strong lang="ar" dir="rtl">{letter.character}</strong>
+                      <span>{letter.name}</span>
+                      {letter.note && <small>{letter.note}</small>}
+                    </div>
+                  ))}
                 </div>
                 <div className="question-block">
                   <span className="question-label">ПРОВЕРЬ СЕБЯ</span>
@@ -220,14 +326,7 @@ export default function App() {
                       const isSelected = option === selectedAnswer;
                       const stateClass = selectedAnswer === null ? "" : isCorrect ? "answer-correct" : isSelected ? "answer-wrong" : "answer-muted";
                       return (
-                        <button
-                          key={option}
-                          className={`answer-option ${stateClass}`}
-                          onClick={() => answerQuestion(option)}
-                          disabled={selectedAnswer !== null}
-                          lang="ar"
-                          dir="rtl"
-                        >
+                        <button key={option} className={`answer-option ${stateClass}`} onClick={() => answerQuestion(option)} disabled={selectedAnswer !== null} lang="ar" dir="rtl">
                           {option}
                         </button>
                       );
@@ -235,18 +334,18 @@ export default function App() {
                   </div>
                   {selectedAnswer !== null && (
                     <div className={`answer-feedback ${selectedAnswer === currentQuestion.correct ? "feedback-correct" : "feedback-wrong"}`}>
-                      <strong>{selectedAnswer === currentQuestion.correct ? "Правильно!" : "Попробуй запомнить"}</strong>
-                      <span>{selectedAnswer === currentQuestion.correct ? currentQuestion.explanation : `Правильный ответ: ${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
+                      <strong>{selectedAnswer === currentQuestion.correct ? "Правильно!" : "Правильный ответ"}</strong>
+                      <span>{selectedAnswer === currentQuestion.correct ? currentQuestion.explanation : `${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
                     </div>
                   )}
                 </div>
                 {selectedAnswer !== null && (
                   <button className="primary-button modal-button" onClick={nextQuestion}>
-                    {questionIndex === questions.length - 1 ? "Завершить урок" : "Следующий вопрос →"}
+                    {questionIndex === selectedLesson.questions.length - 1 ? "Завершить урок" : "Следующий вопрос →"}
                   </button>
                 )}
               </>
-            )}
+            ) : null}
           </section>
         </div>
       )}
