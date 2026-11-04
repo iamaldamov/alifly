@@ -61,7 +61,7 @@ export default {
       }
 
       const rawMessages = Array.isArray(body?.messages) ? body.messages : [];
-      const messages = rawMessages
+      let messages = rawMessages
         .filter((item) =>
           item &&
           ["user", "assistant"].includes(item.role) &&
@@ -73,6 +73,10 @@ export default {
           parts: [{ text: item.content.trim().slice(0, 1000) }],
         }))
         .filter((item) => item.parts[0].text.length > 0);
+
+      // The app's initial greeting is an assistant message, but Gemini
+      // conversation history must begin with a user turn.
+      while (messages[0]?.role === "model") messages.shift();
 
       if (!messages.length || !messages.some((item) => item.role === "user")) {
         return json({ error: "Напиши вопрос об арабском языке." }, 400, headers);
