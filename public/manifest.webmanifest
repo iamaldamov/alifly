@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "ALIFLY — Арабский язык с нуля",
+  "short_name": "ALIFLY",
+  "description": "Игровое обучение арабскому языку для начинающих.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f6ef",
+  "theme_color": "#285b45",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
