@@ -213,3 +213,16 @@ button:focus-visible, a:focus-visible { outline: 3px solid #c59a4a; outline-offs
 .unlocked-stage-mark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 15px; background: #dcebd8; color: #356448; font-size: 24px; font-weight: 850; }
 .unlocked-stage-panel > strong { color: #315b3f; font-size: 16px; }
 .unlocked-stage-panel p { margin: 0; }
+
+
+/* Spaced-repetition feedback */
+.memory-next-review {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border: 1px solid #e7e5d8;
+  border-radius: 12px;
+  background: #faf8ef;
+  color: #7d806f;
+  font-size: 11px;
+  line-height: 1.5;
+}
