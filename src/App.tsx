@@ -199,7 +199,44 @@ function readCompletedLessons(): number[] {
 }
 
 
-type Mistake = { id: string; lessonId: number; lessonTitle: string; question: Question };
+type Mistake = {
+  id: string;
+  lessonId: number;
+  lessonTitle: string;
+  question: Question;
+  dueAt: number;
+  intervalDays: number;
+  repetitions: number;
+  easeFactor: number;
+};
+
+const REVIEW_DELAY_MINUTES = 10;
+
+function updateReviewCard(
+  previous: Mistake | undefined,
+  input: Omit<Mistake, "dueAt" | "intervalDays" | "repetitions" | "easeFactor">,
+  correct: boolean,
+): Mistake {
+  const repetitions = previous?.repetitions ?? 0;
+  const easeFactor = previous?.easeFactor ?? 2.5;
+  const nextEase = correct
+    ? Math.min(3, easeFactor + 0.1)
+    : Math.max(1.3, easeFactor - 0.2);
+  const intervalDays = correct
+    ? repetitions === 0 ? 1 : repetitions === 1 ? 3 : Math.max(1, Math.round((previous?.intervalDays ?? 3) * nextEase))
+    : 0;
+  const dueAt = correct
+    ? Date.now() + intervalDays * 24 * 60 * 60 * 1000
+    : Date.now() + REVIEW_DELAY_MINUTES * 60 * 1000;
+
+  return {
+    ...input,
+    dueAt,
+    intervalDays,
+    repetitions: correct ? repetitions + 1 : 0,
+    easeFactor: nextEase,
+  };
+}
 
 function readMistakes(): Mistake[] {
   try {
@@ -219,7 +256,13 @@ function readMistakes(): Mistake[] {
       Array.isArray(item.question.options) &&
       typeof item.question.correct === "string" &&
       typeof item.question.explanation === "string"
-    );
+    ).map((item) => ({
+      ...item,
+      dueAt: Number.isFinite(item.dueAt) ? item.dueAt : Date.now(),
+      intervalDays: Number.isFinite(item.intervalDays) ? item.intervalDays : 0,
+      repetitions: Number.isInteger(item.repetitions) ? item.repetitions : 0,
+      easeFactor: Number.isFinite(item.easeFactor) ? item.easeFactor : 2.5,
+    }));
   } catch {
     return [];
   }
@@ -232,6 +275,10 @@ function readNumber(key: string): number {
   } catch {
     return 0;
   }
+}
+
+function readBoolean(key: string): boolean {
+  try { return localStorage.getItem(key) === "true"; } catch { return false; }
 }
 
 function readLastStudyDate(): string {
@@ -336,30 +383,30 @@ export default function App() {
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewMistakeIds, setReviewMistakeIds] = useState<string[]>([]);
   const [examMode, setExamMode] = useState(false);
-  const [examPassed, setExamPassed] = useState<boolean>(() => localStorage.getItem("alifly-stage-1-exam-passed") === "true");
+  const [examPassed, setExamPassed] = useState<boolean>(() => readBoolean("alifly-stage-1-exam-passed"));
 
   useEffect(() => {
-    localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds));
+    try { localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds)); } catch { /* Storage may be unavailable. */ }
   }, [completedLessonIds]);
 
   useEffect(() => {
-    localStorage.setItem("alifly-mistakes", JSON.stringify(mistakes));
+    try { localStorage.setItem("alifly-mistakes", JSON.stringify(mistakes)); } catch { /* Storage may be unavailable. */ }
   }, [mistakes]);
 
   useEffect(() => {
-    localStorage.setItem("alifly-xp", String(xp));
+    try { localStorage.setItem("alifly-xp", String(xp)); } catch { /* Storage may be unavailable. */ }
   }, [xp]);
 
   useEffect(() => {
-    localStorage.setItem("alifly-streak", String(streak));
+    try { localStorage.setItem("alifly-streak", String(streak)); } catch { /* Storage may be unavailable. */ }
   }, [streak]);
 
   useEffect(() => {
-    localStorage.setItem("alifly-last-study-date", lastStudyDate);
+    try { localStorage.setItem("alifly-last-study-date", lastStudyDate); } catch { /* Storage may be unavailable. */ }
   }, [lastStudyDate]);
 
   useEffect(() => {
-    localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed));
+    try { localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed)); } catch { /* Storage may be unavailable. */ }
   }, [examPassed]);
 
   const closeStage = () => {
@@ -392,17 +439,23 @@ export default function App() {
     const mistakeId = reviewMode
       ? reviewMistakeIds[questionIndex]
       : `${selectedLesson.id}:${question.prompt}`;
+    const isCorrect = answer === question.correct;
 
-    if (answer === question.correct) {
+    if (isCorrect) {
       setCorrectAnswers((count) => count + 1);
       setXp((current) => current + 10);
-      if (mistakeId) {
-        setMistakes((current) => current.filter((item) => item.id !== mistakeId));
-      }
-    } else if (!reviewMode) {
-      setMistakes((current) => current.some((item) => item.id === mistakeId)
-        ? current
-        : [...current, { id: mistakeId, lessonId: selectedLesson.id, lessonTitle: selectedLesson.title, question }]);
+    }
+
+    if (mistakeId && !examMode) {
+      setMistakes((current) => {
+        const previous = current.find((item) => item.id === mistakeId);
+        const card = updateReviewCard(
+          previous,
+          { id: mistakeId, lessonId: selectedLesson.id, lessonTitle: selectedLesson.title, question },
+          isCorrect,
+        );
+        return [...current.filter((item) => item.id !== mistakeId), card];
+      });
     }
   };
 
@@ -453,17 +506,20 @@ export default function App() {
     setExamMode(true);
   };
 
+  const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
+
   const startReview = () => {
-    if (mistakes.length === 0) return;
+    const due = mistakes.filter((item) => item.dueAt <= Date.now());
+    if (due.length === 0) return;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 0,
-      title: "Повторение ошибок",
-      goal: "Спокойно повтори вопросы, в которых ошибался.",
+      title: "Тренировка памяти",
+      goal: "Повтори материал в нужный момент — так знания закрепляются надолго.",
       letters: [],
-      questions: mistakes.map((item) => item.question),
+      questions: due.map((item) => item.question),
     });
-    setReviewMistakeIds(mistakes.map((item) => item.id));
+    setReviewMistakeIds(due.map((item) => item.id));
     setQuestionIndex(0);
     setSelectedAnswer(null);
     setCorrectAnswers(0);
@@ -518,11 +574,13 @@ export default function App() {
           <div className="progress-info"><span>{completedLessonIds.length} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
           <p>{completedLessonIds.length === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
-          {mistakes.length > 0 && (
+          {dueMistakes.length > 0 ? (
             <button className="review-button" type="button" onClick={startReview}>
-              Повторить ошибки · {mistakes.length}
+              Тренировка памяти · {dueMistakes.length}
             </button>
-          )}
+          ) : mistakes.length > 0 ? (
+            <p className="memory-next-review">Следующее повторение запланировано. Возвращайся позже — интервалы помогают запоминать надолго.</p>
+          ) : null}
         </div>
       </section>
 
@@ -627,11 +685,11 @@ export default function App() {
                 ) : (
                   <>
                 <div className="result-symbol">✦</div>
-                <span className="section-label">{reviewMode ? "ПОВТОРЕНИЕ ЗАВЕРШЕНО" : "УРОК ЗАВЕРШЁН"}</span>
-                <h2 id="stage-modal-title">{reviewMode ? "Ошибки разобраны!" : "Отличная работа!"}</h2>
+                <span className="section-label">{reviewMode ? "ТРЕНИРОВКА ПАМЯТИ ЗАВЕРШЕНА" : "УРОК ЗАВЕРШЁН"}</span>
+                <h2 id="stage-modal-title">{reviewMode ? "Повторение завершено!" : "Отличная работа!"}</h2>
                 <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
                 <div className="result-score">{correctAnswers}/{selectedLesson.questions.length}</div>
-                <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : reviewMode ? "Некоторые вопросы ещё требуют практики. Они останутся в списке повторения." : "Хорошее начало. Повтори буквы и попробуй ещё раз."}</p>
+                <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : reviewMode ? "Правильные ответы вернутся через более длинный интервал, а ошибки появятся раньше." : "Хорошее начало. Возвращайся к материалу по расписанию — так он лучше закрепится."}</p>
                 <button className="primary-button modal-button" onClick={() => { setSelectedLesson(null); setLessonFinished(false); setReviewMode(false); setReviewMistakeIds([]); setExamMode(false); }}>К списку уроков</button>
                 </>
                 )}
