@@ -42,7 +42,7 @@ const lessons: Lesson[] = [
       { character: "ا", name: "алиф", note: "Прямая вертикальная форма." },
       { character: "ب", name: "ба", note: "Одна точка снизу." },
       { character: "ت", name: "та", note: "Две точки сверху." },
-      { character: "ث", name: "са", note: "Три точки сверху; звук произносится между зубами." },
+      { character: "ث", name: "са (thāʾ)", note: "Три точки сверху. Межзубный звук, близкий к th в английском think; это не обычный русский «с»." },
     ],
     questions: [
       { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Это ба — ب. У неё одна точка под буквой." },
@@ -56,10 +56,10 @@ const lessons: Lesson[] = [
     goal: "Познакомься с джим, ха, ха, даль и заль.",
     letters: [
       { character: "ج", name: "джим", note: "Одна точка снизу." },
-      { character: "ح", name: "ха", note: "Без точек." },
-      { character: "خ", name: "ха", note: "Одна точка сверху." },
+      { character: "ح", name: "ḥāʾ (глубокая ха)", note: "Без точек. Глухой глоточный звук; обычная русская «х» не передаёт его точно." },
+      { character: "خ", name: "khāʾ (х)", note: "Одна точка сверху. Шумный звук, похожий на русское «х»." },
       { character: "د", name: "даль", note: "Без точек." },
-      { character: "ذ", name: "заль", note: "Одна точка сверху." },
+      { character: "ذ", name: "dhāl (межзубный звук)", note: "Одна точка сверху. Звонкий межзубный звук, близкий к th в английском this." },
     ],
     questions: [
       { prompt: "Найди джим — букву с точкой снизу.", options: ["ح", "ج", "خ"], correct: "ج", explanation: "Это джим — ج. Её отличительный знак — точка снизу." },
@@ -91,7 +91,7 @@ const lessons: Lesson[] = [
       { character: "ص", name: "сад" },
       { character: "ض", name: "дад" },
       { character: "ط", name: "та" },
-      { character: "ظ", name: "за" },
+      { character: "ظ", name: "ẓāʾ (эмфатическая за)", note: "Одна точка сверху. Эмфатический звук; русская «з» — лишь приблизительная подсказка." },
       { character: "ع", name: "айн", note: "Глубокий гортанный звук, без точного аналога в русском." },
       { character: "غ", name: "гайн", note: "Звонкий звук, образуется в глубине горла." },
     ],
@@ -107,12 +107,12 @@ const lessons: Lesson[] = [
     goal: "Познакомься с оставшимися буквами и заверши первый блок.",
     letters: [
       { character: "ف", name: "фа" },
-      { character: "ق", name: "къаф" },
+      { character: "ق", name: "qāf (къаф)", note: "Глубокий заднеязычный звук; не обычное русское «к»." },
       { character: "ك", name: "каф" },
       { character: "ل", name: "лям" },
       { character: "م", name: "мим" },
       { character: "ن", name: "нун" },
-      { character: "ه", name: "ха" },
+      { character: "ه", name: "hāʾ (лёгкая h)", note: "Лёгкий выдох, не путай с ح и خ." },
       { character: "و", name: "уау" },
       { character: "ي", name: "йа" },
     ],
@@ -443,7 +443,7 @@ export default function App() {
 
     if (isCorrect) {
       setCorrectAnswers((count) => count + 1);
-      setXp((current) => current + 10);
+      if (!reviewMode) setXp((current) => current + 10);
     }
 
     if (mistakeId && !examMode) {
