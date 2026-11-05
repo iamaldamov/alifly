@@ -1,10 +1,11 @@
 /* ALIFLY offline shell. Bump the cache version when changing this file. */
-const CACHE_NAME = "alifly-shell-v1";
+const CACHE_NAME = "alifly-shell-v2";
 const APP_BASE = new URL("./", self.location.href).pathname;
 const APP_SHELL = [
   APP_BASE,
   `${APP_BASE}manifest.webmanifest`,
   `${APP_BASE}icon.svg`,
+  `${APP_BASE}apple-touch-icon.png`,
 ];
 
 self.addEventListener("install", (event) => {
@@ -59,8 +60,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Cache-first is suitable for Vite's versioned assets and the app icon.
-  if (url.pathname.includes("/assets/") || url.pathname.endsWith("icon.svg") || url.pathname.endsWith("manifest.webmanifest")) {
+  // Cache-first is suitable for Vite's versioned assets and app icons.
+  if (
+    url.pathname.includes("/assets/") ||
+    url.pathname.endsWith("icon.svg") ||
+    url.pathname.endsWith("apple-touch-icon.png") ||
+    url.pathname.endsWith("manifest.webmanifest")
+  ) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
