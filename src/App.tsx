@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ReadingTrainer from "./ReadingTrainer";
 
 type Stage = {
   id: number;
@@ -562,6 +563,8 @@ export default function App() {
           <div className="art-dot" />
         </div>
       </section>
+
+      <ReadingTrainer />
 
       <AiTutor />
 
