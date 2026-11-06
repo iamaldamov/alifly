@@ -2,7 +2,9 @@ import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
 
-export default function AuthPanel() {
+type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error";
+
+export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus }) {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -111,8 +113,9 @@ export default function AuthPanel() {
             {user ? (
               <>
                 <span className="auth-kicker">ТВОЙ АККАУНТ</span>
-                <h2 id="auth-title">Прогресс сохранён</h2>
-                <p className="auth-description">Ты вошёл в ALIFLY. Уроки и повторения синхронизируются с этим аккаунтом.</p>
+                <h2 id="auth-title">Аккаунт ALIFLY</h2>
+                <p className="auth-description">Ты вошёл в ALIFLY. Твой прогресс привязан к этому аккаунту.</p>
+                <p className={cloudStatus === "error" ? "auth-error" : "auth-message"} role="status">{cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Проверь интернет и обнови страницу." : cloudStatus === "saved" ? "Прогресс успешно синхронизирован." : "Подключаем аккаунт…"}</p>
                 <p className="auth-user-email">{user.email || user.phone || "Аккаунт Apple"}</p>
                 <button className="auth-submit" type="button" onClick={signOut} disabled={busy}>{busy ? "Подожди…" : "Выйти из аккаунта"}</button>
               </>

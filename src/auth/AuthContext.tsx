@@ -14,13 +14,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    let receivedAuthEvent = false;
 
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (active && !error) setSession(data.session);
+    // Subscribe first: Supabase emits INITIAL_SESSION and later auth changes.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      receivedAuthEvent = true;
+      if (active) setSession(nextSession);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
+    // Ignore the async fallback if a newer auth event already supplied the session.
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (active && !receivedAuthEvent && !error) setSession(data.session);
     });
 
     return () => {
