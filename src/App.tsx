@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import ReadingTrainer from "./ReadingTrainer";
+import AuthPanel from "./auth/AuthPanel";
+import { useAuth } from "./auth/AuthContext";
+import { supabase } from "./lib/supabase";
 
 type Stage = {
   id: number;
@@ -298,6 +301,8 @@ function localDateKey(date = new Date()): string {
 }
 
 export default function App() {
+  const { user } = useAuth();
+  const [cloudReady, setCloudReady] = useState(false);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -372,6 +377,68 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed)); } catch { /* Storage may be unavailable. */ }
   }, [examPassed]);
+
+  // Load this learner's saved progress after authentication.
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!user) {
+      setCloudReady(false);
+      return;
+    }
+
+    setCloudReady(false);
+    const loadProgress = async () => {
+      const { data, error } = await supabase
+        .from("user_progress")
+        .select("completed_lesson_ids, mistakes, streak, last_study_date, exam_passed")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("ALIFLY: could not load cloud progress", error);
+        setCloudReady(true);
+        return;
+      }
+
+      if (data) {
+        setCompletedLessonIds(Array.isArray(data.completed_lesson_ids) ? data.completed_lesson_ids : []);
+        setMistakes(Array.isArray(data.mistakes) ? data.mistakes as Mistake[] : []);
+        setStreak(Number.isFinite(data.streak) ? data.streak : 0);
+        setLastStudyDate(data.last_study_date ?? "");
+        setExamPassed(Boolean(data.exam_passed));
+      }
+
+      setCloudReady(true);
+    };
+
+    void loadProgress();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  // Keep local progress and the signed-in account in sync.
+  useEffect(() => {
+    if (!user || !cloudReady) return;
+
+    const timeout = window.setTimeout(() => {
+      void supabase.from("user_progress").upsert({
+        user_id: user.id,
+        completed_lesson_ids: completedLessonIds,
+        mistakes,
+        streak,
+        last_study_date: lastStudyDate || null,
+        exam_passed: examPassed,
+        updated_at: new Date().toISOString(),
+      }).then(({ error }) => {
+        if (error) console.error("ALIFLY: could not save cloud progress", error);
+      });
+    }, 500);
+
+    return () => window.clearTimeout(timeout);
+  }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed]);
+
 
   const closeStage = () => {
     setSelectedStage(null);
@@ -501,6 +568,7 @@ export default function App() {
         </a>
         <div className="topbar-right">
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
+          <AuthPanel />
           <button
             className="theme-toggle"
             type="button"
@@ -609,7 +677,7 @@ export default function App() {
                         </button>
                       );
                     })}
-                    <p className="local-progress-note">Прогресс сохраняется в этом браузере на устройстве.</p>
+                    <p className="local-progress-note">Прогресс сохраняется на устройстве, а после входа — в твоём аккаунте.</p>
                   </div>
                 ) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
@@ -630,7 +698,7 @@ export default function App() {
                       <span className="lesson-pick-text"><strong>Итоговый экзамен</strong><small>{examPassed ? "Экзамен успешно сдан" : "10 вопросов · нужно 8 правильных"}</small></span>
                       <span className="lesson-pick-state">{examPassed ? "Пройден" : completedLessonIds.length === lessons.length ? "Начать →" : "Сначала 5 уроков"}</span>
                     </button>
-                    <p className="local-progress-note">Прогресс сохраняется в этом браузере на устройстве.</p>
+                    <p className="local-progress-note">Прогресс сохраняется на устройстве, а после входа — в твоём аккаунте.</p>
                   </div>
                 ) : (
                   <p className="locked-message">🔒 Этот этап пока закрыт. Сначала пройди предыдущие уроки.</p>
