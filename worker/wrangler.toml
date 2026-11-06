@@ -1,0 +1,16 @@
+name = "alifly-ai"
+main = "src/index.js"
+compatibility_date = "2026-11-04"
+
+[vars]
+ALLOWED_ORIGIN = "https://iamaldamov.github.io"
+
+# Approximate edge rate limit per client IP. This is abuse protection,
+# not a strict global quota or an authentication system.
+[[ratelimits]]
+name = "AI_RATE_LIMITER"
+namespace_id = "491027"
+
+[ratelimits.simple]
+limit = 10
+period = 60
