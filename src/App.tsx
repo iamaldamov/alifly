@@ -297,78 +297,6 @@ function localDateKey(date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
-type TutorMessage = { role: "user" | "assistant"; content: string };
-
-function AiTutor() {
-  const [messages, setMessages] = useState<TutorMessage[]>([
-    { role: "assistant", content: "Ассаляму алейкум! Я помогу тебе изучать арабский: объясню буквы, огласовки и простые правила. Спрашивай — будем разбирать всё постепенно." },
-  ]);
-  const [draft, setDraft] = useState("");
-  const [loading, setLoading] = useState(false);
-  const endpoint = import.meta.env.VITE_AI_TUTOR_URL as string | undefined;
-  const ready = Boolean(endpoint && endpoint.trim());
-
-  const sendMessage = async () => {
-    const question = draft.trim();
-    if (!question || loading || !ready) return;
-    const nextMessages: TutorMessage[] = [...messages, { role: "user", content: question }];
-    setMessages(nextMessages);
-    setDraft("");
-    setLoading(true);
-    try {
-      const response = await fetch(endpoint as string, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages.slice(-10) }),
-      });
-      const data: { answer?: string; error?: string } = await response.json();
-      if (!response.ok || !data.answer) {
-        throw new Error(data.error || "Не удалось получить ответ. Попробуй ещё раз.");
-      }
-      setMessages((current) => [...current, { role: "assistant", content: data.answer as string }]);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Связь с помощником временно недоступна.";
-      setMessages((current) => [...current, { role: "assistant", content: message }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <section className="ai-section" id="ai-tutor">
-      <div className="ai-heading">
-        <div>
-          <span className="section-label">ТВОЙ ПОМОЩНИК</span>
-          <h2>Учись вместе с ИИ</h2>
-          <p>Задавай вопросы об арабском языке и получай объяснения на русском.</p>
-        </div>
-        <div className="ai-mark" aria-hidden="true">✦</div>
-      </div>
-      <div className="ai-chat">
-        <div className="ai-chat-top">
-          <span className="ai-avatar">ا</span>
-          <div><strong>ALIFLY · ИИ-репетитор</strong><small>{ready ? "Помощник готов к работе" : "Подготовка подключения"}</small></div>
-          <span className={ready ? "ai-status ai-status-ready" : "ai-status"}>{ready ? "Онлайн" : "Скоро"}</span>
-        </div>
-        <div className="ai-messages" aria-live="polite">
-          {messages.map((message, index) => (
-            <div className={`ai-message ${message.role === "user" ? "ai-message-user" : "ai-message-assistant"}`} key={index}>
-              {message.content}
-            </div>
-          ))}
-          {loading && <div className="ai-message ai-message-assistant ai-typing">Готовлю объяснение…</div>}
-        </div>
-        {!ready && <p className="ai-setup-note">Чат уже подготовлен, но настоящий ИИ пока не подключён. Для запуска нужен защищённый сервер и API-ключ — ключ не будет храниться в браузере.</p>}
-        <div className="ai-composer">
-          <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Например: чем отличаются ب и ت?" rows={2} disabled={!ready || loading} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} />
-          <button type="button" onClick={() => void sendMessage()} disabled={!ready || loading || !draft.trim()} aria-label="Отправить вопрос">↑</button>
-        </div>
-        <div className="ai-disclaimer">ИИ может ошибаться. Учебные правила и произношение сверяй с проверенными материалами.</div>
-      </div>
-    </section>
-  );
-}
-
 export default function App() {
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
@@ -592,8 +520,6 @@ export default function App() {
       </section>
 
       <ReadingTrainer />
-
-      <AiTutor />
 
       <section className="progress-section">
         <div>
