@@ -758,3 +758,42 @@ button, a, .progress-card, .stage-card, .reading-card, .stage-modal,
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ALIFLY stability pass: keep the layout anchored on touch screens */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+#root, .app, .topbar, .hero, .progress-section, .learning-section {
+  min-width: 0;
+}
+.hero-art,
+.art-circle,
+.hero,
+.progress-section,
+.learning-section {
+  animation: none !important;
+}
+.stage-card,
+.primary-button,
+.theme-toggle,
+.answer-option,
+.reading-option,
+.review-button {
+  will-change: auto;
+}
+.stage-card:not(.stage-locked):hover,
+.primary-button:hover,
+.theme-toggle:hover,
+.answer-option:not(:disabled):hover,
+.reading-option:hover:not(:disabled),
+.review-button:hover,
+.primary-button:active,
+.theme-toggle:active,
+.review-button:active,
+.answer-option:not(:disabled):active,
+.reading-option:not(:disabled):active {
+  transform: none;
+}
