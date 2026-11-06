@@ -314,6 +314,19 @@ export default function App() {
   const [examMode, setExamMode] = useState(false);
   const [examPassed, setExamPassed] = useState<boolean>(() => readBoolean("alifly-stage-1-exam-passed"));
 
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    try {
+      return localStorage.getItem("alifly-theme") === "dark" ? "dark" : "light";
+    } catch {
+      return "light";
+    }
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("alifly-theme", theme); } catch { /* Storage may be unavailable. */ }
+  }, [theme]);
+
   useEffect(() => {
     if (!selectedStage) return;
 
@@ -498,6 +511,17 @@ export default function App() {
           <span className="language">RU · Русский</span>
           <span className="xp-counter" aria-label="Баллы опыта">✦ {xp} XP</span>
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
+            title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
+            aria-pressed={theme === "dark"}
+          >
+            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+            <span className="theme-toggle-label">{theme === "dark" ? "Светлая" : "Тёмная"}</span>
+          </button>
         </div>
       </header>
 
