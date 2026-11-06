@@ -300,8 +300,17 @@ function localDateKey(date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+function readWelcomeDialog(): "welcome" | null {
+  try {
+    return localStorage.getItem("alifly-welcome-seen-v1") === "true" ? null : "welcome";
+  } catch {
+    return "welcome";
+  }
+}
+
 export default function App() {
   const { user } = useAuth();
+  const [infoDialog, setInfoDialog] = useState<"welcome" | "creator" | null>(readWelcomeDialog);
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -331,6 +340,29 @@ export default function App() {
     document.documentElement.dataset.theme = theme;
     try { localStorage.setItem("alifly-theme", theme); } catch { /* Storage may be unavailable. */ }
   }, [theme]);
+
+  useEffect(() => {
+    if (!infoDialog) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeInfoDialog();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [infoDialog]);
+
+  const closeInfoDialog = () => {
+    if (infoDialog === "welcome") {
+      try { localStorage.setItem("alifly-welcome-seen-v1", "true"); } catch { /* Storage may be unavailable. */ }
+    }
+    setInfoDialog(null);
+  };
 
   useEffect(() => {
     if (!selectedStage) return;
@@ -687,8 +719,54 @@ export default function App() {
       <footer className="footer">
         <span className="footer-logo">ALIFLY</span>
         <p>Учись с интересом. Продвигайся с уверенностью.</p>
+        <button className="creator-link" type="button" onClick={() => setInfoDialog("creator")}>О создателе</button>
         <span>Создано с заботой о знаниях.</span>
       </footer>
+
+      {infoDialog && (
+        <div className="info-backdrop" onClick={closeInfoDialog}>
+          <section
+            className="info-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="info-modal-title"
+          >
+            <button className="info-close" type="button" onClick={closeInfoDialog} aria-label="Закрыть">×</button>
+            <div className="info-emblem" aria-hidden="true">ا</div>
+            {infoDialog === "welcome" ? (
+              <>
+                <span className="section-label">РАДЫ ВИДЕТЬ ТЕБЯ В ALIFLY</span>
+                <h2 id="info-modal-title">Ассаляму алейкум!</h2>
+                <p className="info-lead">Добро пожаловать в ALIFLY — пространство для тех, кто начинает изучать арабский язык с нуля.</p>
+                <p>Короткие уроки, практика и повторение помогут двигаться спокойно и последовательно — шаг за шагом.</p>
+                <button
+                  className="primary-button info-primary"
+                  type="button"
+                  onClick={() => {
+                    closeInfoDialog();
+                    window.setTimeout(() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" }), 80);
+                  }}
+                >
+                  Начать обучение <span>→</span>
+                </button>
+                <button className="info-secondary" type="button" onClick={() => setInfoDialog("creator")}>Познакомиться с создателем</button>
+              </>
+            ) : (
+              <>
+                <span className="section-label">НЕСКОЛЬКО СЛОВ О ПРОЕКТЕ</span>
+                <h2 id="info-modal-title">Меня зовут Рамазан</h2>
+                <p className="info-lead">Я создал ALIFLY, потому что хотел сделать изучение арабского языка более понятным, последовательным и доступным для русскоязычных начинающих.</p>
+                <p>Мне хотелось создать не просто набор уроков, а удобное пространство, где можно учиться постепенно, закреплять знания и видеть свой прогресс — даже если свободного времени совсем немного.</p>
+                <p>ALIFLY развивается, и я буду стараться улучшать его, прислушиваясь к вашим отзывам. Надеюсь, проект принесёт пользу каждому, кто начнёт здесь свой путь к знаниям.</p>
+                <p className="info-dua">Пусть Аллах сделает это обучение полезным и облегчит нам путь к знаниям.</p>
+                <p className="info-signature">С теплом, Рамазан · создатель ALIFLY</p>
+                <button className="primary-button info-primary" type="button" onClick={closeInfoDialog}>Продолжить <span>→</span></button>
+              </>
+            )}
+          </section>
+        </div>
+      )}
 
       {selectedStage && (
         <div className="modal-backdrop" onClick={closeStage}>
