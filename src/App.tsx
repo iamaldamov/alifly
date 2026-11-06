@@ -306,7 +306,6 @@ export default function App() {
   const [lessonFinished, setLessonFinished] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(readCompletedLessons);
   const [mistakes, setMistakes] = useState<Mistake[]>(readMistakes);
-  const [xp, setXp] = useState<number>(() => readNumber("alifly-xp"));
   const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
@@ -363,10 +362,6 @@ export default function App() {
   }, [mistakes]);
 
   useEffect(() => {
-    try { localStorage.setItem("alifly-xp", String(xp)); } catch { /* Storage may be unavailable. */ }
-  }, [xp]);
-
-  useEffect(() => {
     try { localStorage.setItem("alifly-streak", String(streak)); } catch { /* Storage may be unavailable. */ }
   }, [streak]);
 
@@ -412,7 +407,6 @@ export default function App() {
 
     if (isCorrect) {
       setCorrectAnswers((count) => count + 1);
-      if (!reviewMode) setXp((current) => current + 10);
     }
 
     if (mistakeId && !examMode) {
@@ -434,11 +428,9 @@ export default function App() {
       if (examMode) {
         if (correctAnswers >= 8 && !examPassed) {
           setExamPassed(true);
-          setXp((current) => current + 30);
         }
       } else if (!reviewMode) {
         setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
-        setXp((current) => current + 15);
       }
       if (!reviewMode) {
         const today = localDateKey();
@@ -508,8 +500,6 @@ export default function App() {
           <span>ALIFLY</span>
         </a>
         <div className="topbar-right">
-          <span className="language">RU · Русский</span>
-          <span className="xp-counter" aria-label="Баллы опыта">✦ {xp} XP</span>
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
           <button
             className="theme-toggle"
