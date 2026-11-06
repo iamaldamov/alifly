@@ -387,6 +387,33 @@ export default function App() {
   const [examPassed, setExamPassed] = useState<boolean>(() => readBoolean("alifly-stage-1-exam-passed"));
 
   useEffect(() => {
+    if (!selectedStage) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedStage(null);
+        setSelectedLesson(null);
+        setQuestionIndex(0);
+        setSelectedAnswer(null);
+        setCorrectAnswers(0);
+        setLessonFinished(false);
+        setReviewMode(false);
+        setReviewMistakeIds([]);
+        setExamMode(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedStage]);
+
+  useEffect(() => {
     try { localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds)); } catch { /* Storage may be unavailable. */ }
   }, [completedLessonIds]);
 
@@ -731,7 +758,7 @@ export default function App() {
                     })}
                   </div>
                   {selectedAnswer !== null && (
-                    <div className={`answer-feedback ${selectedAnswer === currentQuestion.correct ? "feedback-correct" : "feedback-wrong"}`}>
+                    <div className={`answer-feedback ${selectedAnswer === currentQuestion.correct ? "feedback-correct" : "feedback-wrong"}`} aria-live="polite">
                       <strong>{selectedAnswer === currentQuestion.correct ? "Правильно!" : "Правильный ответ"}</strong>
                       <span>{selectedAnswer === currentQuestion.correct ? currentQuestion.explanation : `${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
                     </div>
