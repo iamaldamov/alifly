@@ -303,6 +303,7 @@ function localDateKey(date = new Date()): string {
 export default function App() {
   const { user } = useAuth();
   const [cloudReady, setCloudReady] = useState(false);
+  const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -378,16 +379,19 @@ export default function App() {
     try { localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed)); } catch { /* Storage may be unavailable. */ }
   }, [examPassed]);
 
-  // Load this learner's saved progress after authentication.
+  // Load the signed-in learner's progress before allowing cloud writes.
   useEffect(() => {
     let cancelled = false;
 
     if (!user) {
       setCloudReady(false);
+      setCloudSaveStatus("idle");
       return;
     }
 
     setCloudReady(false);
+    setCloudSaveStatus("loading");
+
     const loadProgress = async () => {
       const { data, error } = await supabase
         .from("user_progress")
@@ -397,10 +401,18 @@ export default function App() {
 
       if (cancelled) return;
 
+      // Never overwrite cloud data with local defaults after a failed read.
       if (error) {
         console.error("ALIFLY: could not load cloud progress", error);
-        setCloudReady(true);
+        setCloudSaveStatus("error");
         return;
+      }
+
+      let previousCloudUserId = "";
+      try {
+        previousCloudUserId = localStorage.getItem("alifly-last-cloud-user-id") || "";
+      } catch {
+        // Cloud data remains authoritative when local storage is unavailable.
       }
 
       if (data) {
@@ -409,8 +421,23 @@ export default function App() {
         setStreak(Number.isFinite(data.streak) ? data.streak : 0);
         setLastStudyDate(data.last_study_date ?? "");
         setExamPassed(Boolean(data.exam_passed));
+      } else if (previousCloudUserId && previousCloudUserId !== user.id) {
+        // A different person signed in on this device. Do not copy the previous
+        // person's local learning history into the new account.
+        setCompletedLessonIds([]);
+        setMistakes([]);
+        setStreak(0);
+        setLastStudyDate("");
+        setExamPassed(false);
       }
 
+      try {
+        localStorage.setItem("alifly-last-cloud-user-id", user.id);
+      } catch {
+        // The authenticated cloud account still works without local storage.
+      }
+
+      setCloudSaveStatus(data ? "saved" : "pending");
       setCloudReady(true);
     };
 
@@ -418,12 +445,14 @@ export default function App() {
     return () => { cancelled = true; };
   }, [user?.id]);
 
-  // Keep local progress and the signed-in account in sync.
+  // Debounce writes and expose whether cloud sync actually succeeded.
   useEffect(() => {
     if (!user || !cloudReady) return;
 
-    const timeout = window.setTimeout(() => {
-      void supabase.from("user_progress").upsert({
+    let cancelled = false;
+    const timeout = window.setTimeout(async () => {
+      setCloudSaveStatus("saving");
+      const { error } = await supabase.from("user_progress").upsert({
         user_id: user.id,
         completed_lesson_ids: completedLessonIds,
         mistakes,
@@ -431,12 +460,21 @@ export default function App() {
         last_study_date: lastStudyDate || null,
         exam_passed: examPassed,
         updated_at: new Date().toISOString(),
-      }).then(({ error }) => {
-        if (error) console.error("ALIFLY: could not save cloud progress", error);
       });
-    }, 500);
 
-    return () => window.clearTimeout(timeout);
+      if (cancelled) return;
+      if (error) {
+        console.error("ALIFLY: could not save cloud progress", error);
+        setCloudSaveStatus("error");
+      } else {
+        setCloudSaveStatus("saved");
+      }
+    }, 600);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
   }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed]);
 
 
@@ -568,7 +606,7 @@ export default function App() {
         </a>
         <div className="topbar-right">
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
-          <AuthPanel />
+          <AuthPanel cloudStatus={cloudSaveStatus} />
           <button
             className="theme-toggle"
             type="button"
