@@ -7,6 +7,7 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
+    // ALIFLY exchanges the callback code itself so expired/used links can be explained clearly.
+    detectSessionInUrl: false,
   },
 });
