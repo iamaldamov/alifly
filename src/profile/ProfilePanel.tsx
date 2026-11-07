@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import CharacterAvatar from "./CharacterAvatar";
 import { useProfile, type AvatarId, type Gender } from "./ProfileContext";
 
@@ -50,7 +50,7 @@ export default function ProfilePanel() {
   );
   const trialExpired = Boolean(profile && new Date(profile.trial_ends_at).getTime() <= now);
 
-  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFeedback("");
     const parsedAge = age.trim() ? Number(age) : null;
