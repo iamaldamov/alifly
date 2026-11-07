@@ -3,6 +3,7 @@ import ReadingTrainer from "./ReadingTrainer";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { supabase } from "./lib/supabase";
+import ProfilePanel from "./profile/ProfilePanel";
 
 type Stage = {
   id: number;
@@ -651,6 +652,7 @@ export default function App() {
         <div className="topbar-right">
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
           <AuthPanel cloudStatus={cloudSaveStatus} authReady={authReady} authCallbackError={authCallbackError} autoOpen={!user && authReady && infoDialog === null} openRequest={authOpenRequest} />
+          {user && <ProfilePanel />}
           <button
             className="theme-toggle"
             type="button"
