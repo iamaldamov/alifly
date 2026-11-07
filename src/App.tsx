@@ -309,7 +309,8 @@ function readWelcomeDialog(): "welcome" | null {
 }
 
 export default function App() {
-  const { user } = useAuth();
+  const { user, authReady, authCallbackError } = useAuth();
+  const [authOpenRequest, setAuthOpenRequest] = useState(0);
   const [infoDialog, setInfoDialog] = useState<"welcome" | "creator" | null>(readWelcomeDialog);
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
@@ -523,6 +524,7 @@ export default function App() {
   };
 
   const startLesson = (lesson: Lesson) => {
+    if (!user) { setAuthOpenRequest((value) => value + 1); return; }
     setSelectedLesson(lesson);
     setQuestionIndex(0);
     setSelectedAnswer(null);
@@ -586,6 +588,7 @@ export default function App() {
   };
 
   const startExam = () => {
+    if (!user) { setAuthOpenRequest((value) => value + 1); return; }
     if (completedLessonIds.length < lessons.length) return;
     setSelectedStage(stages[0]);
     setSelectedLesson({
@@ -607,6 +610,7 @@ export default function App() {
   const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
 
   const startReview = () => {
+    if (!user) { setAuthOpenRequest((value) => value + 1); return; }
     const due = mistakes.filter((item) => item.dueAt <= Date.now());
     if (due.length === 0) return;
     setSelectedStage(stages[0]);
@@ -633,12 +637,20 @@ export default function App() {
     <main className="app">
       <header className="topbar">
         <a className="logo" href="#" aria-label="ALIFLY — главная">
-          <span className="logo-mark">ا</span>
+          <span className="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <path d="M7.5 15.5c6.3-2.4 11.8-1.6 16.5 2.4v20c-4.7-4-10.2-4.8-16.5-2.4z" />
+              <path d="M40.5 15.5C34.2 13.1 28.7 13.9 24 17.9v20c4.7-4 10.2-4.8 16.5-2.4z" />
+              <path d="M24 17.8v20.1" />
+              <path d="M24 13.2c2.2-5.4 7.4-7.7 12.6-6.8-1.1 5.5-5.5 9.2-12.6 9.3" />
+              <path d="M23.8 15.6c-1.4-3.2-4.2-5-7.8-5.2" />
+            </svg>
+          </span>
           <span>ALIFLY</span>
         </a>
         <div className="topbar-right">
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
-          <AuthPanel cloudStatus={cloudSaveStatus} />
+          <AuthPanel cloudStatus={cloudSaveStatus} authReady={authReady} authCallbackError={authCallbackError} autoOpen={!user && authReady && infoDialog === null} openRequest={authOpenRequest} />
           <button
             className="theme-toggle"
             type="button"
@@ -658,7 +670,7 @@ export default function App() {
           <span className="eyebrow">ТВОЙ ПУТЬ К ЗНАНИЯМ</span>
           <h1>Арабский язык <span>с нуля</span></h1>
           <p>Начни изучать современный литературный арабский постепенно. Маленькие уроки — большие достижения.</p>
-          <button className="primary-button" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
+          <button className="primary-button" onClick={() => { if (!user) setAuthOpenRequest((value) => value + 1); else document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" }); }}>
             Начать обучение <span>→</span>
           </button>
           <div className="hero-note"><span>✦</span> Первые 5 уроков бесплатно</div>
