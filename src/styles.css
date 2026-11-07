@@ -1078,3 +1078,115 @@ html, body {
   .info-modal .info-lead { font-size: 13px; }
   .creator-link { min-height: 34px; }
 }
+
+
+/* ALIFLY brand refresh: original book-and-leaf mark */
+.logo { gap: 12px; font-size: 18px; letter-spacing: .15em; }
+.logo-mark {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border: 1px solid #7b9c78;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #356d50, #214b38);
+  color: #f6f1df;
+  box-shadow: 0 7px 18px rgba(35,79,56,.18), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.logo-mark svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2.15; stroke-linecap: round; stroke-linejoin: round; }
+:root[data-theme="dark"] .logo-mark {
+  border-color: #658667;
+  background: linear-gradient(145deg, #3d7253, #2d5941);
+  color: #f2f2df;
+  box-shadow: 0 7px 18px rgba(0,0,0,.22);
+}
+
+/* Comfortable forest-night palette — intentionally not pure black */
+:root[data-theme="dark"] {
+  --page: #17271f;
+  --surface: #20352a;
+  --surface-soft: #294235;
+  --text: #edf3e9;
+  --text-soft: #c1cec2;
+  --text-muted: #9eaea1;
+  --border: #354d3e;
+  --accent: #b5d89a;
+  --accent-strong: #c8e6a9;
+  --accent-soft: #2a4332;
+  --gold-soft: #433a28;
+  --shadow: 0 16px 42px rgba(0,0,0,.20);
+}
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(95,139,94,.16), transparent 34rem),
+    radial-gradient(ellipse at 95% 65%, rgba(153,128,73,.08), transparent 30rem),
+    var(--page);
+  color: var(--text);
+}
+:root[data-theme="dark"] .hero {
+  background:
+    radial-gradient(circle at 82% 40%, rgba(161,197,128,.17), transparent 20rem),
+    linear-gradient(125deg, #234a37 0%, #28533d 58%, #294a39 100%);
+}
+:root[data-theme="dark"] .progress-card,
+:root[data-theme="dark"] .stage-card,
+:root[data-theme="dark"] .reading-card,
+:root[data-theme="dark"] .lesson-pick,
+:root[data-theme="dark"] .answer-option,
+:root[data-theme="dark"] .reading-option,
+:root[data-theme="dark"] .exam-pick {
+  background: #20352a;
+  border-color: #3b5544;
+}
+:root[data-theme="dark"] .stage-locked,
+:root[data-theme="dark"] .lesson-pick:disabled {
+  background: #1b2b22;
+  border-color: #304337;
+}
+:root[data-theme="dark"] .stage-card:not(.stage-locked):hover {
+  border-color: #73936d;
+  background: #294235;
+}
+:root[data-theme="dark"] .auth-modal {
+  background: linear-gradient(155deg, #263d30, #1e3228);
+  border-color: #49634e;
+}
+:root[data-theme="dark"] .info-modal {
+  background: linear-gradient(155deg, #263d30, #1e3228);
+  border-color: #49634e;
+}
+:root[data-theme="dark"] .auth-form input,
+:root[data-theme="dark"] .auth-user-email {
+  background: #17271f;
+  border-color: #405846;
+}
+:root[data-theme="dark"] .auth-message { background: #2b4935; color: #d1ebc6; }
+:root[data-theme="dark"] .auth-error { background: #4a302c; color: #ffd3c9; }
+
+/* Clear, recognizable sign-in choices */
+.auth-google, .auth-apple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 47px;
+  margin: 8px 0;
+  border: 1px solid #dfe6dc;
+  border-radius: 13px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.auth-google { background: #fff; color: #293b31; }
+.auth-apple { background: #17221c; color: #fff; }
+.auth-google:disabled, .auth-apple:disabled { opacity: .55; cursor: wait; }
+.google-g { font-size: 17px; font-weight: 850; color: #4285f4; }
+:root[data-theme="dark"] .auth-google { background: #e9eee5; border-color: #d5dfd1; color: #263b2e; }
+:root[data-theme="dark"] .auth-apple { background: #111a15; border-color: #111a15; color: #fff; }
+@media (max-width: 700px) {
+  .logo-mark { width: 39px; height: 39px; border-radius: 13px; }
+  .logo-mark svg { width: 27px; height: 27px; }
+  .logo { font-size: 16px; gap: 9px; }
+}
