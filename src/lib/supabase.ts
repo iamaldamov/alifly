@@ -7,6 +7,8 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
+    // Use PKCE for email and social sign-in; ALIFLY handles the callback to show helpful errors.
+    flowType: "pkce",
+    detectSessionInUrl: false,
   },
 });

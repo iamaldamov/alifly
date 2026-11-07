@@ -3,6 +3,7 @@ import ReadingTrainer from "./ReadingTrainer";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { supabase } from "./lib/supabase";
+import ProfilePanel from "./profile/ProfilePanel";
 
 type Stage = {
   id: number;
@@ -300,8 +301,18 @@ function localDateKey(date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+function readWelcomeDialog(): "welcome" | null {
+  try {
+    return localStorage.getItem("alifly-welcome-seen-v1") === "true" ? null : "welcome";
+  } catch {
+    return "welcome";
+  }
+}
+
 export default function App() {
-  const { user } = useAuth();
+  const { user, authReady, authCallbackError } = useAuth();
+  const [authOpenRequest, setAuthOpenRequest] = useState(0);
+  const [infoDialog, setInfoDialog] = useState<"welcome" | "creator" | null>(readWelcomeDialog);
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -331,6 +342,29 @@ export default function App() {
     document.documentElement.dataset.theme = theme;
     try { localStorage.setItem("alifly-theme", theme); } catch { /* Storage may be unavailable. */ }
   }, [theme]);
+
+  useEffect(() => {
+    if (!infoDialog) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeInfoDialog();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [infoDialog]);
+
+  const closeInfoDialog = () => {
+    if (infoDialog === "welcome") {
+      try { localStorage.setItem("alifly-welcome-seen-v1", "true"); } catch { /* Storage may be unavailable. */ }
+    }
+    setInfoDialog(null);
+  };
 
   useEffect(() => {
     if (!selectedStage) return;
@@ -491,6 +525,7 @@ export default function App() {
   };
 
   const startLesson = (lesson: Lesson) => {
+    if (!user) { setAuthOpenRequest((value) => value + 1); return; }
     setSelectedLesson(lesson);
     setQuestionIndex(0);
     setSelectedAnswer(null);
@@ -554,6 +589,7 @@ export default function App() {
   };
 
   const startExam = () => {
+    if (!user) { setAuthOpenRequest((value) => value + 1); return; }
     if (completedLessonIds.length < lessons.length) return;
     setSelectedStage(stages[0]);
     setSelectedLesson({
@@ -575,6 +611,7 @@ export default function App() {
   const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
 
   const startReview = () => {
+    if (!user) { setAuthOpenRequest((value) => value + 1); return; }
     const due = mistakes.filter((item) => item.dueAt <= Date.now());
     if (due.length === 0) return;
     setSelectedStage(stages[0]);
@@ -601,12 +638,21 @@ export default function App() {
     <main className="app">
       <header className="topbar">
         <a className="logo" href="#" aria-label="ALIFLY — главная">
-          <span className="logo-mark">ا</span>
+          <span className="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <path d="M7.5 15.5c6.3-2.4 11.8-1.6 16.5 2.4v20c-4.7-4-10.2-4.8-16.5-2.4z" />
+              <path d="M40.5 15.5C34.2 13.1 28.7 13.9 24 17.9v20c4.7-4 10.2-4.8 16.5-2.4z" />
+              <path d="M24 17.8v20.1" />
+              <path d="M24 13.2c2.2-5.4 7.4-7.7 12.6-6.8-1.1 5.5-5.5 9.2-12.6 9.3" />
+              <path d="M23.8 15.6c-1.4-3.2-4.2-5-7.8-5.2" />
+            </svg>
+          </span>
           <span>ALIFLY</span>
         </a>
         <div className="topbar-right">
           <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
-          <AuthPanel cloudStatus={cloudSaveStatus} />
+          <AuthPanel cloudStatus={cloudSaveStatus} authReady={authReady} authCallbackError={authCallbackError} autoOpen={!user && authReady && infoDialog === null} openRequest={authOpenRequest} />
+          {user && <ProfilePanel />}
           <button
             className="theme-toggle"
             type="button"
@@ -626,7 +672,7 @@ export default function App() {
           <span className="eyebrow">ТВОЙ ПУТЬ К ЗНАНИЯМ</span>
           <h1>Арабский язык <span>с нуля</span></h1>
           <p>Начни изучать современный литературный арабский постепенно. Маленькие уроки — большие достижения.</p>
-          <button className="primary-button" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
+          <button className="primary-button" onClick={() => { if (!user) setAuthOpenRequest((value) => value + 1); else document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" }); }}>
             Начать обучение <span>→</span>
           </button>
           <div className="hero-note"><span>✦</span> Первые 5 уроков бесплатно</div>
@@ -687,8 +733,54 @@ export default function App() {
       <footer className="footer">
         <span className="footer-logo">ALIFLY</span>
         <p>Учись с интересом. Продвигайся с уверенностью.</p>
+        <button className="creator-link" type="button" onClick={() => setInfoDialog("creator")}>О создателе</button>
         <span>Создано с заботой о знаниях.</span>
       </footer>
+
+      {infoDialog && (
+        <div className="info-backdrop" onClick={closeInfoDialog}>
+          <section
+            className="info-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="info-modal-title"
+          >
+            <button className="info-close" type="button" onClick={closeInfoDialog} aria-label="Закрыть">×</button>
+            <div className="info-emblem" aria-hidden="true">ا</div>
+            {infoDialog === "welcome" ? (
+              <>
+                <span className="section-label">РАДЫ ВИДЕТЬ ТЕБЯ В ALIFLY</span>
+                <h2 id="info-modal-title">Ассаляму алейкум!</h2>
+                <p className="info-lead">Добро пожаловать в ALIFLY — пространство для тех, кто начинает изучать арабский язык с нуля.</p>
+                <p>Короткие уроки, практика и повторение помогут двигаться спокойно и последовательно — шаг за шагом.</p>
+                <button
+                  className="primary-button info-primary"
+                  type="button"
+                  onClick={() => {
+                    closeInfoDialog();
+                    window.setTimeout(() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" }), 80);
+                  }}
+                >
+                  Начать обучение <span>→</span>
+                </button>
+                <button className="info-secondary" type="button" onClick={() => setInfoDialog("creator")}>Познакомиться с создателем</button>
+              </>
+            ) : (
+              <>
+                <span className="section-label">НЕСКОЛЬКО СЛОВ О ПРОЕКТЕ</span>
+                <h2 id="info-modal-title">Меня зовут Рамазан</h2>
+                <p className="info-lead">Я создал ALIFLY, потому что хотел сделать изучение арабского языка более понятным, последовательным и доступным для русскоязычных начинающих.</p>
+                <p>Мне хотелось создать не просто набор уроков, а удобное пространство, где можно учиться постепенно, закреплять знания и видеть свой прогресс — даже если свободного времени совсем немного.</p>
+                <p>ALIFLY развивается, и я буду стараться улучшать его, прислушиваясь к вашим отзывам. Надеюсь, проект принесёт пользу каждому, кто начнёт здесь свой путь к знаниям.</p>
+                <p className="info-dua">Пусть Аллах сделает это обучение полезным и облегчит нам путь к знаниям.</p>
+                <p className="info-signature">С теплом, Рамазан · создатель ALIFLY</p>
+                <button className="primary-button info-primary" type="button" onClick={closeInfoDialog}>Продолжить <span>→</span></button>
+              </>
+            )}
+          </section>
+        </div>
+      )}
 
       {selectedStage && (
         <div className="modal-backdrop" onClick={closeStage}>
