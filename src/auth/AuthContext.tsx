@@ -35,10 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const initializeAuth = async () => {
       const callbackUrl = new URL(window.location.href);
+      const hashParams = new URLSearchParams(callbackUrl.hash.replace(/^#/, ""));
       const code = callbackUrl.searchParams.get("code");
-      const tokenHash = callbackUrl.searchParams.get("token_hash");
-      const callbackType = callbackUrl.searchParams.get("type");
-      const callbackError = callbackUrl.searchParams.get("error_description") || callbackUrl.searchParams.get("error");
+      const tokenHash = callbackUrl.searchParams.get("token_hash") || hashParams.get("token_hash");
+      const callbackType = callbackUrl.searchParams.get("type") || hashParams.get("type");
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const callbackError = callbackUrl.searchParams.get("error_description") || callbackUrl.searchParams.get("error") || hashParams.get("error_description") || hashParams.get("error");
 
       if (callbackError && active) {
         setAuthCallbackError("Ссылка не сработала или уже устарела. Вернись в ALIFLY и запроси новую ссылку для входа.");
@@ -54,11 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error && active) {
           setAuthCallbackError("Не удалось подтвердить ссылку. Запроси новую ссылку для входа и открой её один раз.");
         }
+      } else if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        if (error && active) {
+          setAuthCallbackError("Не удалось завершить вход. Запроси новую ссылку и открой её ещё раз.");
+        }
       }
 
-      if (code || tokenHash || callbackError) {
+      if (code || tokenHash || accessToken || callbackError) {
         ["code", "token_hash", "type", "error", "error_description", "error_code"].forEach((key) => callbackUrl.searchParams.delete(key));
-        window.history.replaceState({}, document.title, callbackUrl.pathname + callbackUrl.search + callbackUrl.hash);
+        callbackUrl.hash = "";
+        window.history.replaceState({}, document.title, callbackUrl.pathname + callbackUrl.search);
       }
 
       const { data, error } = await supabase.auth.getSession();
