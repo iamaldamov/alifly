@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../auth/AuthContext";
 
@@ -45,40 +45,55 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const profileRequestId = useRef(0);
 
   const refreshProfile = useCallback(async () => {
     if (!user) {
+      profileRequestId.current += 1;
       setProfile(null);
+      setProfileError(null);
+      setProfileLoading(false);
       return;
     }
 
+    const requestId = ++profileRequestId.current;
     setProfileLoading(true);
     setProfileError(null);
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .select("user_id, display_name, age, gender, avatar_id, trial_started_at, trial_ends_at, created_at, updated_at")
-      .eq("user_id", user.id)
-      .maybeSingle();
 
-    if (error) {
-      setProfileError("Не удалось загрузить профиль. Проверь подключение и попробуй ещё раз.");
-      setProfileLoading(false);
-      return;
+    try {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("user_id, display_name, age, gender, avatar_id, trial_started_at, trial_ends_at, created_at, updated_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      // Ignore a stale response if the account changed or a newer refresh started.
+      if (requestId !== profileRequestId.current) return;
+
+      if (error) {
+        setProfileError("Не удалось загрузить профиль. Проверь подключение и попробуй ещё раз.");
+        return;
+      }
+
+      if (!data) {
+        setProfileError("Профиль ещё создаётся. Обнови страницу через несколько секунд.");
+        return;
+      }
+
+      setProfile(data as UserProfile);
+    } catch {
+      if (requestId === profileRequestId.current) {
+        setProfileError("Не удалось загрузить профиль из-за ошибки соединения. Проверь интернет и попробуй ещё раз.");
+      }
+    } finally {
+      if (requestId === profileRequestId.current) setProfileLoading(false);
     }
-
-    if (!data) {
-      setProfileError("Профиль ещё создаётся. Обнови страницу через несколько секунд.");
-      setProfileLoading(false);
-      return;
-    }
-
-    setProfile(data as UserProfile);
-    setProfileLoading(false);
   }, [user?.id]);
 
   useEffect(() => {
     if (!authReady) return;
     if (!user) {
+      profileRequestId.current += 1;
       setProfile(null);
       setProfileError(null);
       setProfileLoading(false);
@@ -87,28 +102,38 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     void refreshProfile();
   }, [authReady, user?.id, refreshProfile]);
 
+  useEffect(() => () => {
+    profileRequestId.current += 1;
+  }, []);
+
   const saveProfile = useCallback(async (input: ProfileInput) => {
     if (!user) return false;
     setProfileError(null);
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .update({
-        display_name: input.display_name.trim(),
-        age: input.age,
-        gender: input.gender,
-        avatar_id: input.avatar_id,
-      })
-      .eq("user_id", user.id)
-      .select("user_id, display_name, age, gender, avatar_id, trial_started_at, trial_ends_at, created_at, updated_at")
-      .single();
 
-    if (error || !data) {
-      setProfileError("Не удалось сохранить изменения. Попробуй ещё раз.");
+    try {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .update({
+          display_name: input.display_name.trim(),
+          age: input.age,
+          gender: input.gender,
+          avatar_id: input.avatar_id,
+        })
+        .eq("user_id", user.id)
+        .select("user_id, display_name, age, gender, avatar_id, trial_started_at, trial_ends_at, created_at, updated_at")
+        .single();
+
+      if (error || !data) {
+        setProfileError("Не удалось сохранить изменения. Проверь подключение и попробуй ещё раз.");
+        return false;
+      }
+
+      setProfile(data as UserProfile);
+      return true;
+    } catch {
+      setProfileError("Не удалось сохранить профиль из-за ошибки соединения. Попробуй ещё раз.");
       return false;
     }
-
-    setProfile(data as UserProfile);
-    return true;
   }, [user?.id]);
 
   const value = useMemo(
