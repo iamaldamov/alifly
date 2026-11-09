@@ -926,3 +926,211 @@ html, body {
   .account-button { min-height: 34px; gap: 5px; padding: 0 9px; font-size: 10px; }
   .auth-modal { padding: 31px 20px 21px; }
 }
+
+
+/* Daily learning quest */
+.daily-quest-section { padding: 22px 4% 8px; }
+.daily-quest-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  align-items: center;
+  gap: 28px;
+  padding: 25px 28px;
+  border: 1px solid #dce7d9;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(197, 224, 165, .34), transparent 13rem),
+    linear-gradient(120deg, #f1f6ec 0%, #fbfaf3 65%, #eff4e8 100%);
+  box-shadow: 0 10px 28px rgba(31, 69, 48, .055);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.daily-quest-card.is-complete {
+  border-color: #b8d3ac;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(177, 220, 143, .38), transparent 13rem),
+    linear-gradient(120deg, #edf6e9 0%, #fbfaf3 65%, #eaf3e5 100%);
+}
+.daily-quest-kicker {
+  display: inline-block;
+  color: #71866f;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .16em;
+}
+.daily-quest-copy h2 {
+  margin: 8px 0 7px;
+  color: #1f4333;
+  font-size: 25px;
+  font-weight: 850;
+  letter-spacing: -.04em;
+}
+.daily-quest-copy p {
+  max-width: 540px;
+  margin: 0;
+  color: #6d7c70;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.daily-quest-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 17px;
+}
+.daily-quest-option {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #dbe5d8;
+  border-radius: 12px;
+  background: rgba(255,255,250,.82);
+  color: #587060;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.daily-quest-option:hover { border-color: #a8c3a0; }
+.daily-quest-option.is-selected {
+  border-color: #235d43;
+  background: #235d43;
+  color: #fffdf3;
+  box-shadow: 0 3px 0 #174632;
+}
+.daily-quest-note {
+  display: block;
+  margin-top: 11px;
+  color: #909b8e;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.daily-quest-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.daily-quest-emblem {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  border: 1px solid #d5e4ce;
+  border-radius: 19px;
+  background: #e1eddc;
+  color: #235d43;
+  font-family: Georgia, serif;
+  font-size: 35px;
+  line-height: 1;
+  box-shadow: 0 4px 0 #d3e2cc;
+}
+.daily-quest-summary > strong {
+  color: #234a37;
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: -.04em;
+}
+.daily-quest-summary > span:not(.daily-quest-status) {
+  margin-top: 1px;
+  color: #7e8c7e;
+  font-size: 10px;
+  font-weight: 650;
+}
+.daily-quest-progress {
+  width: 100%;
+  height: 8px;
+  margin-top: 13px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #dfe9d9;
+}
+.daily-quest-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2a704e, #99c86c);
+  transition: width .35s ease;
+}
+.daily-quest-status {
+  margin-top: 7px;
+  color: #55775a;
+  font-size: 10px;
+  font-weight: 800;
+}
+:root[data-theme="dark"] .daily-quest-card {
+  border-color: #34513b;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(118, 157, 91, .16), transparent 13rem),
+    linear-gradient(120deg, #1a3024 0%, #17251f 66%, #1d2e22 100%);
+  box-shadow: 0 14px 35px rgba(0,0,0,.16);
+}
+:root[data-theme="dark"] .daily-quest-card.is-complete {
+  border-color: #4b7048;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(150, 190, 112, .2), transparent 13rem),
+    linear-gradient(120deg, #1d3928 0%, #17251f 66%, #203826 100%);
+}
+:root[data-theme="dark"] .daily-quest-kicker { color: #a7c68f; }
+:root[data-theme="dark"] .daily-quest-copy h2,
+:root[data-theme="dark"] .daily-quest-summary > strong { color: #edf3e9; }
+:root[data-theme="dark"] .daily-quest-copy p { color: #b2c0b4; }
+:root[data-theme="dark"] .daily-quest-note,
+:root[data-theme="dark"] .daily-quest-summary > span:not(.daily-quest-status) { color: #91a095; }
+:root[data-theme="dark"] .daily-quest-option {
+  border-color: #36513d;
+  background: #1c3024;
+  color: #c2d4be;
+}
+:root[data-theme="dark"] .daily-quest-option.is-selected {
+  border-color: #9ac77e;
+  background: #a8d18a;
+  color: #163b2b;
+  box-shadow: 0 3px 0 #729d61;
+}
+:root[data-theme="dark"] .daily-quest-emblem {
+  border-color: #456448;
+  background: #2a4630;
+  color: #c8e8a4;
+  box-shadow: 0 4px 0 #203b29;
+}
+:root[data-theme="dark"] .daily-quest-progress { background: #2b4035; }
+:root[data-theme="dark"] .daily-quest-status { color: #b7d99b; }
+@media (max-width: 700px) {
+  .daily-quest-section { padding: 16px 2% 5px; }
+  .daily-quest-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 21px 19px 18px;
+    border-radius: 20px;
+  }
+  .daily-quest-copy h2 { font-size: 23px; }
+  .daily-quest-summary {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 12px;
+    align-items: center;
+    justify-items: start;
+    text-align: left;
+  }
+  .daily-quest-emblem {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    border-radius: 15px;
+    font-size: 29px;
+  }
+  .daily-quest-summary > strong { grid-column: 2; font-size: 18px; }
+  .daily-quest-summary > span:not(.daily-quest-status) { grid-column: 2; }
+  .daily-quest-progress { grid-column: 1 / -1; margin-top: 12px; }
+  .daily-quest-status { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .daily-quest-progress > span,
+  .daily-quest-card,
+  .daily-quest-option { transition: none; }
+}
