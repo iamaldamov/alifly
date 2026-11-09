@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ReadingTrainer from "./ReadingTrainer";
+import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { supabase } from "./lib/supabase";
@@ -300,8 +301,51 @@ function localDateKey(date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+type DailyActivity = { date: string; lessonIds: number[] };
+
+function dailyActivityStorageKey(userId: string): string {
+  return `alifly-daily-activity:${userId}`;
+}
+
+function dailyGoalStorageKey(userId: string): string {
+  return `alifly-daily-goal:${userId}`;
+}
+
+function readDailyActivity(userId: string): DailyActivity {
+  try {
+    const saved = localStorage.getItem(dailyActivityStorageKey(userId));
+    if (!saved) return { date: "", lessonIds: [] };
+    const parsed: unknown = JSON.parse(saved);
+    if (!parsed || typeof parsed !== "object") return { date: "", lessonIds: [] };
+
+    const value = parsed as { date?: unknown; lessonIds?: unknown };
+    if (typeof value.date !== "string" || !Array.isArray(value.lessonIds)) {
+      return { date: "", lessonIds: [] };
+    }
+
+    const lessonIds = [...new Set(value.lessonIds.filter(
+      (id): id is number => Number.isInteger(id) && id >= 1 && id <= 8,
+    ))];
+    return { date: value.date, lessonIds };
+  } catch {
+    return { date: "", lessonIds: [] };
+  }
+}
+
+function readDailyGoal(userId: string): DailyGoal {
+  try {
+    const saved = Number(localStorage.getItem(dailyGoalStorageKey(userId)));
+    return saved === 2 || saved === 3 ? saved : 1;
+  } catch {
+    return 1;
+  }
+}
+
 export default function App() {
   const { user } = useAuth();
+  const dailyUserId = user?.id ?? "guest";
+  const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
+  const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -331,6 +375,11 @@ export default function App() {
     document.documentElement.dataset.theme = theme;
     try { localStorage.setItem("alifly-theme", theme); } catch { /* Storage may be unavailable. */ }
   }, [theme]);
+
+  useEffect(() => {
+    setDailyGoal(readDailyGoal(dailyUserId));
+    setDailyActivity(readDailyActivity(dailyUserId));
+  }, [dailyUserId]);
 
   useEffect(() => {
     if (!selectedStage) return;
@@ -478,6 +527,15 @@ export default function App() {
   }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed]);
 
 
+  const updateDailyGoal = (goal: DailyGoal) => {
+    setDailyGoal(goal);
+    try {
+      localStorage.setItem(dailyGoalStorageKey(dailyUserId), String(goal));
+    } catch {
+      // The daily goal remains available for this session if storage is blocked.
+    }
+  };
+
   const closeStage = () => {
     setSelectedStage(null);
     setSelectedLesson(null);
@@ -536,6 +594,22 @@ export default function App() {
         }
       } else if (!reviewMode) {
         setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
+        if (!examMode) {
+          const today = localDateKey();
+          setDailyActivity((current) => {
+            const existingIds = current.date === today ? current.lessonIds : [];
+            const next: DailyActivity = {
+              date: today,
+              lessonIds: [...new Set([...existingIds, selectedLesson.id])],
+            };
+            try {
+              localStorage.setItem(dailyActivityStorageKey(dailyUserId), JSON.stringify(next));
+            } catch {
+              // Daily progress remains available for this session if storage is blocked.
+            }
+            return next;
+          });
+        }
       }
       if (!reviewMode) {
         const today = localDateKey();
@@ -595,6 +669,8 @@ export default function App() {
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
   const progressPercent = Math.round((completedLessonIds.length / lessons.length) * 100);
+  const today = localDateKey();
+  const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed;
 
   return (
@@ -638,6 +714,12 @@ export default function App() {
           <div className="art-dot" />
         </div>
       </section>
+
+      <DailyQuest
+        goal={dailyGoal}
+        completedCount={dailyCompletedCount}
+        onGoalChange={updateDailyGoal}
+      />
 
       <ReadingTrainer />
 
