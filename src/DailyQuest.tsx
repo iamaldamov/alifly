@@ -62,7 +62,7 @@ export default function DailyQuest({
           >
             <span style={{ width: `${progress}%` }} />
           </div>
-          <span className="daily-quest-status">
+          <span className="daily-quest-status" role="status" aria-live="polite">
             {completed ? "Цель выполнена" : `${progress}% выполнено`}
           </span>
         </div>
