@@ -596,19 +596,17 @@ export default function App() {
         setCompletedLessonIds((current) => current.includes(selectedLesson.id) ? current : [...current, selectedLesson.id]);
         if (!examMode) {
           const today = localDateKey();
-          setDailyActivity((current) => {
-            const existingIds = current.date === today ? current.lessonIds : [];
-            const next: DailyActivity = {
-              date: today,
-              lessonIds: [...new Set([...existingIds, selectedLesson.id])],
-            };
-            try {
-              localStorage.setItem(dailyActivityStorageKey(dailyUserId), JSON.stringify(next));
-            } catch {
-              // Daily progress remains available for this session if storage is blocked.
-            }
-            return next;
-          });
+          const existingIds = dailyActivity.date === today ? dailyActivity.lessonIds : [];
+          const next: DailyActivity = {
+            date: today,
+            lessonIds: [...new Set([...existingIds, selectedLesson.id])],
+          };
+          setDailyActivity(next);
+          try {
+            localStorage.setItem(dailyActivityStorageKey(dailyUserId), JSON.stringify(next));
+          } catch {
+            // Daily progress remains available for this session if storage is blocked.
+          }
         }
       }
       if (!reviewMode) {
