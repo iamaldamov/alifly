@@ -197,7 +197,7 @@ const recallAliases: Record<string, string[]> = {
   "ت": ["та", "ta"],
   "ث": ["са", "tha", "thāʾ"],
   "ج": ["джим", "jim"],
-  "ح": ["ха глубокая", "ḥāʾ"],
+  "ح": ["ха глубокая", "ha deep"],
   "خ": ["ха", "kha", "khāʾ"],
   "د": ["даль", "dal"],
   "ذ": ["dhāl", "dhal"],
@@ -207,7 +207,7 @@ const recallAliases: Record<string, string[]> = {
   "ش": ["шин", "shin"],
   "ص": ["сад", "ṣād", "sad"],
   "ض": ["дад", "ḍād", "dad"],
-  "ط": ["эмфатическая та", "emphatic ta", "ṭāʾ"],
+  "ط": ["эмфатическая та"],
   "ظ": ["эмфатическая за", "emphatic za", "ẓāʾ"],
   "ع": ["айн", "ʿayn", "ayn"],
   "غ": ["гайн", "ghayn", "ghain"],
@@ -217,7 +217,7 @@ const recallAliases: Record<string, string[]> = {
   "ل": ["лям", "lam"],
   "م": ["мим", "mim"],
   "ن": ["нун", "nun"],
-  "ه": ["hāʾ", "ha light", "лёгкая h"],
+  "ه": ["ha light", "лёгкая h"],
   "و": ["уау", "waw"],
   "ي": ["йа", "ya"],
 };
@@ -302,13 +302,15 @@ type Mistake = {
   intervalDays: number;
   repetitions: number;
   easeFactor: number;
+  errorCount: number;
+  lastCorrect: boolean;
 };
 
 const REVIEW_DELAY_MINUTES = 10;
 
 function updateReviewCard(
   previous: Mistake | undefined,
-  input: Omit<Mistake, "dueAt" | "intervalDays" | "repetitions" | "easeFactor">,
+  input: Omit<Mistake, "dueAt" | "intervalDays" | "repetitions" | "easeFactor" | "errorCount" | "lastCorrect">,
   correct: boolean,
 ): Mistake {
   const repetitions = previous?.repetitions ?? 0;
@@ -327,6 +329,8 @@ function updateReviewCard(
     intervalDays,
     repetitions: correct ? repetitions + 1 : 0,
     easeFactor,
+    errorCount: (previous?.errorCount ?? 0) + (correct ? 0 : 1),
+    lastCorrect: correct,
   };
 }
 
@@ -354,6 +358,8 @@ function readMistakes(): Mistake[] {
       intervalDays: Number.isFinite(item.intervalDays) ? item.intervalDays : 0,
       repetitions: Number.isInteger(item.repetitions) ? item.repetitions : 0,
       easeFactor: Number.isFinite(item.easeFactor) ? item.easeFactor : 2.5,
+      errorCount: Number.isInteger(item.errorCount) ? Math.max(0, item.errorCount) : (item.intervalDays === 0 ? 1 : 0),
+      lastCorrect: typeof item.lastCorrect === "boolean" ? item.lastCorrect : item.intervalDays > 0,
     }));
   } catch {
     return [];
@@ -739,6 +745,31 @@ export default function App() {
   };
 
   const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
+  const weakMistakes = mistakes.filter((item) => item.errorCount > 0);
+
+  const startWeakReview = () => {
+    const weak = [...mistakes]
+      .filter((item) => item.errorCount > 0)
+      .sort((a, b) => b.errorCount - a.errorCount);
+    if (weak.length === 0) return;
+    setSelectedStage(stages[0]);
+    setSelectedLesson({
+      id: 0,
+      title: "Слабые слова",
+      goal: "Здесь собраны буквы и задания, в которых раньше были ошибки. Попробуй ответить самостоятельно.",
+      letters: [],
+      questions: weak.map((item) => item.question),
+    });
+    setLessonPhase("practice");
+    setReviewMistakeIds(weak.map((item) => item.id));
+    setQuestionIndex(0);
+    setSelectedAnswer(null);
+    setTypedAnswer("");
+    setCorrectAnswers(0);
+    setLessonFinished(false);
+    setReviewMode(true);
+    setExamMode(false);
+  };
 
   const startReview = () => {
     const due = mistakes.filter((item) => item.dueAt <= Date.now());
@@ -830,13 +861,21 @@ export default function App() {
           <div className="progress-info"><span>{firstStageCompletedCount} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
           <p>{firstStageCompletedCount === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
-          {dueMistakes.length > 0 ? (
-            <button className="review-button" type="button" onClick={startReview}>
-              Тренировка памяти · {dueMistakes.length}
-            </button>
-          ) : mistakes.length > 0 ? (
-            <p className="memory-next-review">Следующее повторение запланировано. Возвращайся позже — интервалы помогают запоминать надолго.</p>
-          ) : null}
+          <div className="memory-actions">
+            {dueMistakes.length > 0 && (
+              <button className="review-button" type="button" onClick={startReview}>
+                Повторить по расписанию · {dueMistakes.length}
+              </button>
+            )}
+            {weakMistakes.length > 0 && (
+              <button className="review-button weak-words-button" type="button" onClick={startWeakReview}>
+                Слабые слова · {weakMistakes.length}
+              </button>
+            )}
+            {dueMistakes.length === 0 && mistakes.length > 0 && (
+              <p className="memory-next-review">Следующее повторение запланировано автоматически.</p>
+            )}
+          </div>
         </div>
       </section>
 
