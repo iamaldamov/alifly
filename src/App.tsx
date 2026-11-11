@@ -207,20 +207,6 @@ const stageTwoLessons: Lesson[] = [
   },
 ];
 
-const examQuestions: Question[] = [
-  { prompt: "Какая буква называется «алиф»?", options: ["ا", "ب", "ت"], correct: "ا", explanation: "Алиф — ا. Она выглядит как вертикальная линия." },
-  { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Ба — ب. У неё одна точка снизу." },
-  { prompt: "Найди букву «та» с двумя точками сверху.", options: ["ث", "ت", "ج"], correct: "ت", explanation: "Та — ت. У неё две точки сверху." },
-  { prompt: "Какая буква имеет три точки сверху?", options: ["ب", "ش", "س"], correct: "ش", explanation: "Шин — ش. Её отличают три точки сверху." },
-  { prompt: "Найди букву «джим».", options: ["ح", "خ", "ج"], correct: "ج", explanation: "Джим — ج. У неё одна точка снизу." },
-  { prompt: "Какая буква называется «даль»?", options: ["ذ", "د", "ر"], correct: "د", explanation: "Даль — د. Она пишется без точки." },
-  { prompt: "Найди букву «зай».", options: ["ز", "ر", "س"], correct: "ز", explanation: "Зай — ز. У неё одна точка сверху." },
-  { prompt: "Какая буква называется «айн»?", options: ["غ", "ع", "ض"], correct: "ع", explanation: "Айн — ع. Это гортанный звук, которому нужна отдельная практика." },
-  { prompt: "Найди букву «фа».", options: ["ق", "ف", "ك"], correct: "ف", explanation: "Фа — ف. В этой учебной форме у неё одна точка сверху." },
-  { prompt: "Какая буква называется «мим»?", options: ["ن", "م", "ل"], correct: "م", explanation: "Мим — م." },
-];
-
-
 const recallAliases: Record<string, string[]> = {
   "ا": ["алиф", "alif"],
   "ب": ["ба", "ba"],
@@ -283,6 +269,15 @@ function buildLetterRecallQuestion(letter: Lesson["letters"][number]): Question 
   };
 }
 
+function shuffleQuestions(questions: Question[]): Question[] {
+  const shuffled = [...questions];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 6) return lesson.questions;
   const recall = lesson.letters.map(buildLetterRecallQuestion);
@@ -292,22 +287,16 @@ function buildLessonQuestions(lesson: Lesson): Question[] {
     if (lesson.questions[index]) mixed.push(lesson.questions[index]);
     if (recall[index]) mixed.push(recall[index]);
   }
-  return mixed;
+  return shuffleQuestions(mixed);
 }
 
 function buildExamRecallQuestions(): Question[] {
-  return examQuestions.map((question) => {
-    const acceptedAnswers = recallAliases[question.correct] ?? [question.correct];
-    return {
-      ...question,
-      prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
-      options: [],
-      correct: acceptedAnswers[0],
-      acceptedAnswers,
-      mode: "recall",
-      stimulus: question.correct,
-    };
-  });
+  const allLetters = lessons.flatMap((lesson) => lesson.letters);
+  const sampledQuestions = shuffleQuestions(allLetters.map(buildLetterRecallQuestion)).slice(0, 10);
+  return sampledQuestions.map((question) => ({
+    ...question,
+    prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
+  }));
 }
 
 
