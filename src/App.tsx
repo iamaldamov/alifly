@@ -461,7 +461,8 @@ const stageThreeLessons: Lesson[] = [
     ],
   ),
 ];
- Record<string, string[]> = {
+
+const recallAliases: Record<string, string[]> = {
   "ا": ["алиф", "alif"],
   "ب": ["ба", "ba"],
   "ت": ["та", "ta"],
