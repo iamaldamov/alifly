@@ -21,7 +21,16 @@ type Question = {
   explanation: string;
   mode?: "choice" | "recall";
   stimulus?: string;
+  stimulusLang?: "ar" | "ru";
+  stimulusDir?: "rtl" | "ltr";
   acceptedAnswers?: string[];
+};
+
+type StudyCard = {
+  arabic: string;
+  transliteration: string;
+  translation: string;
+  note?: string;
 };
 
 type Lesson = {
@@ -29,12 +38,14 @@ type Lesson = {
   title: string;
   goal: string;
   letters: { character: string; name: string; note?: string }[];
+  studyCards?: StudyCard[];
   questions: Question[];
 };
 
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
   { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
+  { id: 3, title: "Знакомство", description: "Первые диалоги на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
 ];
 
 const legacyLessons: Lesson[] = [
@@ -207,7 +218,243 @@ const stageTwoLessons: Lesson[] = [
   },
 ];
 
-const recallAliases: Record<string, string[]> = {
+type IntroCard = StudyCard & {
+  acceptedTransliterations: string[];
+  acceptedTranslations?: string[];
+};
+
+function makeIntroductionLesson(
+  id: number,
+  title: string,
+  goal: string,
+  cards: IntroCard[],
+): Lesson {
+  const questions: Question[] = cards.flatMap((card) => [
+    {
+      prompt: "Переведи фразу на русский. Ответ введи самостоятельно.",
+      options: [],
+      correct: card.translation,
+      acceptedAnswers: card.acceptedTranslations ?? [card.translation],
+      mode: "recall",
+      stimulus: card.arabic,
+      stimulusLang: "ar",
+      stimulusDir: "rtl",
+      explanation: `Это значит: «${card.translation}». Произношение: ${card.transliteration}.`,
+    },
+    {
+      prompt: "Как сказать это по-арабски? Введи звучание по памяти.",
+      options: [],
+      correct: card.transliteration,
+      acceptedAnswers: card.acceptedTransliterations,
+      mode: "recall",
+      stimulus: card.translation,
+      stimulusLang: "ru",
+      stimulusDir: "ltr",
+      explanation: `${card.arabic} — ${card.transliteration}.`,
+    },
+  ]);
+  return {
+    id,
+    title,
+    goal,
+    letters: [],
+    studyCards: cards,
+    questions,
+  };
+}
+
+const stageThreeLessons: Lesson[] = [
+  makeIntroductionLesson(
+    30,
+    "Приветствие и ответ",
+    "Научись начинать разговор и отвечать на приветствие. Сначала пойми пару, затем вспоминай её без подсказки.",
+    [
+      {
+        arabic: "السَّلَامُ عَلَيْكُمْ",
+        transliteration: "as-salāmu ʿalaykum",
+        translation: "Мир вам",
+        acceptedTransliterations: ["as-salamu alaykum", "assalamu alaykum", "ас-саляму алейкум", "ассаляму алейкум"],
+        acceptedTranslations: ["мир вам", "мир вам всем"],
+      },
+      {
+        arabic: "وَعَلَيْكُمُ السَّلَامُ",
+        transliteration: "wa-ʿalaykumu s-salām",
+        translation: "И вам мир",
+        acceptedTransliterations: ["wa alaykumu s-salam", "waalaykumu salam", "уа алейкуму салям", "уа алейкуму ссалям"],
+        acceptedTranslations: ["и вам мир", "и вам мир тоже"],
+      },
+      {
+        arabic: "مَرْحَبًا",
+        transliteration: "marḥaban",
+        translation: "Здравствуйте",
+        acceptedTransliterations: ["marhaban", "мархабан"],
+        acceptedTranslations: ["здравствуйте", "привет", "добро пожаловать"],
+      },
+      {
+        arabic: "أَهْلًا وَسَهْلًا",
+        transliteration: "ahlan wa-sahlan",
+        translation: "Добро пожаловать",
+        acceptedTransliterations: ["ahlan wa sahlan", "ахлан уа сахлан", "ахлан васахлан"],
+        acceptedTranslations: ["добро пожаловать", "добро пожаловать к нам"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    31,
+    "Как тебя зовут?",
+    "Спроси имя собеседника, ответь о себе и обрати внимание на форму обращения к мужчине и женщине.",
+    [
+      {
+        arabic: "مَا اسْمُكَ؟",
+        transliteration: "mā ismuka?",
+        translation: "Как тебя зовут? (обращение к мужчине)",
+        acceptedTransliterations: ["ma ismuka", "maa ismuka", "ма исмука"],
+        acceptedTranslations: ["как тебя зовут", "какое у тебя имя", "как вас зовут"],
+      },
+      {
+        arabic: "مَا اسْمُكِ؟",
+        transliteration: "mā ismuki?",
+        translation: "Как тебя зовут? (обращение к женщине)",
+        acceptedTransliterations: ["ma ismuki", "maa ismuki", "ма исмуки"],
+        acceptedTranslations: ["как тебя зовут", "какое у тебя имя", "как вас зовут"],
+      },
+      {
+        arabic: "اسْمِي ...",
+        transliteration: "ismī ...",
+        translation: "Меня зовут…",
+        acceptedTransliterations: ["ismi", "исми"],
+        acceptedTranslations: ["меня зовут", "мое имя"],
+      },
+      {
+        arabic: "تَشَرَّفْنَا",
+        transliteration: "tasharrafnā",
+        translation: "Рад(а) знакомству",
+        acceptedTransliterations: ["tasharrafna", "ташаррафна"],
+        acceptedTranslations: ["рад знакомству", "рада знакомству", "приятно познакомиться", "рад а знакомству"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    32,
+    "Откуда ты?",
+    "Спроси, откуда человек, ответь о себе и различай формы обращения к мужчине и женщине.",
+    [
+      {
+        arabic: "مِنْ أَيْنَ أَنْتَ؟",
+        transliteration: "min ayna anta?",
+        translation: "Откуда ты? (обращение к мужчине)",
+        acceptedTransliterations: ["min ayna anta", "min aina anta", "мин айна анта"],
+        acceptedTranslations: ["откуда ты", "откуда вы"],
+      },
+      {
+        arabic: "مِنْ أَيْنَ أَنْتِ؟",
+        transliteration: "min ayna anti?",
+        translation: "Откуда ты? (обращение к женщине)",
+        acceptedTransliterations: ["min ayna anti", "min aina anti", "мин айна анти"],
+        acceptedTranslations: ["откуда ты", "откуда вы"],
+      },
+      {
+        arabic: "أَنَا مِنْ ...",
+        transliteration: "anā min ...",
+        translation: "Я из…",
+        acceptedTransliterations: ["ana min", "anaa min", "ана мин"],
+        acceptedTranslations: ["я из", "я родом из"],
+      },
+      {
+        arabic: "أَنَا مِنْ رُوسِيَا",
+        transliteration: "anā min rūsiyā",
+        translation: "Я из России",
+        acceptedTransliterations: ["ana min rusiya", "anaa min rusiya", "ана мин русия"],
+        acceptedTranslations: ["я из россии", "я родом из россии"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    33,
+    "Как дела?",
+    "Спроси, как дела, ответь вежливо и верни вопрос собеседнику.",
+    [
+      {
+        arabic: "كَيْفَ حَالُكَ؟",
+        transliteration: "kayfa ḥāluka?",
+        translation: "Как ты? (обращение к мужчине)",
+        acceptedTransliterations: ["kayfa haluka", "kayfa haaluka", "кайфа халука"],
+        acceptedTranslations: ["как ты", "как дела", "как поживаешь"],
+      },
+      {
+        arabic: "كَيْفَ حَالُكِ؟",
+        transliteration: "kayfa ḥāluki?",
+        translation: "Как ты? (обращение к женщине)",
+        acceptedTransliterations: ["kayfa haluki", "kayfa haaluki", "кайфа халики"],
+        acceptedTranslations: ["как ты", "как дела", "как поживаешь"],
+      },
+      {
+        arabic: "أَنَا بِخَيْرٍ، شُكْرًا",
+        transliteration: "anā bikhayr, shukran",
+        translation: "У меня всё хорошо, спасибо",
+        acceptedTransliterations: ["ana bikhayr shukran", "anaa bikhair shukran", "ана бихайр шукран"],
+        acceptedTranslations: ["у меня все хорошо спасибо", "я в порядке спасибо", "все хорошо спасибо"],
+      },
+      {
+        arabic: "وَأَنْتَ؟ / وَأَنْتِ؟",
+        transliteration: "wa anta? / wa anti?",
+        translation: "А ты? (мужчине / женщине)",
+        acceptedTransliterations: ["wa anta wa anti", "уа анта уа анти"],
+        acceptedTranslations: ["а ты", "а вы", "а у тебя"],
+      },
+      {
+        arabic: "الْحَمْدُ لِلَّهِ",
+        transliteration: "al-ḥamdu lillāh",
+        translation: "Хвала Аллаху",
+        acceptedTransliterations: ["alhamdu lillah", "al hamdu lillah", "альхамду лиллях", "альхамдулиллях"],
+        acceptedTranslations: ["хвала аллаху", "слава аллаху", "вся хвала аллаху"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    34,
+    "Знакомство — полный диалог",
+    "Собери знакомство от приветствия до вопроса о самочувствии. Это итоговая практика знакомых выражений в контексте.",
+    [
+      {
+        arabic: "السَّلَامُ عَلَيْكُمْ\nوَعَلَيْكُمُ السَّلَامُ",
+        transliteration: "as-salāmu ʿalaykum\nwa-ʿalaykumu s-salām",
+        translation: "— Мир вам. — И вам мир.",
+        acceptedTransliterations: ["as salamu alaykum wa alaykumu salam", "ассаляму алейкум уа алейкуму салям"],
+        acceptedTranslations: ["мир вам и вам мир", "мир вам и вам мир тоже"],
+      },
+      {
+        arabic: "مَا اسْمُكِ؟\nاسْمِي سَارَةُ",
+        transliteration: "mā ismuki? ismī sāra",
+        translation: "— Как тебя зовут? — Меня зовут Сара.",
+        acceptedTransliterations: ["ma ismuki ismi sara", "maa ismuki ismi sara", "ма исмуки исми сара"],
+        acceptedTranslations: ["как тебя зовут меня зовут сара", "меня зовут сара"],
+      },
+      {
+        arabic: "مِنْ أَيْنَ أَنْتِ؟\nأَنَا مِنْ رُوسِيَا",
+        transliteration: "min ayna anti? anā min rūsiyā",
+        translation: "— Откуда ты? — Я из России.",
+        acceptedTransliterations: ["min ayna anti ana min rusiya", "мин айна анти ана мин русия"],
+        acceptedTranslations: ["откуда ты я из россии", "я из россии"],
+      },
+      {
+        arabic: "كَيْفَ حَالُكِ؟\nأَنَا بِخَيْرٍ، شُكْرًا",
+        transliteration: "kayfa ḥāluki? anā bikhayr, shukran",
+        translation: "— Как дела? — Хорошо, спасибо.",
+        acceptedTransliterations: ["kayfa haluki ana bikhayr shukran", "кайфа халики ана бихайр шукран"],
+        acceptedTranslations: ["как дела хорошо спасибо", "у меня все хорошо спасибо"],
+      },
+      {
+        arabic: "تَشَرَّفْنَا",
+        transliteration: "tasharrafnā",
+        translation: "Рад(а) знакомству",
+        acceptedTransliterations: ["tasharrafna", "ташаррафна"],
+        acceptedTranslations: ["рад знакомству", "рада знакомству", "приятно познакомиться"],
+      },
+    ],
+  ),
+];
+ Record<string, string[]> = {
   "ا": ["алиф", "alif"],
   "ب": ["ба", "ba"],
   "ت": ["та", "ta"],
