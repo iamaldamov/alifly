@@ -33,11 +33,11 @@ type Lesson = {
 };
 
 const stages: Stage[] = [
-  { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 5, status: "available" },
+  { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
   { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
 ];
 
-const lessons: Lesson[] = [
+const legacyLessons: Lesson[] = [
   {
     id: 1,
     title: "Первые четыре буквы",
@@ -128,6 +128,36 @@ const lessons: Lesson[] = [
   },
 ];
 
+function makeMicroLesson(
+  sourceIndex: number,
+  id: number,
+  title: string,
+  goal: string,
+  letterIndexes: number[],
+  questionIndexes: number[],
+): Lesson {
+  const source = legacyLessons[sourceIndex];
+  return {
+    id,
+    title,
+    goal,
+    letters: letterIndexes.map((index) => source.letters[index]),
+    questions: questionIndexes.map((index) => source.questions[index]).filter(Boolean),
+  };
+}
+
+// Nine short lessons of 2–4 letters. Existing Arabic letter notes are reused unchanged.
+const lessons: Lesson[] = [
+  { ...legacyLessons[0], id: 20, title: "Алиф, ба, та и са", goal: "Научись узнавать и самостоятельно вспоминать алиф, ба, та и са." },
+  makeMicroLesson(1, 21, "Джим, ха и ха", "Различай три похожие по основе буквы и обращай внимание на точки.", [0, 1, 2], [0, 1]),
+  makeMicroLesson(1, 22, "Даль и заль", "Запомни пару букв, которые отличаются точкой сверху.", [3, 4], [2]),
+  { ...legacyLessons[2], id: 23, title: "Ра, зай, син и шин" },
+  makeMicroLesson(3, 24, "Сад, дад и эмфатическая та", "Познакомься с тремя эмфатическими согласными и их особенностями.", [0, 1, 2], []),
+  makeMicroLesson(3, 25, "За, айн и гайн", "Различай три буквы с особыми артикуляционными особенностями.", [3, 4, 5], [0, 1, 2]),
+  makeMicroLesson(4, 26, "Фа, къаф и каф", "Сравни три буквы и запомни их характерные формы.", [0, 1, 2], [0]),
+  makeMicroLesson(4, 27, "Лям, мим и нун", "Закрепи три новые буквы и их отличительные формы.", [3, 4, 5], [1]),
+  makeMicroLesson(4, 28, "Ха, уау и йа", "Заверши знакомство с алфавитом: изучи последние три буквы.", [6, 7, 8], [2]),
+];
 
 const stageTwoLessons: Lesson[] = [
   {
@@ -176,20 +206,6 @@ const stageTwoLessons: Lesson[] = [
     ],
   },
 ];
-
-const examQuestions: Question[] = [
-  { prompt: "Какая буква называется «алиф»?", options: ["ا", "ب", "ت"], correct: "ا", explanation: "Алиф — ا. Она выглядит как вертикальная линия." },
-  { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Ба — ب. У неё одна точка снизу." },
-  { prompt: "Найди букву «та» с двумя точками сверху.", options: ["ث", "ت", "ج"], correct: "ت", explanation: "Та — ت. У неё две точки сверху." },
-  { prompt: "Какая буква имеет три точки сверху?", options: ["ب", "ش", "س"], correct: "ش", explanation: "Шин — ش. Её отличают три точки сверху." },
-  { prompt: "Найди букву «джим».", options: ["ح", "خ", "ج"], correct: "ج", explanation: "Джим — ج. У неё одна точка снизу." },
-  { prompt: "Какая буква называется «даль»?", options: ["ذ", "د", "ر"], correct: "د", explanation: "Даль — د. Она пишется без точки." },
-  { prompt: "Найди букву «зай».", options: ["ز", "ر", "س"], correct: "ز", explanation: "Зай — ز. У неё одна точка сверху." },
-  { prompt: "Какая буква называется «айн»?", options: ["غ", "ع", "ض"], correct: "ع", explanation: "Айн — ع. Это гортанный звук, которому нужна отдельная практика." },
-  { prompt: "Найди букву «фа».", options: ["ق", "ف", "ك"], correct: "ف", explanation: "Фа — ف. В этой учебной форме у неё одна точка сверху." },
-  { prompt: "Какая буква называется «мим»?", options: ["ن", "م", "ل"], correct: "م", explanation: "Мим — م." },
-];
-
 
 const recallAliases: Record<string, string[]> = {
   "ا": ["алиф", "alif"],
@@ -253,6 +269,15 @@ function buildLetterRecallQuestion(letter: Lesson["letters"][number]): Question 
   };
 }
 
+function shuffleQuestions(questions: Question[]): Question[] {
+  const shuffled = [...questions];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 6) return lesson.questions;
   const recall = lesson.letters.map(buildLetterRecallQuestion);
@@ -262,22 +287,45 @@ function buildLessonQuestions(lesson: Lesson): Question[] {
     if (lesson.questions[index]) mixed.push(lesson.questions[index]);
     if (recall[index]) mixed.push(recall[index]);
   }
-  return mixed;
+  return shuffleQuestions(mixed);
 }
 
 function buildExamRecallQuestions(): Question[] {
-  return examQuestions.map((question) => {
-    const acceptedAnswers = recallAliases[question.correct] ?? [question.correct];
-    return {
-      ...question,
-      prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
-      options: [],
-      correct: acceptedAnswers[0],
-      acceptedAnswers,
-      mode: "recall",
-      stimulus: question.correct,
-    };
-  });
+  const allLetters = lessons.flatMap((lesson) => lesson.letters);
+  const sampledQuestions = shuffleQuestions(allLetters.map(buildLetterRecallQuestion)).slice(0, 10);
+  return sampledQuestions.map((question) => ({
+    ...question,
+    prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
+  }));
+}
+
+
+const legacyAlphabetProgress: Record<number, number[]> = {
+  1: [20],
+  2: [21, 22],
+  3: [23],
+  4: [24, 25],
+  5: [26, 27, 28],
+};
+
+function normalizeCompletedLessonIds(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  const ids = value.filter((id): id is number => Number.isInteger(id));
+  const alreadyMigrated = ids.some((id) => id >= 20 && id <= 28);
+  const normalized = alreadyMigrated
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 6 && id <= 8))
+    : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
+  return [...new Set(normalized)];
+}
+
+function normalizeDailyLessonIds(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  const ids = value.filter((id): id is number => Number.isInteger(id));
+  const alreadyMigrated = ids.some((id) => id >= 20 && id <= 28);
+  const normalized = alreadyMigrated
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 6 && id <= 8))
+    : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
+  return [...new Set(normalized)];
 }
 
 function readCompletedLessons(): number[] {
@@ -286,7 +334,7 @@ function readCompletedLessons(): number[] {
     if (!saved) return [];
     const parsed: unknown = JSON.parse(saved);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((value): value is number => Number.isInteger(value) && value >= 1 && value <= 8);
+    return normalizeCompletedLessonIds(parsed);
   } catch {
     return [];
   }
@@ -416,9 +464,7 @@ function readDailyActivity(userId: string): DailyActivity {
       return { date: "", lessonIds: [] };
     }
 
-    const lessonIds = [...new Set(value.lessonIds.filter(
-      (id): id is number => Number.isInteger(id) && id >= 1 && id <= 8,
-    ))];
+    const lessonIds = normalizeDailyLessonIds(value.lessonIds);
     return { date: value.date, lessonIds };
   } catch {
     return { date: "", lessonIds: [] };
@@ -560,7 +606,7 @@ export default function App() {
       }
 
       if (data) {
-        setCompletedLessonIds(Array.isArray(data.completed_lesson_ids) ? data.completed_lesson_ids : []);
+        setCompletedLessonIds(normalizeCompletedLessonIds(data.completed_lesson_ids));
         setMistakes(Array.isArray(data.mistakes) ? data.mistakes as Mistake[] : []);
         setStreak(Number.isFinite(data.streak) ? data.streak : 0);
         setLastStudyDate(data.last_study_date ?? "");
@@ -796,7 +842,7 @@ export default function App() {
   const currentQuestionCorrect = currentQuestion && selectedAnswer !== null
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
     : false;
-  const firstStageCompletedCount = completedLessonIds.filter((id) => id >= 1 && id <= 5).length;
+  const firstStageCompletedCount = lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
   const progressPercent = Math.round((firstStageCompletedCount / lessons.length) * 100);
   const today = localDateKey();
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
@@ -834,7 +880,7 @@ export default function App() {
           <button className="primary-button" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
             Начать обучение <span>→</span>
           </button>
-          <div className="hero-note"><span>✦</span> Первые 5 уроков бесплатно</div>
+          <div className="hero-note"><span>✦</span> Девять коротких уроков бесплатно</div>
         </div>
         <div className="hero-art" aria-label="Арабская буква Алиф">
           <div className="art-circle"><span>ا</span></div>
@@ -858,9 +904,9 @@ export default function App() {
           <h2>Каждый шаг важен</h2>
         </div>
         <div className="progress-card">
-          <div className="progress-info"><span>{firstStageCompletedCount} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
+          <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
-          <p>{firstStageCompletedCount === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          <p>{firstStageCompletedCount === lessons.length ? "Все девять уроков алфавита завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
           <div className="memory-actions">
             {dueMistakes.length > 0 && (
               <button className="review-button" type="button" onClick={startReview}>
@@ -894,7 +940,7 @@ export default function App() {
                   <span className="stage-number">ЭТАП {stage.id}</span>
                   <strong>{stage.title}</strong>
                   <span className="stage-description">{stage.description}</span>
-                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/5 бесплатных уроков` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
+                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/${lessons.length} уроков алфавита` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
                 </span>
                 <span className="stage-arrow">{unlocked ? "→" : "🔒"}</span>
               </button>
@@ -938,13 +984,15 @@ export default function App() {
                   </div>
                 ) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
-                    <p className="modal-note">Пять первых уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
+                    <p className="modal-note">Девять коротких уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
                     {lessons.map((lesson) => {
-                      const isOpen = lesson.id === 1 || completedLessonIds.includes(lesson.id - 1);
+                      const lessonPosition = lessons.findIndex((item) => item.id === lesson.id);
+                      const previousLesson = lessonPosition > 0 ? lessons[lessonPosition - 1] : undefined;
+                      const isOpen = lessonPosition === 0 || (previousLesson !== undefined && completedLessonIds.includes(previousLesson.id));
                       const isCompleted = completedLessonIds.includes(lesson.id);
                       return (
                         <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
-                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(lesson.id).padStart(2, "0")}</span>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(lessonPosition + 1).padStart(2, "0")}</span>
                           <span className="lesson-pick-text"><strong>{lesson.title}</strong><small>{lesson.letters.length} букв · {buildLessonQuestions(lesson).length} заданий</small></span>
                           <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
                         </button>
@@ -953,7 +1001,7 @@ export default function App() {
                     <button className={`exam-pick ${examPassed ? "exam-pick-passed" : ""}`} type="button" onClick={startExam} disabled={firstStageCompletedCount < lessons.length}>
                       <span className="exam-pick-mark">{examPassed ? "✓" : "10"}</span>
                       <span className="lesson-pick-text"><strong>Итоговый экзамен</strong><small>{examPassed ? "Экзамен успешно сдан" : "10 вопросов · нужно 8 правильных"}</small></span>
-                      <span className="lesson-pick-state">{examPassed ? "Пройден" : firstStageCompletedCount === lessons.length ? "Начать →" : "Сначала 5 уроков"}</span>
+                      <span className="lesson-pick-state">{examPassed ? "Пройден" : firstStageCompletedCount === lessons.length ? "Начать →" : `Сначала ${lessons.length} уроков`}</span>
                     </button>
                     <p className="local-progress-note">Прогресс сохраняется на устройстве, а после входа — в твоём аккаунте.</p>
                   </div>
