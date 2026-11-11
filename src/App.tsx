@@ -558,9 +558,9 @@ const legacyAlphabetProgress: Record<number, number[]> = {
 function normalizeCompletedLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => id >= 20 && id <= 28);
+  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34));
   const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 6 && id <= 8))
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34) || (id >= 6 && id <= 8))
     : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
   return [...new Set(normalized)];
 }
@@ -568,9 +568,9 @@ function normalizeCompletedLessonIds(value: unknown): number[] {
 function normalizeDailyLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => id >= 20 && id <= 28);
+  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34));
   const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 6 && id <= 8))
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34) || (id >= 6 && id <= 8))
     : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
   return [...new Set(normalized)];
 }
@@ -1094,6 +1094,7 @@ export default function App() {
   const today = localDateKey();
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed;
+  const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id));
 
   return (
     <main className="app">
@@ -1175,11 +1176,11 @@ export default function App() {
       <section className="learning-section" id="learning-path">
         <div className="section-heading">
           <div><span className="section-label">ПРОГРАММА ОБУЧЕНИЯ</span><h2>Твой путь</h2></div>
-          <span className="stage-count">2 этапа</span>
+          <span className="stage-count">3 этапа</span>
         </div>
         <div className="stage-list">
           {stages.map((stage) => {
-            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked);
+            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked) || (stage.id === 3 && stageThreeUnlocked);
             return (
               <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
                 <span className="stage-icon">{stage.icon}</span>
@@ -1187,7 +1188,7 @@ export default function App() {
                   <span className="stage-number">ЭТАП {stage.id}</span>
                   <strong>{stage.title}</strong>
                   <span className="stage-description">{stage.description}</span>
-                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/${lessons.length} уроков алфавита` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
+                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/${lessons.length} уроков алфавита` : stage.id === 2 && unlocked ? "Открыт после экзамена" : stage.id === 3 ? `${stageThreeLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length}/5 уроков знакомства` : `${stage.lessons} уроков`}</span>
                 </span>
                 <span className="stage-arrow">{unlocked ? "→" : "🔒"}</span>
               </button>
