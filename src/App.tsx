@@ -148,7 +148,7 @@ function makeMicroLesson(
 
 // Nine short lessons of 2–4 letters. Existing Arabic letter notes are reused unchanged.
 const lessons: Lesson[] = [
-  { ...legacyLessons[0], id: 20, title: "Алиф, ба, та и са" },
+  { ...legacyLessons[0], id: 20, title: "Алиф, ба, та и са", goal: "Научись узнавать и самостоятельно вспоминать алиф, ба, та и са." },
   makeMicroLesson(1, 21, "Джим, ха и ха", "Различай три похожие по основе буквы и обращай внимание на точки.", [0, 1, 2], [0, 1]),
   makeMicroLesson(1, 22, "Даль и заль", "Запомни пару букв, которые отличаются точкой сверху.", [3, 4], [2]),
   { ...legacyLessons[2], id: 23, title: "Ра, зай, син и шин" },
@@ -1002,7 +1002,7 @@ export default function App() {
                       const isCompleted = completedLessonIds.includes(lesson.id);
                       return (
                         <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
-                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(lesson.id).padStart(2, "0")}</span>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(lessonPosition + 1).padStart(2, "0")}</span>
                           <span className="lesson-pick-text"><strong>{lesson.title}</strong><small>{lesson.letters.length} букв · {buildLessonQuestions(lesson).length} заданий</small></span>
                           <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
                         </button>
