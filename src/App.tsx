@@ -32,10 +32,6 @@ type Lesson = {
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 5, status: "available" },
   { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
-  { id: 3, title: "Первые слова", description: "Изучаем простые слова и выражения", icon: "ك", lessons: 10, status: "locked" },
-  { id: 4, title: "Основы грамматики", description: "Строим простые предложения", icon: "ن", lessons: 10, status: "locked" },
-  { id: 5, title: "Разговорный арабский", description: "Знакомство и повседневные диалоги", icon: "ح", lessons: 10, status: "locked" },
-  { id: 6, title: "Чтение и понимание", description: "Читаем небольшие тексты", icon: "ق", lessons: 10, status: "locked" },
 ];
 
 const lessons: Lesson[] = [
@@ -626,7 +622,7 @@ export default function App() {
   };
 
   const startExam = () => {
-    if (completedLessonIds.length < lessons.length) return;
+    if (firstStageCompletedCount < lessons.length) return;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 99,
@@ -666,7 +662,8 @@ export default function App() {
   };
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
-  const progressPercent = Math.round((completedLessonIds.length / lessons.length) * 100);
+  const firstStageCompletedCount = completedLessonIds.filter((id) => id >= 1 && id <= 5).length;
+  const progressPercent = Math.round((firstStageCompletedCount / lessons.length) * 100);
   const today = localDateKey();
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed;
@@ -727,9 +724,9 @@ export default function App() {
           <h2>Каждый шаг важен</h2>
         </div>
         <div className="progress-card">
-          <div className="progress-info"><span>{completedLessonIds.length} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
+          <div className="progress-info"><span>{firstStageCompletedCount} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
-          <p>{completedLessonIds.length === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          <p>{firstStageCompletedCount === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
           {dueMistakes.length > 0 ? (
             <button className="review-button" type="button" onClick={startReview}>
               Тренировка памяти · {dueMistakes.length}
@@ -743,7 +740,7 @@ export default function App() {
       <section className="learning-section" id="learning-path">
         <div className="section-heading">
           <div><span className="section-label">ПРОГРАММА ОБУЧЕНИЯ</span><h2>Твой путь</h2></div>
-          <span className="stage-count">6 этапов</span>
+          <span className="stage-count">2 этапа</span>
         </div>
         <div className="stage-list">
           {stages.map((stage) => {
@@ -755,7 +752,7 @@ export default function App() {
                   <span className="stage-number">ЭТАП {stage.id}</span>
                   <strong>{stage.title}</strong>
                   <span className="stage-description">{stage.description}</span>
-                  <span className="lesson-count">{stage.id === 1 ? `${completedLessonIds.length}/5 бесплатных уроков` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
+                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/5 бесплатных уроков` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
                 </span>
                 <span className="stage-arrow">{unlocked ? "→" : "🔒"}</span>
               </button>
@@ -811,10 +808,10 @@ export default function App() {
                         </button>
                       );
                     })}
-                    <button className={`exam-pick ${examPassed ? "exam-pick-passed" : ""}`} type="button" onClick={startExam} disabled={completedLessonIds.length < lessons.length}>
+                    <button className={`exam-pick ${examPassed ? "exam-pick-passed" : ""}`} type="button" onClick={startExam} disabled={firstStageCompletedCount < lessons.length}>
                       <span className="exam-pick-mark">{examPassed ? "✓" : "10"}</span>
                       <span className="lesson-pick-text"><strong>Итоговый экзамен</strong><small>{examPassed ? "Экзамен успешно сдан" : "10 вопросов · нужно 8 правильных"}</small></span>
-                      <span className="lesson-pick-state">{examPassed ? "Пройден" : completedLessonIds.length === lessons.length ? "Начать →" : "Сначала 5 уроков"}</span>
+                      <span className="lesson-pick-state">{examPassed ? "Пройден" : firstStageCompletedCount === lessons.length ? "Начать →" : "Сначала 5 уроков"}</span>
                     </button>
                     <p className="local-progress-note">Прогресс сохраняется на устройстве, а после входа — в твоём аккаунте.</p>
                   </div>
