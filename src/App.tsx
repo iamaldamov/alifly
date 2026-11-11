@@ -636,7 +636,7 @@ function buildLessonQuestions(lesson: Lesson): Question[] {
 
 function buildExamRecallQuestions(): Question[] {
   const allLetters = lessons.flatMap((lesson) => lesson.letters);
-  const sampledQuestions = shuffleQuestions(allLetters.map((letter) => buildLetterRecallQuestions(letter)[0])).slice(0, 10);
+  const sampledQuestions = shuffleQuestions(allLetters.flatMap((letter) => buildLetterRecallQuestions(letter).slice(0, 1))).slice(0, 10);
   return sampledQuestions.map((question) => ({
     ...question,
     prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
