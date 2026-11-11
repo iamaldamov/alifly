@@ -19,6 +19,9 @@ type Question = {
   options: string[];
   correct: string;
   explanation: string;
+  mode?: "choice" | "recall";
+  stimulus?: string;
+  acceptedAnswers?: string[];
 };
 
 type Lesson = {
@@ -137,9 +140,9 @@ const stageTwoLessons: Lesson[] = [
       { character: "مَ", name: "ма", note: "Мим с фатхой читается как «ма»." },
     ],
     questions: [
-      { prompt: "Как называется знак над буквой, который даёт короткий звук «а»?", options: ["Фатха", "Кясра", "Дамма"], correct: "Фатха", explanation: "Фатха — короткая диагональная черта над буквой. Например: بَ — «ба»." },
-      { prompt: "Как читается сочетание بَ?", options: ["би", "бу", "ба"], correct: "ба", explanation: "Буква ба с фатхой читается «ба»." },
-      { prompt: "Где находится фатха?", options: ["Под буквой", "Над буквой", "После буквы"], correct: "Над буквой", explanation: "Фатха ставится над согласной буквой." },
+      { prompt: "Как называется знак над буквой, который даёт короткий звук «а»?", options: [], correct: "Фатха", explanation: "Фатха — короткая диагональная черта над буквой. Например: بَ — «ба».", mode: "recall" },
+      { prompt: "Как читается сочетание بَ?", options: [], correct: "ба", explanation: "Буква ба с фатхой читается «ба».", mode: "recall" },
+      { prompt: "Где находится фатха?", options: [], correct: "Над буквой", explanation: "Фатха ставится над согласной буквой.", mode: "recall" },
     ],
   },
   {
@@ -152,9 +155,9 @@ const stageTwoLessons: Lesson[] = [
       { character: "مِ", name: "ми", note: "Мим с кясрой читается как «ми»." },
     ],
     questions: [
-      { prompt: "Как называется короткая черта под буквой?", options: ["Дамма", "Фатха", "Кясра"], correct: "Кясра", explanation: "Кясра — короткая черта под буквой. Она обозначает короткий звук «и»." },
-      { prompt: "Как читается сочетание بِ?", options: ["ба", "би", "бу"], correct: "би", explanation: "Ба с кясрой читается «би»." },
-      { prompt: "Где ставится кясра?", options: ["Под буквой", "Над буквой", "Слева от буквы"], correct: "Под буквой", explanation: "Кясра располагается под согласной буквой." },
+      { prompt: "Как называется короткая черта под буквой?", options: [], correct: "Кясра", explanation: "Кясра — короткая черта под буквой. Она обозначает короткий звук «и».", mode: "recall" },
+      { prompt: "Как читается сочетание بِ?", options: [], correct: "би", explanation: "Ба с кясрой читается «би».", mode: "recall" },
+      { prompt: "Где ставится кясра?", options: [], correct: "Под буквой", explanation: "Кясра располагается под согласной буквой.", mode: "recall" },
     ],
   },
   {
@@ -167,9 +170,9 @@ const stageTwoLessons: Lesson[] = [
       { character: "مُ", name: "му", note: "Мим с даммой читается как «му»." },
     ],
     questions: [
-      { prompt: "Как называется знак, похожий на маленькую запятую над буквой?", options: ["Кясра", "Дамма", "Фатха"], correct: "Дамма", explanation: "Дамма ставится над буквой и обозначает короткий звук «у»." },
-      { prompt: "Как читается сочетание بُ?", options: ["бу", "би", "ба"], correct: "бу", explanation: "Ба с даммой читается «бу»." },
-      { prompt: "Какое соответствие верное?", options: ["Фатха — «и»", "Кясра — «у»", "Дамма — «у»"], correct: "Дамма — «у»", explanation: "Запомни: фатха — короткое «а», кясра — короткое «и», дамма — короткое «у»." },
+      { prompt: "Как называется знак, похожий на маленькую запятую над буквой?", options: [], correct: "Дамма", explanation: "Дамма ставится над буквой и обозначает короткий звук «у».", mode: "recall" },
+      { prompt: "Как читается сочетание بُ?", options: [], correct: "бу", explanation: "Ба с даммой читается «бу».", mode: "recall" },
+      { prompt: "Какое соответствие верное?", options: [], correct: "Дамма — «у»", explanation: "Запомни: фатха — короткое «а», кясра — короткое «и», дамма — короткое «у».", mode: "recall" },
     ],
   },
 ];
@@ -186,6 +189,96 @@ const examQuestions: Question[] = [
   { prompt: "Найди букву «фа».", options: ["ق", "ف", "ك"], correct: "ف", explanation: "Фа — ف. В этой учебной форме у неё одна точка сверху." },
   { prompt: "Какая буква называется «мим»?", options: ["ن", "م", "ل"], correct: "م", explanation: "Мим — م." },
 ];
+
+
+const recallAliases: Record<string, string[]> = {
+  "ا": ["алиф", "alif"],
+  "ب": ["ба", "ba"],
+  "ت": ["та", "ta"],
+  "ث": ["са", "tha", "thāʾ"],
+  "ج": ["джим", "jim"],
+  "ح": ["ха глубокая", "ha deep"],
+  "خ": ["ха", "kha", "khāʾ"],
+  "د": ["даль", "dal"],
+  "ذ": ["dhāl", "dhal"],
+  "ر": ["ра", "ra"],
+  "ز": ["зай", "zay"],
+  "س": ["син", "sin"],
+  "ش": ["шин", "shin"],
+  "ص": ["сад", "ṣād", "sad"],
+  "ض": ["дад", "ḍād", "dad"],
+  "ط": ["эмфатическая та"],
+  "ظ": ["эмфатическая за", "emphatic za", "ẓāʾ"],
+  "ع": ["айн", "ʿayn", "ayn"],
+  "غ": ["гайн", "ghayn", "ghain"],
+  "ف": ["фа", "fa"],
+  "ق": ["къаф", "qāf", "qaf"],
+  "ك": ["каф", "kaf"],
+  "ل": ["лям", "lam"],
+  "م": ["мим", "mim"],
+  "ن": ["нун", "nun"],
+  "ه": ["ha light", "лёгкая h"],
+  "و": ["уау", "waw"],
+  "ي": ["йа", "ya"],
+};
+
+function normalizeTypedAnswer(value: string): string {
+  return value
+    .toLocaleLowerCase("ru-RU")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[ʼ’'ʾʿ]/g, "")
+    .replace(/ё/g, "е")
+    .replace(/[^a-zа-я0-9]/gi, "");
+}
+
+function isCorrectAnswer(question: Question, answer: string): boolean {
+  if (question.mode !== "recall") return answer === question.correct;
+  const normalized = normalizeTypedAnswer(answer);
+  if (!normalized) return false;
+  return (question.acceptedAnswers ?? [question.correct])
+    .some((candidate) => normalizeTypedAnswer(candidate) === normalized);
+}
+
+function buildLetterRecallQuestion(letter: Lesson["letters"][number]): Question {
+  const acceptedAnswers = recallAliases[letter.character] ?? [letter.name];
+  return {
+    prompt: "Как называется эта буква? Напиши название по памяти.",
+    options: [],
+    correct: acceptedAnswers[0],
+    acceptedAnswers,
+    mode: "recall",
+    stimulus: letter.character,
+    explanation: `Это ${letter.name} — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
+  };
+}
+
+function buildLessonQuestions(lesson: Lesson): Question[] {
+  if (lesson.id >= 6) return lesson.questions;
+  const recall = lesson.letters.map(buildLetterRecallQuestion);
+  const mixed: Question[] = [];
+  const total = Math.max(lesson.questions.length, recall.length);
+  for (let index = 0; index < total; index++) {
+    if (lesson.questions[index]) mixed.push(lesson.questions[index]);
+    if (recall[index]) mixed.push(recall[index]);
+  }
+  return mixed;
+}
+
+function buildExamRecallQuestions(): Question[] {
+  return examQuestions.map((question) => {
+    const acceptedAnswers = recallAliases[question.correct] ?? [question.correct];
+    return {
+      ...question,
+      prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
+      options: [],
+      correct: acceptedAnswers[0],
+      acceptedAnswers,
+      mode: "recall",
+      stimulus: question.correct,
+    };
+  });
+}
 
 function readCompletedLessons(): number[] {
   try {
@@ -209,22 +302,22 @@ type Mistake = {
   intervalDays: number;
   repetitions: number;
   easeFactor: number;
+  errorCount: number;
+  lastCorrect: boolean;
 };
 
 const REVIEW_DELAY_MINUTES = 10;
 
 function updateReviewCard(
   previous: Mistake | undefined,
-  input: Omit<Mistake, "dueAt" | "intervalDays" | "repetitions" | "easeFactor">,
+  input: Omit<Mistake, "dueAt" | "intervalDays" | "repetitions" | "easeFactor" | "errorCount" | "lastCorrect">,
   correct: boolean,
 ): Mistake {
   const repetitions = previous?.repetitions ?? 0;
   const easeFactor = previous?.easeFactor ?? 2.5;
-  const nextEase = correct
-    ? Math.min(3, easeFactor + 0.1)
-    : Math.max(1.3, easeFactor - 0.2);
+  const leitnerIntervals = [1, 3, 7, 14, 30];
   const intervalDays = correct
-    ? repetitions === 0 ? 1 : repetitions === 1 ? 3 : Math.max(1, Math.round((previous?.intervalDays ?? 3) * nextEase))
+    ? leitnerIntervals[Math.min(repetitions, leitnerIntervals.length - 1)]
     : 0;
   const dueAt = correct
     ? Date.now() + intervalDays * 24 * 60 * 60 * 1000
@@ -235,7 +328,9 @@ function updateReviewCard(
     dueAt,
     intervalDays,
     repetitions: correct ? repetitions + 1 : 0,
-    easeFactor: nextEase,
+    easeFactor,
+    errorCount: (previous?.errorCount ?? 0) + (correct ? 0 : 1),
+    lastCorrect: correct,
   };
 }
 
@@ -263,6 +358,8 @@ function readMistakes(): Mistake[] {
       intervalDays: Number.isFinite(item.intervalDays) ? item.intervalDays : 0,
       repetitions: Number.isInteger(item.repetitions) ? item.repetitions : 0,
       easeFactor: Number.isFinite(item.easeFactor) ? item.easeFactor : 2.5,
+      errorCount: Number.isInteger(item.errorCount) ? Math.max(0, item.errorCount) : (item.intervalDays === 0 ? 1 : 0),
+      lastCorrect: typeof item.lastCorrect === "boolean" ? item.lastCorrect : item.intervalDays > 0,
     }));
   } catch {
     return [];
@@ -346,8 +443,10 @@ export default function App() {
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [typedAnswer, setTypedAnswer] = useState("");
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [lessonFinished, setLessonFinished] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(readCompletedLessons);
@@ -545,9 +644,11 @@ export default function App() {
   };
 
   const startLesson = (lesson: Lesson) => {
-    setSelectedLesson(lesson);
+    setSelectedLesson({ ...lesson, questions: buildLessonQuestions(lesson) });
+    setLessonPhase("study");
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(false);
@@ -561,8 +662,8 @@ export default function App() {
     const question = selectedLesson.questions[questionIndex];
     const mistakeId = reviewMode
       ? reviewMistakeIds[questionIndex]
-      : `${selectedLesson.id}:${question.prompt}`;
-    const isCorrect = answer === question.correct;
+      : `${selectedLesson.id}:${question.prompt}${question.stimulus ? `:${question.stimulus}` : ""}`;
+    const isCorrect = isCorrectAnswer(question, answer);
 
     if (isCorrect) {
       setCorrectAnswers((count) => count + 1);
@@ -619,6 +720,7 @@ export default function App() {
     }
     setQuestionIndex((index) => index + 1);
     setSelectedAnswer(null);
+    setTypedAnswer("");
   };
 
   const startExam = () => {
@@ -629,10 +731,12 @@ export default function App() {
       title: "Итоговый экзамен",
       goal: "Проверь, насколько хорошо ты запомнил буквы первого этапа.",
       letters: [],
-      questions: examQuestions,
+      questions: buildExamRecallQuestions(),
     });
+    setLessonPhase("practice");
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(false);
@@ -641,6 +745,31 @@ export default function App() {
   };
 
   const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
+  const weakMistakes = mistakes.filter((item) => item.errorCount > 0);
+
+  const startWeakReview = () => {
+    const weak = [...mistakes]
+      .filter((item) => item.errorCount > 0)
+      .sort((a, b) => b.errorCount - a.errorCount);
+    if (weak.length === 0) return;
+    setSelectedStage(stages[0]);
+    setSelectedLesson({
+      id: 0,
+      title: "Слабые слова",
+      goal: "Здесь собраны буквы и задания, в которых раньше были ошибки. Попробуй ответить самостоятельно.",
+      letters: [],
+      questions: weak.map((item) => item.question),
+    });
+    setLessonPhase("practice");
+    setReviewMistakeIds(weak.map((item) => item.id));
+    setQuestionIndex(0);
+    setSelectedAnswer(null);
+    setTypedAnswer("");
+    setCorrectAnswers(0);
+    setLessonFinished(false);
+    setReviewMode(true);
+    setExamMode(false);
+  };
 
   const startReview = () => {
     const due = mistakes.filter((item) => item.dueAt <= Date.now());
@@ -653,15 +782,20 @@ export default function App() {
       letters: [],
       questions: due.map((item) => item.question),
     });
+    setLessonPhase("practice");
     setReviewMistakeIds(due.map((item) => item.id));
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(true);
   };
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
+  const currentQuestionCorrect = currentQuestion && selectedAnswer !== null
+    ? isCorrectAnswer(currentQuestion, selectedAnswer)
+    : false;
   const firstStageCompletedCount = completedLessonIds.filter((id) => id >= 1 && id <= 5).length;
   const progressPercent = Math.round((firstStageCompletedCount / lessons.length) * 100);
   const today = localDateKey();
@@ -727,13 +861,21 @@ export default function App() {
           <div className="progress-info"><span>{firstStageCompletedCount} из 5 бесплатных уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
           <p>{firstStageCompletedCount === 5 ? "Все пять первых уроков завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
-          {dueMistakes.length > 0 ? (
-            <button className="review-button" type="button" onClick={startReview}>
-              Тренировка памяти · {dueMistakes.length}
-            </button>
-          ) : mistakes.length > 0 ? (
-            <p className="memory-next-review">Следующее повторение запланировано. Возвращайся позже — интервалы помогают запоминать надолго.</p>
-          ) : null}
+          <div className="memory-actions">
+            {dueMistakes.length > 0 && (
+              <button className="review-button" type="button" onClick={startReview}>
+                Повторить по расписанию · {dueMistakes.length}
+              </button>
+            )}
+            {weakMistakes.length > 0 && (
+              <button className="review-button weak-words-button" type="button" onClick={startWeakReview}>
+                Слабые слова · {weakMistakes.length}
+              </button>
+            )}
+            {dueMistakes.length === 0 && mistakes.length > 0 && (
+              <p className="memory-next-review">Следующее повторение запланировано автоматически.</p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -803,7 +945,7 @@ export default function App() {
                       return (
                         <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
                           <span className="lesson-pick-number">{isCompleted ? "✓" : String(lesson.id).padStart(2, "0")}</span>
-                          <span className="lesson-pick-text"><strong>{lesson.title}</strong><small>{lesson.letters.length} букв · 3 задания</small></span>
+                          <span className="lesson-pick-text"><strong>{lesson.title}</strong><small>{lesson.letters.length} букв · {buildLessonQuestions(lesson).length} заданий</small></span>
                           <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
                         </button>
                       );
@@ -819,6 +961,28 @@ export default function App() {
                   <p className="locked-message">🔒 Этот этап пока закрыт. Сначала пройди предыдущие уроки.</p>
                 )}
               </>
+            ) : lessonPhase === "study" && !examMode && !reviewMode ? (
+              <div className="lesson-study">
+                <div className="lesson-topline">
+                  <span className="section-label">СНАЧАЛА ИЗУЧИ</span>
+                  <span className="lesson-step">{selectedLesson.letters.length} элементов</span>
+                </div>
+                <h2 id="stage-modal-title">{selectedLesson.title}</h2>
+                <p className="lesson-intro">{selectedLesson.goal}</p>
+                <p className="study-guidance">Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно.</p>
+                <div className="letter-intro lesson-letters">
+                  {selectedLesson.letters.map((letter) => (
+                    <div key={letter.character}>
+                      <strong lang="ar" dir="rtl">{letter.character}</strong>
+                      <span>{letter.name}</span>
+                      {letter.note && <small>{letter.note}</small>}
+                    </div>
+                  ))}
+                </div>
+                <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
+                  Начать вспоминание →
+                </button>
+              </div>
             ) : lessonFinished ? (
               <div className="lesson-result">
                 {examMode ? (
@@ -850,40 +1014,59 @@ export default function App() {
             ) : currentQuestion ? (
               <>
                 <div className="lesson-topline">
-                  <span className="section-label">{examMode ? "ЭКЗАМЕН · ЭТАП 1" : `УРОК ${selectedLesson.id} · АЛФАВИТ`}</span>
+                  <span className="section-label">{examMode ? "ЭКЗАМЕН · ЭТАП 1" : reviewMode ? "ПОВТОРЕНИЕ · АКТИВНОЕ ВСПОМИНАНИЕ" : `УРОК ${selectedLesson.id} · ПРАКТИКА`}</span>
                   <span className="lesson-step">{questionIndex + 1} из {selectedLesson.questions.length}</span>
                 </div>
                 <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / selectedLesson.questions.length) * 100}%` }} /></div>
                 <h2 id="stage-modal-title">{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
-                {selectedLesson.letters.length > 0 && <div className="letter-intro lesson-letters">
-                  {selectedLesson.letters.map((letter) => (
-                    <div key={letter.character}>
-                      <strong lang="ar" dir="rtl">{letter.character}</strong>
-                      <span>{letter.name}</span>
-                      {letter.note && <small>{letter.note}</small>}
-                    </div>
-                  ))}
-                </div>}
                 <div className="question-block">
                   <span className="question-label">ПРОВЕРЬ СЕБЯ</span>
                   <h3>{currentQuestion.prompt}</h3>
-                  <div className="answer-options">
-                    {currentQuestion.options.map((option) => {
-                      const isCorrect = option === currentQuestion.correct;
-                      const isSelected = option === selectedAnswer;
-                      const stateClass = selectedAnswer === null ? "" : isCorrect ? "answer-correct" : isSelected ? "answer-wrong" : "answer-muted";
-                      return (
-                        <button key={option} className={`answer-option ${stateClass}`} onClick={() => answerQuestion(option)} disabled={selectedAnswer !== null} lang="ar" dir="rtl">
-                          {option}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {currentQuestion.mode === "recall" ? (
+                    <>
+                      {currentQuestion.stimulus && (
+                        <div className="recall-stimulus" lang="ar" dir="rtl">{currentQuestion.stimulus}</div>
+                      )}
+                      <form className="recall-form" onSubmit={(event) => { event.preventDefault(); if (typedAnswer.trim()) answerQuestion(typedAnswer.trim()); }}>
+                        <label className="recall-label" htmlFor="recall-answer">Твой ответ по памяти</label>
+                        <input
+                          id="recall-answer"
+                          className="recall-input"
+                          type="text"
+                          value={typedAnswer}
+                          onChange={(event) => setTypedAnswer(event.target.value)}
+                          placeholder="Введи ответ..."
+                          autoComplete="off"
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          disabled={selectedAnswer !== null}
+                        />
+                        {selectedAnswer === null && (
+                          <button className="primary-button modal-button" type="submit" disabled={!typedAnswer.trim()}>
+                            Проверить ответ
+                          </button>
+                        )}
+                      </form>
+                    </>
+                  ) : (
+                    <div className="answer-options">
+                      {currentQuestion.options.map((option) => {
+                        const isCorrect = option === currentQuestion.correct;
+                        const isSelected = option === selectedAnswer;
+                        const stateClass = selectedAnswer === null ? "" : isCorrect ? "answer-correct" : isSelected ? "answer-wrong" : "answer-muted";
+                        return (
+                          <button key={option} className={`answer-option ${stateClass}`} onClick={() => answerQuestion(option)} disabled={selectedAnswer !== null} lang="ar" dir="rtl">
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                   {selectedAnswer !== null && (
-                    <div className={`answer-feedback ${selectedAnswer === currentQuestion.correct ? "feedback-correct" : "feedback-wrong"}`} aria-live="polite">
-                      <strong>{selectedAnswer === currentQuestion.correct ? "Правильно!" : "Правильный ответ"}</strong>
-                      <span>{selectedAnswer === currentQuestion.correct ? currentQuestion.explanation : `${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
+                    <div className={`answer-feedback ${currentQuestionCorrect ? "feedback-correct" : "feedback-wrong"}`} aria-live="polite">
+                      <strong>{currentQuestionCorrect ? "Правильно!" : "Правильный ответ"}</strong>
+                      <span>{currentQuestionCorrect ? currentQuestion.explanation : `${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
                     </div>
                   )}
                 </div>
