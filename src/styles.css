@@ -1206,3 +1206,18 @@ html, body {
   display: grid;
   gap: 12px;
 }
+
+.memory-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.memory-actions .review-button {
+  margin-top: 12px;
+}
+.weak-words-button {
+  border-color: #d9c9a2;
+  background: #fbf6e9;
+  color: #66522b;
+}
