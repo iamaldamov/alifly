@@ -159,6 +159,7 @@ const lessons: Lesson[] = [
   makeMicroLesson(4, 28, "Ха, уау и йа", "Заверши знакомство с алфавитом: изучи последние три буквы.", [6, 7, 8], [2]),
 ];
 
+const stageTwoLessons: Lesson[] = [
   {
     id: 6,
     title: "Фатха — короткий звук «а»",
