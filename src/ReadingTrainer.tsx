@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 type Exercise = {
   prompt: string;
@@ -60,7 +60,7 @@ export default function ReadingTrainer() {
   const exercise = exercises[index];
   const isCorrect = submitted !== null && normalizeAnswer(submitted) === normalizeAnswer(exercise.answer);
 
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (submitted !== null || finished || !draft.trim()) return;
     setSubmitted(draft.trim());
