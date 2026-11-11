@@ -3,68 +3,70 @@ import { useState } from "react";
 type Exercise = {
   prompt: string;
   target: string;
-  options: string[];
   answer: string;
   explanation: string;
 };
 
 const exercises: Exercise[] = [
   {
-    prompt: "Как читается буква بَ с фатхой?",
+    prompt: "Прочитай сочетание и введи его звучание.",
     target: "بَ",
-    options: ["ба", "би", "бу"],
     answer: "ба",
     explanation: "Фатха (َ) стоит сверху и даёт короткий звук «а»: بَ — ба.",
   },
   {
-    prompt: "Как читается буква بِ с кясрой?",
+    prompt: "Прочитай сочетание и введи его звучание.",
     target: "بِ",
-    options: ["ба", "би", "бу"],
     answer: "би",
     explanation: "Кясра (ِ) стоит снизу и даёт короткий звук «и»: بِ — би.",
   },
   {
-    prompt: "Как читается буква بُ с даммой?",
+    prompt: "Прочитай сочетание и введи его звучание.",
     target: "بُ",
-    options: ["ба", "би", "бу"],
     answer: "бу",
     explanation: "Дамма (ُ) стоит сверху и даёт короткий звук «у»: بُ — бу.",
   },
   {
-    prompt: "Выбери сочетание, которое читается «та»",
+    prompt: "Прочитай сочетание и введи его звучание.",
     target: "تَ",
-    options: ["تِ", "تَ", "تُ"],
-    answer: "تَ",
+    answer: "та",
     explanation: "تَ — буква ت с фатхой. Читаем коротко: «та».",
   },
   {
-    prompt: "Как прочитать сочетание из двух слогов?",
+    prompt: "Прочитай сочетание из двух слогов.",
     target: "بَتَ",
-    options: ["бата", "бити", "туба"],
     answer: "бата",
     explanation: "Читаем справа налево: بَ — «ба», затем تَ — «та». Вместе: «бата». Это учебное сочетание звуков, не слово.",
   },
   {
-    prompt: "Как прочитать сочетание из двух слогов?",
+    prompt: "Прочитай сочетание из двух слогов.",
     target: "مَنَ",
-    options: ["мана", "мину", "нама"],
     answer: "мана",
     explanation: "Читаем справа налево: مَ — «ма», затем نَ — «на». Вместе: «мана». Это упражнение на чтение слогов, не слово.",
   },
 ];
 
+function normalizeAnswer(value: string): string {
+  return value.trim().toLocaleLowerCase("ru-RU").replace(/ё/g, "е").replace(/[\s-]/g, "");
+}
+
 export default function ReadingTrainer() {
   const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [submitted, setSubmitted] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
   const [finished, setFinished] = useState(false);
 
   const exercise = exercises[index];
+  const isCorrect = submitted !== null && normalizeAnswer(submitted) === normalizeAnswer(exercise.answer);
 
-  const choose = (option: string) => {
-    if (selected !== null || finished) return;
-    setSelected(option);
-    if (option === exercise.answer) setCorrect((value) => value + 1);
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (submitted !== null || finished || !draft.trim()) return;
+    setSubmitted(draft.trim());
+    if (normalizeAnswer(draft) === normalizeAnswer(exercise.answer)) {
+      setCorrect((value) => value + 1);
+    }
   };
 
   const next = () => {
@@ -73,12 +75,14 @@ export default function ReadingTrainer() {
       return;
     }
     setIndex((value) => value + 1);
-    setSelected(null);
+    setDraft("");
+    setSubmitted(null);
   };
 
   const restart = () => {
     setIndex(0);
-    setSelected(null);
+    setDraft("");
+    setSubmitted(null);
     setCorrect(0);
     setFinished(false);
   };
@@ -88,8 +92,8 @@ export default function ReadingTrainer() {
       <div className="reading-heading">
         <div>
           <span className="section-label">ПРАКТИКА ЧТЕНИЯ</span>
-          <h2 id="reading-title">Соединяй буквы и звуки</h2>
-          <p>Начни с трёх коротких огласовок, а затем попробуй прочитать простые сочетания слогов.</p>
+          <h2 id="reading-title">Читай без подсказок</h2>
+          <p>Сначала смотри на арабское сочетание, затем самостоятельно введи его звучание.</p>
         </div>
         <span className="reading-level">Уровень 1</span>
       </div>
@@ -106,31 +110,33 @@ export default function ReadingTrainer() {
             </div>
             <p className="reading-prompt">{exercise.prompt}</p>
             <div className="reading-glyph" lang="ar" dir="rtl">{exercise.target}</div>
-            <div className="reading-options">
-              {exercise.options.map((option) => {
-                const isAnswer = option === exercise.answer;
-                const isSelected = option === selected;
-                const state = selected === null ? "" : isAnswer ? "reading-option-correct" : isSelected ? "reading-option-wrong" : "reading-option-muted";
-                return (
-                  <button
-                    type="button"
-                    key={option}
-                    className={`reading-option ${state}`}
-                    onClick={() => choose(option)}
-                    disabled={selected !== null}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
-            {selected !== null && (
-              <div className={`reading-feedback ${selected === exercise.answer ? "is-correct" : "is-wrong"}`} aria-live="polite">
-                <strong>{selected === exercise.answer ? "Правильно!" : `Верный ответ: ${exercise.answer}`}</strong>
+            <form className="reading-answer-form" onSubmit={submit}>
+              <label className="recall-label" htmlFor="reading-answer">Введи звучание по памяти</label>
+              <input
+                id="reading-answer"
+                className="reading-answer-input"
+                type="text"
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder="Например: ба"
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                disabled={submitted !== null}
+              />
+              {submitted === null && (
+                <button className="primary-button reading-next" type="submit" disabled={!draft.trim()}>
+                  Проверить
+                </button>
+              )}
+            </form>
+            {submitted !== null && (
+              <div className={`reading-feedback ${isCorrect ? "is-correct" : "is-wrong"}`} aria-live="polite">
+                <strong>{isCorrect ? "Верно!" : `Правильный ответ: ${exercise.answer}`}</strong>
                 <span>{exercise.explanation}</span>
               </div>
             )}
-            {selected !== null && (
+            {submitted !== null && (
               <button type="button" className="primary-button reading-next" onClick={next}>
                 {index === exercises.length - 1 ? "Завершить тренировку" : "Дальше →"}
               </button>
@@ -141,7 +147,7 @@ export default function ReadingTrainer() {
             <span className="section-label">ТРЕНИРОВКА ЗАВЕРШЕНА</span>
             <div className="reading-result-score">{correct} / {exercises.length}</div>
             <h3>{correct === exercises.length ? "Ма ша Аллах! Отлично!" : "Хорошая работа!"}</h3>
-            <p>Повтори фатху, кясру и дамму, а затем попробуй ещё раз. Транскрипция здесь — только начальная подсказка к звучанию.</p>
+            <p>Повтори фатху, кясру и дамму, а затем попробуй снова без вариантов ответа.</p>
             <button type="button" className="primary-button reading-next" onClick={restart}>Повторить тренировку</button>
           </div>
         )}
