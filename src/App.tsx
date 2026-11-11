@@ -525,17 +525,91 @@ function isCorrectAnswer(question: Question, answer: string): boolean {
     .some((candidate) => normalizeTypedAnswer(candidate) === normalized);
 }
 
-function buildLetterRecallQuestion(letter: Lesson["letters"][number]): Question {
-  const acceptedAnswers = recallAliases[letter.character] ?? [letter.name];
-  return {
+const letterDotDetails: Record<string, { count: string; position: "сверху" | "снизу" | "нет точек" }> = {
+  "ا": { count: "0", position: "нет точек" },
+  "ب": { count: "1", position: "снизу" },
+  "ت": { count: "2", position: "сверху" },
+  "ث": { count: "3", position: "сверху" },
+  "ج": { count: "1", position: "снизу" },
+  "ح": { count: "0", position: "нет точек" },
+  "خ": { count: "1", position: "сверху" },
+  "د": { count: "0", position: "нет точек" },
+  "ذ": { count: "1", position: "сверху" },
+  "ر": { count: "0", position: "нет точек" },
+  "ز": { count: "1", position: "сверху" },
+  "س": { count: "0", position: "нет точек" },
+  "ش": { count: "3", position: "сверху" },
+  "ص": { count: "0", position: "нет точек" },
+  "ض": { count: "1", position: "сверху" },
+  "ط": { count: "0", position: "нет точек" },
+  "ظ": { count: "1", position: "сверху" },
+  "ع": { count: "0", position: "нет точек" },
+  "غ": { count: "1", position: "сверху" },
+  "ف": { count: "1", position: "сверху" },
+  "ق": { count: "2", position: "сверху" },
+  "ك": { count: "0", position: "нет точек" },
+  "ل": { count: "0", position: "нет точек" },
+  "م": { count: "0", position: "нет точек" },
+  "ن": { count: "1", position: "сверху" },
+  "ه": { count: "0", position: "нет точек" },
+  "و": { count: "0", position: "нет точек" },
+  "ي": { count: "2", position: "снизу" },
+};
+
+const dotCountAliases: Record<string, string[]> = {
+  "0": ["0", "ноль", "ни одной"],
+  "1": ["1", "одна", "одну", "один"],
+  "2": ["2", "две", "два"],
+  "3": ["3", "три"],
+};
+
+function buildLetterRecallQuestions(letter: Lesson["letters"][number]): Question[] {
+  const acceptedNames = recallAliases[letter.character] ?? [letter.name];
+  const details = letterDotDetails[letter.character];
+
+  const questions: Question[] = [{
     prompt: "Как называется эта буква? Напиши название по памяти.",
     options: [],
-    correct: acceptedAnswers[0],
-    acceptedAnswers,
+    correct: acceptedNames[0],
+    acceptedAnswers: acceptedNames,
     mode: "recall",
     stimulus: letter.character,
     explanation: `Это ${letter.name} — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
-  };
+  }];
+
+  if (!details) return questions;
+
+  questions.push({
+    prompt: "Сколько точек у этой буквы? Ответь числом или словом.",
+    options: [],
+    correct: details.count,
+    acceptedAnswers: dotCountAliases[details.count],
+    mode: "recall",
+    stimulus: letter.character,
+    explanation: details.count === "0"
+      ? "У этой буквы нет точек."
+      : `У этой буквы ${details.count} ${details.count === "1" ? "точка" : details.count === "2" ? "точки" : "точки"}.`,
+  });
+
+  questions.push({
+    prompt: details.position === "нет точек"
+      ? "Есть ли у этой буквы точки? Напиши «нет»."
+      : "Где расположены точки? Ответь «сверху» или «снизу».",
+    options: [],
+    correct: details.position,
+    acceptedAnswers: details.position === "сверху"
+      ? ["сверху", "над буквой", "сверху над буквой"]
+      : details.position === "снизу"
+        ? ["снизу", "под буквой", "снизу под буквой"]
+        : ["нет", "нет точек", "точек нет", "без точек"],
+    mode: "recall",
+    stimulus: letter.character,
+    explanation: details.position === "нет точек"
+      ? "У этой буквы нет точек."
+      : `Точки этой буквы расположены ${details.position}.`,
+  });
+
+  return questions;
 }
 
 function shuffleQuestions(questions: Question[]): Question[] {
@@ -550,7 +624,7 @@ function shuffleQuestions(questions: Question[]): Question[] {
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 30) return shuffleQuestions(lesson.questions);
   if (lesson.id >= 6 && lesson.id <= 8) return lesson.questions;
-  const recall = lesson.letters.map(buildLetterRecallQuestion);
+  const recall = lesson.letters.flatMap(buildLetterRecallQuestions);
   const mixed: Question[] = [];
   const total = Math.max(lesson.questions.length, recall.length);
   for (let index = 0; index < total; index++) {
