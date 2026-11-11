@@ -21,7 +21,16 @@ type Question = {
   explanation: string;
   mode?: "choice" | "recall";
   stimulus?: string;
+  stimulusLang?: "ar" | "ru";
+  stimulusDir?: "rtl" | "ltr";
   acceptedAnswers?: string[];
+};
+
+type StudyCard = {
+  arabic: string;
+  transliteration: string;
+  translation: string;
+  note?: string;
 };
 
 type Lesson = {
@@ -29,12 +38,14 @@ type Lesson = {
   title: string;
   goal: string;
   letters: { character: string; name: string; note?: string }[];
+  studyCards?: StudyCard[];
   questions: Question[];
 };
 
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
   { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
+  { id: 3, title: "Знакомство", description: "Первые диалоги на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
 ];
 
 const legacyLessons: Lesson[] = [
@@ -207,6 +218,264 @@ const stageTwoLessons: Lesson[] = [
   },
 ];
 
+type IntroCard = StudyCard & {
+  acceptedTransliterations: string[];
+  acceptedTranslations?: string[];
+  recallCue?: string;
+};
+
+function makeIntroductionLesson(
+  id: number,
+  title: string,
+  goal: string,
+  cards: IntroCard[],
+): Lesson {
+  const questions: Question[] = cards.flatMap((card) => [
+    {
+      prompt: "Переведи фразу на русский. Ответ введи самостоятельно.",
+      options: [],
+      correct: card.translation,
+      acceptedAnswers: card.acceptedTranslations ?? [card.translation],
+      mode: "recall",
+      stimulus: card.arabic,
+      stimulusLang: "ar",
+      stimulusDir: "rtl",
+      explanation: `Это значит: «${card.translation}». Произношение: ${card.transliteration}.`,
+    },
+    {
+      prompt: "Как сказать это по-арабски? Введи звучание по памяти.",
+      options: [],
+      correct: card.transliteration,
+      acceptedAnswers: card.acceptedTransliterations,
+      mode: "recall",
+      stimulus: card.recallCue ?? card.translation,
+      stimulusLang: "ru",
+      stimulusDir: "ltr",
+      explanation: `${card.arabic} — ${card.transliteration}.`,
+    },
+  ]);
+  return {
+    id,
+    title,
+    goal,
+    letters: [],
+    studyCards: cards,
+    questions,
+  };
+}
+
+const stageThreeLessons: Lesson[] = [
+  makeIntroductionLesson(
+    30,
+    "Приветствие и ответ",
+    "Научись начинать разговор и отвечать на приветствие. Сначала пойми пару, затем вспоминай её без подсказки.",
+    [
+      {
+        arabic: "السَّلَامُ عَلَيْكُمْ",
+        transliteration: "as-salāmu ʿalaykum",
+        translation: "Мир вам",
+        acceptedTransliterations: ["as-salamu alaykum", "assalamu alaykum", "ас-саляму алейкум", "ассаляму алейкум"],
+        acceptedTranslations: ["мир вам", "мир вам всем"],
+      },
+      {
+        arabic: "وَعَلَيْكُمُ السَّلَامُ",
+        transliteration: "wa-ʿalaykumu s-salām",
+        translation: "И вам мир",
+        acceptedTransliterations: ["wa alaykumu s-salam", "waalaykumu salam", "уа алейкуму салям", "уа алейкуму ссалям"],
+        acceptedTranslations: ["и вам мир", "и вам мир тоже"],
+      },
+      {
+        arabic: "مَرْحَبًا",
+        transliteration: "marḥaban",
+        translation: "Здравствуйте",
+        acceptedTransliterations: ["marhaban", "мархабан"],
+        acceptedTranslations: ["здравствуйте", "привет", "добро пожаловать"],
+      },
+      {
+        arabic: "أَهْلًا وَسَهْلًا",
+        transliteration: "ahlan wa-sahlan",
+        translation: "Добро пожаловать",
+        acceptedTransliterations: ["ahlan wa sahlan", "ахлан уа сахлан", "ахлан васахлан"],
+        acceptedTranslations: ["добро пожаловать", "добро пожаловать к нам"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    31,
+    "Как тебя зовут?",
+    "Спроси имя собеседника, ответь о себе и обрати внимание на форму обращения к мужчине и женщине.",
+    [
+      {
+        arabic: "مَا اسْمُكَ؟",
+        transliteration: "mā ismuka?",
+        translation: "Как тебя зовут?",
+        note: "Форма обращения к мужчине.",
+        recallCue: "Как тебя зовут? (обращение к мужчине)",
+        acceptedTransliterations: ["ma ismuka", "maa ismuka", "ма исмука"],
+        acceptedTranslations: ["как тебя зовут", "какое у тебя имя", "как вас зовут"],
+      },
+      {
+        arabic: "مَا اسْمُكِ؟",
+        transliteration: "mā ismuki?",
+        translation: "Как тебя зовут?",
+        note: "Форма обращения к женщине.",
+        recallCue: "Как тебя зовут? (обращение к женщине)",
+        acceptedTransliterations: ["ma ismuki", "maa ismuki", "ма исмуки"],
+        acceptedTranslations: ["как тебя зовут", "какое у тебя имя", "как вас зовут"],
+      },
+      {
+        arabic: "اسْمِي ...",
+        transliteration: "ismī ...",
+        translation: "Меня зовут…",
+        acceptedTransliterations: ["ismi", "исми"],
+        acceptedTranslations: ["меня зовут", "мое имя"],
+      },
+      {
+        arabic: "تَشَرَّفْنَا",
+        transliteration: "tasharrafnā",
+        translation: "Рад(а) знакомству",
+        acceptedTransliterations: ["tasharrafna", "ташаррафна"],
+        acceptedTranslations: ["рад знакомству", "рада знакомству", "приятно познакомиться", "рад а знакомству"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    32,
+    "Откуда ты?",
+    "Спроси, откуда человек, ответь о себе и различай формы обращения к мужчине и женщине.",
+    [
+      {
+        arabic: "مِنْ أَيْنَ أَنْتَ؟",
+        transliteration: "min ayna anta?",
+        translation: "Откуда ты?",
+        note: "Форма обращения к мужчине.",
+        recallCue: "Откуда ты? (обращение к мужчине)",
+        acceptedTransliterations: ["min ayna anta", "min aina anta", "мин айна анта"],
+        acceptedTranslations: ["откуда ты", "откуда вы"],
+      },
+      {
+        arabic: "مِنْ أَيْنَ أَنْتِ؟",
+        transliteration: "min ayna anti?",
+        translation: "Откуда ты?",
+        note: "Форма обращения к женщине.",
+        recallCue: "Откуда ты? (обращение к женщине)",
+        acceptedTransliterations: ["min ayna anti", "min aina anti", "мин айна анти"],
+        acceptedTranslations: ["откуда ты", "откуда вы"],
+      },
+      {
+        arabic: "أَنَا مِنْ ...",
+        transliteration: "anā min ...",
+        translation: "Я из…",
+        acceptedTransliterations: ["ana min", "anaa min", "ана мин"],
+        acceptedTranslations: ["я из", "я родом из"],
+      },
+      {
+        arabic: "أَنَا مِنْ رُوسِيَا",
+        transliteration: "anā min rūsiyā",
+        translation: "Я из России",
+        acceptedTransliterations: ["ana min rusiya", "anaa min rusiya", "ана мин русия"],
+        acceptedTranslations: ["я из россии", "я родом из россии"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    33,
+    "Как дела?",
+    "Спроси, как дела, ответь вежливо и верни вопрос собеседнику.",
+    [
+      {
+        arabic: "كَيْفَ حَالُكَ؟",
+        transliteration: "kayfa ḥāluka?",
+        translation: "Как ты?",
+        note: "Форма обращения к мужчине.",
+        recallCue: "Как ты? (обращение к мужчине)",
+        acceptedTransliterations: ["kayfa haluka", "kayfa haaluka", "кайфа халука"],
+        acceptedTranslations: ["как ты", "как дела", "как поживаешь"],
+      },
+      {
+        arabic: "كَيْفَ حَالُكِ؟",
+        transliteration: "kayfa ḥāluki?",
+        translation: "Как ты?",
+        note: "Форма обращения к женщине.",
+        recallCue: "Как ты? (обращение к женщине)",
+        acceptedTransliterations: ["kayfa haluki", "kayfa haaluki", "кайфа халики"],
+        acceptedTranslations: ["как ты", "как дела", "как поживаешь"],
+      },
+      {
+        arabic: "أَنَا بِخَيْرٍ، شُكْرًا",
+        transliteration: "anā bikhayr, shukran",
+        translation: "У меня всё хорошо, спасибо",
+        acceptedTransliterations: ["ana bikhayr shukran", "anaa bikhair shukran", "ана бихайр шукран"],
+        acceptedTranslations: ["у меня все хорошо спасибо", "я в порядке спасибо", "все хорошо спасибо"],
+      },
+      {
+        arabic: "وَأَنْتَ؟",
+        transliteration: "wa anta?",
+        translation: "А ты?",
+        note: "При обращении к женщине: وَأَنْتِ؟ (wa anti?).",
+        recallCue: "А ты? (обращение к мужчине)",
+        acceptedTransliterations: ["wa anta", "уа анта"],
+        acceptedTranslations: ["а ты", "а вы", "а у тебя"],
+      },
+      {
+        arabic: "الْحَمْدُ لِلَّهِ",
+        transliteration: "al-ḥamdu lillāh",
+        translation: "Хвала Аллаху",
+        acceptedTransliterations: ["alhamdu lillah", "al hamdu lillah", "альхамду лиллях", "альхамдулиллях"],
+        acceptedTranslations: ["хвала аллаху", "слава аллаху", "вся хвала аллаху"],
+      },
+    ],
+  ),
+  makeIntroductionLesson(
+    34,
+    "Знакомство — полный диалог",
+    "Собери знакомство от приветствия до вопроса о самочувствии. Это итоговая практика знакомых выражений в контексте.",
+    [
+      {
+        arabic: "السَّلَامُ عَلَيْكُمْ\nوَعَلَيْكُمُ السَّلَامُ",
+        transliteration: "as-salāmu ʿalaykum\nwa-ʿalaykumu s-salām",
+        translation: "— Мир вам. — И вам мир.",
+        acceptedTransliterations: ["as salamu alaykum wa alaykumu salam", "as-salamu alaykum wa alaykumu s-salam", "ассаляму алейкум уа алейкуму салям"],
+        acceptedTranslations: ["мир вам и вам мир", "мир вам и вам мир тоже"],
+      },
+      {
+        arabic: "مَا اسْمُكِ؟\nاسْمِي سَارَةُ",
+        transliteration: "mā ismuki? ismī sāra",
+        translation: "— Как тебя зовут? — Меня зовут Сара.",
+        note: "Вопрос обращён к женщине.",
+        recallCue: "Диалог: спроси у женщины имя и представься Сарой.",
+        acceptedTransliterations: ["ma ismuki ismi sara", "maa ismuki ismi sara", "ма исмуки исми сара"],
+        acceptedTranslations: ["как тебя зовут меня зовут сара", "меня зовут сара"],
+      },
+      {
+        arabic: "مِنْ أَيْنَ أَنْتِ؟\nأَنَا مِنْ رُوسِيَا",
+        transliteration: "min ayna anti? anā min rūsiyā",
+        translation: "— Откуда ты? — Я из России.",
+        note: "Форма обращения к женщине.",
+        recallCue: "Диалог: спроси женщину, откуда она, и ответь, что ты из России.",
+        acceptedTransliterations: ["min ayna anti ana min rusiya", "мин айна анти ана мин русия"],
+        acceptedTranslations: ["откуда ты я из россии", "я из россии"],
+      },
+      {
+        arabic: "كَيْفَ حَالُكِ؟\nأَنَا بِخَيْرٍ، شُكْرًا",
+        transliteration: "kayfa ḥāluki? anā bikhayr, shukran",
+        translation: "— Как дела? — Хорошо, спасибо.",
+        note: "Форма обращения к женщине.",
+        recallCue: "Диалог: спроси женщину, как у неё дела, и ответь, что у тебя всё хорошо.",
+        acceptedTransliterations: ["kayfa haluki ana bikhayr shukran", "кайфа халики ана бихайр шукран"],
+        acceptedTranslations: ["как дела хорошо спасибо", "у меня все хорошо спасибо"],
+      },
+      {
+        arabic: "تَشَرَّفْنَا",
+        transliteration: "tasharrafnā",
+        translation: "Рад(а) знакомству",
+        acceptedTransliterations: ["tasharrafna", "ташаррафна"],
+        acceptedTranslations: ["рад знакомству", "рада знакомству", "приятно познакомиться"],
+      },
+    ],
+  ),
+];
+
 const recallAliases: Record<string, string[]> = {
   "ا": ["алиф", "alif"],
   "ب": ["ба", "ba"],
@@ -256,17 +525,91 @@ function isCorrectAnswer(question: Question, answer: string): boolean {
     .some((candidate) => normalizeTypedAnswer(candidate) === normalized);
 }
 
-function buildLetterRecallQuestion(letter: Lesson["letters"][number]): Question {
-  const acceptedAnswers = recallAliases[letter.character] ?? [letter.name];
-  return {
+const letterDotDetails: Record<string, { count: string; position: "сверху" | "снизу" | "нет точек" }> = {
+  "ا": { count: "0", position: "нет точек" },
+  "ب": { count: "1", position: "снизу" },
+  "ت": { count: "2", position: "сверху" },
+  "ث": { count: "3", position: "сверху" },
+  "ج": { count: "1", position: "снизу" },
+  "ح": { count: "0", position: "нет точек" },
+  "خ": { count: "1", position: "сверху" },
+  "د": { count: "0", position: "нет точек" },
+  "ذ": { count: "1", position: "сверху" },
+  "ر": { count: "0", position: "нет точек" },
+  "ز": { count: "1", position: "сверху" },
+  "س": { count: "0", position: "нет точек" },
+  "ش": { count: "3", position: "сверху" },
+  "ص": { count: "0", position: "нет точек" },
+  "ض": { count: "1", position: "сверху" },
+  "ط": { count: "0", position: "нет точек" },
+  "ظ": { count: "1", position: "сверху" },
+  "ع": { count: "0", position: "нет точек" },
+  "غ": { count: "1", position: "сверху" },
+  "ف": { count: "1", position: "сверху" },
+  "ق": { count: "2", position: "сверху" },
+  "ك": { count: "0", position: "нет точек" },
+  "ل": { count: "0", position: "нет точек" },
+  "م": { count: "0", position: "нет точек" },
+  "ن": { count: "1", position: "сверху" },
+  "ه": { count: "0", position: "нет точек" },
+  "و": { count: "0", position: "нет точек" },
+  "ي": { count: "2", position: "снизу" },
+};
+
+const dotCountAliases: Record<string, string[]> = {
+  "0": ["0", "ноль", "ни одной"],
+  "1": ["1", "одна", "одну", "один"],
+  "2": ["2", "две", "два"],
+  "3": ["3", "три"],
+};
+
+function buildLetterRecallQuestions(letter: Lesson["letters"][number]): Question[] {
+  const acceptedNames = recallAliases[letter.character] ?? [letter.name];
+  const details = letterDotDetails[letter.character];
+
+  const questions: Question[] = [{
     prompt: "Как называется эта буква? Напиши название по памяти.",
     options: [],
-    correct: acceptedAnswers[0],
-    acceptedAnswers,
+    correct: acceptedNames[0],
+    acceptedAnswers: acceptedNames,
     mode: "recall",
     stimulus: letter.character,
     explanation: `Это ${letter.name} — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
-  };
+  }];
+
+  if (!details) return questions;
+
+  questions.push({
+    prompt: "Сколько точек у этой буквы? Ответь числом или словом.",
+    options: [],
+    correct: details.count,
+    acceptedAnswers: dotCountAliases[details.count],
+    mode: "recall",
+    stimulus: letter.character,
+    explanation: details.count === "0"
+      ? "У этой буквы нет точек."
+      : `У этой буквы ${details.count} ${details.count === "1" ? "точка" : details.count === "2" ? "точки" : "точки"}.`,
+  });
+
+  questions.push({
+    prompt: details.position === "нет точек"
+      ? "Есть ли у этой буквы точки? Напиши «нет»."
+      : "Где расположены точки? Ответь «сверху» или «снизу».",
+    options: [],
+    correct: details.position,
+    acceptedAnswers: details.position === "сверху"
+      ? ["сверху", "над буквой", "сверху над буквой"]
+      : details.position === "снизу"
+        ? ["снизу", "под буквой", "снизу под буквой"]
+        : ["нет", "нет точек", "точек нет", "без точек"],
+    mode: "recall",
+    stimulus: letter.character,
+    explanation: details.position === "нет точек"
+      ? "У этой буквы нет точек."
+      : `Точки этой буквы расположены ${details.position}.`,
+  });
+
+  return questions;
 }
 
 function shuffleQuestions(questions: Question[]): Question[] {
@@ -279,8 +622,9 @@ function shuffleQuestions(questions: Question[]): Question[] {
 }
 
 function buildLessonQuestions(lesson: Lesson): Question[] {
-  if (lesson.id >= 6) return lesson.questions;
-  const recall = lesson.letters.map(buildLetterRecallQuestion);
+  if (lesson.id >= 30) return shuffleQuestions(lesson.questions);
+  if (lesson.id >= 6 && lesson.id <= 8) return lesson.questions;
+  const recall = lesson.letters.flatMap(buildLetterRecallQuestions);
   const mixed: Question[] = [];
   const total = Math.max(lesson.questions.length, recall.length);
   for (let index = 0; index < total; index++) {
@@ -292,7 +636,7 @@ function buildLessonQuestions(lesson: Lesson): Question[] {
 
 function buildExamRecallQuestions(): Question[] {
   const allLetters = lessons.flatMap((lesson) => lesson.letters);
-  const sampledQuestions = shuffleQuestions(allLetters.map(buildLetterRecallQuestion)).slice(0, 10);
+  const sampledQuestions = shuffleQuestions(allLetters.flatMap((letter) => buildLetterRecallQuestions(letter).slice(0, 1))).slice(0, 10);
   return sampledQuestions.map((question) => ({
     ...question,
     prompt: "Вспомни название буквы и напиши его без вариантов ответа.",
@@ -311,9 +655,9 @@ const legacyAlphabetProgress: Record<number, number[]> = {
 function normalizeCompletedLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => id >= 20 && id <= 28);
+  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34));
   const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 6 && id <= 8))
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34) || (id >= 6 && id <= 8))
     : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
   return [...new Set(normalized)];
 }
@@ -321,9 +665,9 @@ function normalizeCompletedLessonIds(value: unknown): number[] {
 function normalizeDailyLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => id >= 20 && id <= 28);
+  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34));
   const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 6 && id <= 8))
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34) || (id >= 6 && id <= 8))
     : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
   return [...new Set(normalized)];
 }
@@ -847,6 +1191,7 @@ export default function App() {
   const today = localDateKey();
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed;
+  const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id));
 
   return (
     <main className="app">
@@ -928,11 +1273,11 @@ export default function App() {
       <section className="learning-section" id="learning-path">
         <div className="section-heading">
           <div><span className="section-label">ПРОГРАММА ОБУЧЕНИЯ</span><h2>Твой путь</h2></div>
-          <span className="stage-count">2 этапа</span>
+          <span className="stage-count">3 этапа</span>
         </div>
         <div className="stage-list">
           {stages.map((stage) => {
-            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked);
+            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked) || (stage.id === 3 && stageThreeUnlocked);
             return (
               <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
                 <span className="stage-icon">{stage.icon}</span>
@@ -940,7 +1285,7 @@ export default function App() {
                   <span className="stage-number">ЭТАП {stage.id}</span>
                   <strong>{stage.title}</strong>
                   <span className="stage-description">{stage.description}</span>
-                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/${lessons.length} уроков алфавита` : stage.id === 2 && unlocked ? "Открыт после экзамена" : `${stage.lessons} уроков`}</span>
+                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/${lessons.length} уроков алфавита` : stage.id === 2 && unlocked ? "Открыт после экзамена" : stage.id === 3 ? `${stageThreeLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length}/5 уроков знакомства` : `${stage.lessons} уроков`}</span>
                 </span>
                 <span className="stage-arrow">{unlocked ? "→" : "🔒"}</span>
               </button>
@@ -982,6 +1327,26 @@ export default function App() {
                     })}
                     <p className="local-progress-note">Прогресс сохраняется на устройстве, а после входа — в твоём аккаунте.</p>
                   </div>
+                ) : selectedStage.id === 3 && stageThreeUnlocked ? (
+                  <div className="lesson-picker">
+                    <p className="modal-note">Пять уроков на современном литературном арабском (MSA). Сначала изучи фразы в ситуации, затем вспомни их перевод и звучание без подсказки.</p>
+                    {stageThreeLessons.map((lesson, index) => {
+                      const previousLesson = index > 0 ? stageThreeLessons[index - 1] : undefined;
+                      const isOpen = index === 0 || (previousLesson !== undefined && completedLessonIds.includes(previousLesson.id));
+                      const isCompleted = completedLessonIds.includes(lesson.id);
+                      return (
+                        <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(index + 1).padStart(2, "0")}</span>
+                          <span className="lesson-pick-text">
+                            <strong>{lesson.title}</strong>
+                            <small>{lesson.studyCards?.length ?? 0} фраз · {lesson.questions.length} заданий</small>
+                          </span>
+                          <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
+                        </button>
+                      );
+                    })}
+                    <p className="local-progress-note">Следующий урок откроется после завершения предыдущего. Прогресс сохраняется на устройстве и в аккаунте.</p>
+                  </div>
                 ) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
                     <p className="modal-note">Девять коротких уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
@@ -1013,20 +1378,37 @@ export default function App() {
               <div className="lesson-study">
                 <div className="lesson-topline">
                   <span className="section-label">СНАЧАЛА ИЗУЧИ</span>
-                  <span className="lesson-step">{selectedLesson.letters.length} элементов</span>
+                  <span className="lesson-step">{selectedLesson.studyCards?.length ?? selectedLesson.letters.length} элементов</span>
                 </div>
                 <h2 id="stage-modal-title">{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
-                <p className="study-guidance">Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно.</p>
-                <div className="letter-intro lesson-letters">
-                  {selectedLesson.letters.map((letter) => (
-                    <div key={letter.character}>
-                      <strong lang="ar" dir="rtl">{letter.character}</strong>
-                      <span>{letter.name}</span>
-                      {letter.note && <small>{letter.note}</small>}
-                    </div>
-                  ))}
-                </div>
+                <p className="study-guidance">
+                  {selectedLesson.studyCards
+                    ? "Прочитай фразу, её звучание и значение. Перед проверкой карточки исчезнут — ответ придётся вспоминать."
+                    : "Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно."}
+                </p>
+                {selectedLesson.studyCards ? (
+                  <div className="study-phrase-cards">
+                    {selectedLesson.studyCards.map((card, index) => (
+                      <article className="study-phrase-card" key={`${index}-${card.arabic}`}>
+                        <strong className="study-phrase-arabic" lang="ar" dir="rtl">{card.arabic}</strong>
+                        <span className="study-phrase-transliteration">{card.transliteration}</span>
+                        <span className="study-phrase-translation">{card.translation}</span>
+                        {card.note && <small>{card.note}</small>}
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="letter-intro lesson-letters">
+                    {selectedLesson.letters.map((letter) => (
+                      <div key={letter.character}>
+                        <strong lang="ar" dir="rtl">{letter.character}</strong>
+                        <span>{letter.name}</span>
+                        {letter.note && <small>{letter.note}</small>}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
                   Начать вспоминание →
                 </button>
@@ -1074,7 +1456,11 @@ export default function App() {
                   {currentQuestion.mode === "recall" ? (
                     <>
                       {currentQuestion.stimulus && (
-                        <div className="recall-stimulus" lang="ar" dir="rtl">{currentQuestion.stimulus}</div>
+                        <div
+                          className={`recall-stimulus ${currentQuestion.stimulusLang === "ru" ? "recall-stimulus-text" : ""} ${currentQuestion.stimulus.length > 24 ? "recall-stimulus-long" : ""}`}
+                          lang={currentQuestion.stimulusLang ?? "ar"}
+                          dir={currentQuestion.stimulusDir ?? "rtl"}
+                        >{currentQuestion.stimulus}</div>
                       )}
                       <form className="recall-form" onSubmit={(event) => { event.preventDefault(); if (typedAnswer.trim()) answerQuestion(typedAnswer.trim()); }}>
                         <label className="recall-label" htmlFor="recall-answer">Твой ответ по памяти</label>

@@ -1221,3 +1221,89 @@ html, body {
   background: #fbf6e9;
   color: #66522b;
 }
+
+/* Contextual phrase cards for the MSA introduction unit. */
+.study-phrase-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  max-height: 54vh;
+  overflow-y: auto;
+  padding: 2px 3px 8px;
+}
+.study-phrase-card {
+  display: grid;
+  gap: 6px;
+  padding: 15px 16px;
+  border: 1px solid #e7e9df;
+  border-radius: 16px;
+  background: #fffefa;
+  text-align: center;
+}
+.study-phrase-arabic {
+  display: block;
+  color: #285b45;
+  font-family: "Noto Naskh Arabic", "Amiri", "Geeza Pro", "Times New Roman", serif;
+  font-size: clamp(27px, 7vw, 38px);
+  font-weight: 600;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.study-phrase-transliteration {
+  color: #728073;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.study-phrase-translation {
+  color: #30483a;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+.study-phrase-card small {
+  color: #89938a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.recall-stimulus-text {
+  min-height: 68px;
+  padding: 10px 6px;
+  font-family: inherit;
+  font-size: clamp(19px, 5vw, 27px);
+  font-weight: 750;
+  line-height: 1.45;
+}
+.recall-stimulus-long {
+  font-size: clamp(28px, 7vw, 44px);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.recall-stimulus-text.recall-stimulus-long {
+  font-size: clamp(17px, 4.6vw, 23px);
+}
+:root[data-theme="dark"] .study-phrase-card {
+  border-color: #3e5145;
+  background: #1d2b23;
+}
+:root[data-theme="dark"] .study-phrase-arabic {
+  color: #e5efe7;
+}
+:root[data-theme="dark"] .study-phrase-transliteration,
+:root[data-theme="dark"] .study-phrase-card small {
+  color: #a7b5aa;
+}
+:root[data-theme="dark"] .study-phrase-translation {
+  color: #edf3ed;
+}
+@media (max-width: 480px) {
+  .study-phrase-cards {
+    max-height: 51vh;
+    gap: 8px;
+  }
+  .study-phrase-card {
+    padding: 12px;
+  }
+  .study-phrase-arabic {
+    font-size: clamp(25px, 7.2vw, 33px);
+  }
+}
