@@ -326,7 +326,7 @@ function updateReviewCard(
     dueAt,
     intervalDays,
     repetitions: correct ? repetitions + 1 : 0,
-    easeFactor: nextEase,
+    easeFactor,
   };
 }
 
