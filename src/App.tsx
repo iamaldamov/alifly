@@ -549,7 +549,7 @@ function shuffleQuestions(questions: Question[]): Question[] {
 
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 30) return shuffleQuestions(lesson.questions);
-  if (lesson.id >= 6) return lesson.questions;
+  if (lesson.id >= 6 && lesson.id <= 8) return lesson.questions;
   const recall = lesson.letters.map(buildLetterRecallQuestion);
   const mixed: Question[] = [];
   const total = Math.max(lesson.questions.length, recall.length);
