@@ -1230,6 +1230,26 @@ export default function App() {
                     })}
                     <p className="local-progress-note">Прогресс сохраняется на устройстве, а после входа — в твоём аккаунте.</p>
                   </div>
+                ) : selectedStage.id === 3 && stageThreeUnlocked ? (
+                  <div className="lesson-picker">
+                    <p className="modal-note">Пять уроков на современном литературном арабском (MSA). Сначала изучи фразы в ситуации, затем вспомни их перевод и звучание без подсказки.</p>
+                    {stageThreeLessons.map((lesson, index) => {
+                      const previousLesson = index > 0 ? stageThreeLessons[index - 1] : undefined;
+                      const isOpen = index === 0 || (previousLesson !== undefined && completedLessonIds.includes(previousLesson.id));
+                      const isCompleted = completedLessonIds.includes(lesson.id);
+                      return (
+                        <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(index + 1).padStart(2, "0")}</span>
+                          <span className="lesson-pick-text">
+                            <strong>{lesson.title}</strong>
+                            <small>{lesson.studyCards?.length ?? 0} фраз · {lesson.questions.length} заданий</small>
+                          </span>
+                          <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
+                        </button>
+                      );
+                    })}
+                    <p className="local-progress-note">Следующий урок откроется после завершения предыдущего. Прогресс сохраняется на устройстве и в аккаунте.</p>
+                  </div>
                 ) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
                     <p className="modal-note">Девять коротких уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
@@ -1261,20 +1281,37 @@ export default function App() {
               <div className="lesson-study">
                 <div className="lesson-topline">
                   <span className="section-label">СНАЧАЛА ИЗУЧИ</span>
-                  <span className="lesson-step">{selectedLesson.letters.length} элементов</span>
+                  <span className="lesson-step">{selectedLesson.studyCards?.length ?? selectedLesson.letters.length} элементов</span>
                 </div>
                 <h2 id="stage-modal-title">{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
-                <p className="study-guidance">Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно.</p>
-                <div className="letter-intro lesson-letters">
-                  {selectedLesson.letters.map((letter) => (
-                    <div key={letter.character}>
-                      <strong lang="ar" dir="rtl">{letter.character}</strong>
-                      <span>{letter.name}</span>
-                      {letter.note && <small>{letter.note}</small>}
-                    </div>
-                  ))}
-                </div>
+                <p className="study-guidance">
+                  {selectedLesson.studyCards
+                    ? "Прочитай фразу, её звучание и значение. Перед проверкой карточки исчезнут — ответ придётся вспоминать."
+                    : "Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно."}
+                </p>
+                {selectedLesson.studyCards ? (
+                  <div className="study-phrase-cards">
+                    {selectedLesson.studyCards.map((card, index) => (
+                      <article className="study-phrase-card" key={`${index}-${card.arabic}`}>
+                        <strong className="study-phrase-arabic" lang="ar" dir="rtl">{card.arabic}</strong>
+                        <span className="study-phrase-transliteration">{card.transliteration}</span>
+                        <span className="study-phrase-translation">{card.translation}</span>
+                        {card.note && <small>{card.note}</small>}
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="letter-intro lesson-letters">
+                    {selectedLesson.letters.map((letter) => (
+                      <div key={letter.character}>
+                        <strong lang="ar" dir="rtl">{letter.character}</strong>
+                        <span>{letter.name}</span>
+                        {letter.note && <small>{letter.note}</small>}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
                   Начать вспоминание →
                 </button>
@@ -1322,7 +1359,11 @@ export default function App() {
                   {currentQuestion.mode === "recall" ? (
                     <>
                       {currentQuestion.stimulus && (
-                        <div className="recall-stimulus" lang="ar" dir="rtl">{currentQuestion.stimulus}</div>
+                        <div
+                          className={`recall-stimulus ${currentQuestion.stimulusLang === "ru" ? "recall-stimulus-text" : ""} ${currentQuestion.stimulus.length > 24 ? "recall-stimulus-long" : ""}`}
+                          lang={currentQuestion.stimulusLang ?? "ar"}
+                          dir={currentQuestion.stimulusDir ?? "rtl"}
+                        >{currentQuestion.stimulus}</div>
                       )}
                       <form className="recall-form" onSubmit={(event) => { event.preventDefault(); if (typedAnswer.trim()) answerQuestion(typedAnswer.trim()); }}>
                         <label className="recall-label" htmlFor="recall-answer">Твой ответ по памяти</label>
