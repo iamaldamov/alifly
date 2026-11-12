@@ -140,9 +140,11 @@ export default function WordGame() {
           <span style={{ width: `${((currentIndex + (selectedAnswer !== null ? 1 : 0)) / roundWords.length) * 100}%` }} />
         </div>
 
-        <div className="word-game-prompt">Что означает это слово?</div>
-        <div className="word-game-arabic" lang="ar" dir="rtl">{currentWord.arabic}</div>
-        <div className="word-game-transliteration">{currentWord.transliteration}</div>
+        <div className="word-game-question" aria-live="polite" aria-atomic="true">
+          <div className="word-game-prompt">Что означает это слово?</div>
+          <div className="word-game-arabic" lang="ar" dir="rtl">{currentWord.arabic}</div>
+          <div className="word-game-transliteration">{currentWord.transliteration}</div>
+        </div>
         <div className="word-game-options">
           {options.map((option) => {
             const isCorrect = option.translation === currentWord.translation;
