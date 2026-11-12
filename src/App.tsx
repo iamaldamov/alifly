@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ReadingTrainer from "./ReadingTrainer";
+import WordGame from "./WordGame";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
@@ -1281,6 +1282,8 @@ export default function App() {
       />
 
       <ReadingTrainer />
+
+      <WordGame />
 
       <section className="progress-section">
         <div className="progress-heading">
