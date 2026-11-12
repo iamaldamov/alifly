@@ -1200,21 +1200,7 @@ export default function App() {
           <span className="logo-mark">ا</span>
           <span>ALIFLY</span>
         </a>
-        <div className="topbar-right">
-          <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
-          <AuthPanel cloudStatus={cloudSaveStatus} />
-          <button
-            className="theme-toggle"
-            type="button"
-            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
-            aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
-            title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
-            aria-pressed={theme === "dark"}
-          >
-            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
-            <span className="theme-toggle-label">{theme === "dark" ? "Светлая" : "Тёмная"}</span>
-          </button>
-        </div>
+
       </header>
 
       <section className="hero">
@@ -1244,9 +1230,10 @@ export default function App() {
       <ReadingTrainer />
 
       <section className="progress-section">
-        <div>
+        <div className="progress-heading">
           <span className="section-label">ТВОЙ ПРОГРЕСС</span>
           <h2>Каждый шаг важен</h2>
+          <span className="progress-streak" aria-label={`Серия занятий: ${streak}`}>🔥 Серия занятий · {streak}</span>
         </div>
         <div className="progress-card">
           <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
@@ -1266,6 +1253,10 @@ export default function App() {
             {dueMistakes.length === 0 && mistakes.length > 0 && (
               <p className="memory-next-review">Следующее повторение запланировано автоматически.</p>
             )}
+          </div>
+          <div className="progress-account">
+            <AuthPanel cloudStatus={cloudSaveStatus} />
+            <span className="progress-account-note">Войди, чтобы сохранить обучение и продолжить с другого устройства.</span>
           </div>
         </div>
       </section>
@@ -1295,6 +1286,19 @@ export default function App() {
       </section>
 
       <footer className="footer">
+        <div className="footer-controls">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
+            title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
+            aria-pressed={theme === "dark"}
+          >
+            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+            <span className="theme-toggle-label">{theme === "dark" ? "Светлая тема" : "Тёмная тема"}</span>
+          </button>
+        </div>
         <span className="footer-logo">ALIFLY</span>
         <p>Учись с интересом. Продвигайся с уверенностью.</p>
         <span>Создано с заботой о знаниях.</span>
