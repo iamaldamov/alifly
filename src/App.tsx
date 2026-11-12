@@ -1200,7 +1200,6 @@ export default function App() {
           <span className="logo-mark">ا</span>
           <span>ALIFLY</span>
         </a>
-
       </header>
 
       <section className="hero">
@@ -1233,7 +1232,9 @@ export default function App() {
         <div className="progress-heading">
           <span className="section-label">ТВОЙ ПРОГРЕСС</span>
           <h2>Каждый шаг важен</h2>
-          <span className="progress-streak" aria-label={`Серия занятий: ${streak}`}>🔥 Серия занятий · {streak}</span>
+          {streak > 0 && (
+            <span className="progress-streak" aria-label={`Серия занятий: ${streak}`}>🔥 Серия · {streak}</span>
+          )}
         </div>
         <div className="progress-card">
           <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
@@ -1256,7 +1257,6 @@ export default function App() {
           </div>
           <div className="progress-account">
             <AuthPanel cloudStatus={cloudSaveStatus} />
-            <span className="progress-account-note">Войди, чтобы сохранить обучение и продолжить с другого устройства.</span>
           </div>
         </div>
       </section>
