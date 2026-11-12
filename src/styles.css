@@ -1307,3 +1307,125 @@ html, body {
     font-size: clamp(25px, 7.2vw, 33px);
   }
 }
+
+
+/* Interface refinement: keep the header quiet and use one scroll area per modal. */
+.topbar {
+  justify-content: flex-start;
+}
+
+.progress-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.progress-streak {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fffefa;
+  color: #687b6d;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.progress-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px 12px;
+  margin-top: 16px;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+}
+
+.progress-account-note {
+  color: #899188;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.footer-controls {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.footer-controls .theme-toggle {
+  min-height: 36px;
+  margin: 0;
+}
+
+.stage-modal,
+.lesson-modal {
+  max-height: min(88vh, 820px);
+  max-height: min(88dvh, 820px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lesson-picker,
+.lesson-letters,
+.study-phrase-cards {
+  max-height: none;
+  overflow: visible;
+}
+
+.lesson-picker {
+  padding-right: 0;
+}
+
+.lesson-letters {
+  padding-right: 2px;
+}
+
+.stage-modal p,
+.stage-info,
+.lesson-pick-text,
+.lesson-pick-state,
+.lesson-letters small,
+.study-phrase-transliteration,
+.study-phrase-translation,
+.study-phrase-card small,
+.recall-stimulus-text,
+.progress-account-note {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lesson-pick-state {
+  max-width: 92px;
+  white-space: normal;
+  text-align: right;
+  line-height: 1.35;
+}
+
+.study-phrase-arabic {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+:root[data-theme="dark"] .progress-streak {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .progress-account {
+  border-top-color: var(--border);
+}
+
+:root[data-theme="dark"] .progress-account-note {
+  color: var(--text-muted);
+}
