@@ -1671,3 +1671,268 @@ button:disabled {
 :root[data-theme="dark"] .auth-privacy {
   color: var(--text-muted);
 }
+
+
+/* Arabic vocabulary mini-game */
+.word-game-section {
+  padding: 24px 4% 12px;
+}
+.word-game-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.word-game-heading h2 {
+  margin: 7px 0 5px;
+  color: var(--text, #234735);
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 850;
+  letter-spacing: -.04em;
+}
+.word-game-heading p {
+  margin: 0;
+  color: var(--muted, #758477);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.word-game-best-pill {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #e1e8dc);
+  border-radius: 999px;
+  background: var(--surface, #fffefa);
+  color: var(--text-soft, #607366);
+  font-size: 11px;
+  font-weight: 800;
+}
+.word-game-card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 23px;
+  border: 1px solid var(--line, #e1e8dc);
+  border-radius: 24px;
+  background: var(--surface, #fffefa);
+  box-shadow: var(--shadow-card, 0 10px 28px rgba(32,55,46,.055));
+}
+.word-game-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted, #758477);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .1em;
+}
+.word-game-topline strong {
+  color: var(--green, #285b45);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.word-game-progress {
+  height: 7px;
+  margin: 12px 0 23px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--surface-soft, #edf2e9);
+}
+.word-game-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2c704e, #a5c978);
+  transition: width .25s ease;
+}
+.word-game-prompt {
+  color: var(--muted, #758477);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.word-game-arabic {
+  margin: 10px 0 2px;
+  color: var(--green, #285b45);
+  font-family: "Noto Naskh Arabic", "Amiri", "Geeza Pro", serif;
+  font-size: clamp(48px, 12vw, 68px);
+  font-weight: 650;
+  line-height: 1.55;
+  text-align: center;
+}
+.word-game-transliteration {
+  margin-bottom: 19px;
+  color: var(--muted, #758477);
+  font-size: 13px;
+  text-align: center;
+}
+.word-game-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.word-game-option {
+  display: flex;
+  min-width: 0;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 15px;
+  border: 1px solid var(--line, #e1e8dc);
+  border-radius: 14px;
+  background: var(--surface, #fffefa);
+  color: var(--text, #234735);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.word-game-option:not(:disabled):active {
+  transform: scale(.985);
+}
+.word-game-option:focus-visible,
+.word-game-primary:focus-visible {
+  outline: 3px solid rgba(166, 197, 120, .55);
+  outline-offset: 3px;
+}
+.word-game-option:disabled {
+  cursor: default;
+}
+.word-game-option.is-correct {
+  border-color: #78aa78;
+  background: #edf7e9;
+  color: #285b3c;
+}
+.word-game-option.is-wrong {
+  border-color: #d88e83;
+  background: #fbefec;
+  color: #99473e;
+}
+.word-game-feedback {
+  display: grid;
+  gap: 4px;
+  margin-top: 15px;
+  padding: 13px 15px;
+  border-radius: 13px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.word-game-feedback.is-correct {
+  background: #edf7e9;
+  color: #285b3c;
+}
+.word-game-feedback.is-wrong {
+  background: #fbefec;
+  color: #99473e;
+}
+.word-game-feedback span {
+  font-weight: 700;
+}
+.word-game-primary {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 17px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 15px;
+  background: var(--green, #285b45);
+  color: #fffdf3;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.word-game-primary:disabled {
+  background: #a8b6aa;
+  cursor: not-allowed;
+}
+.word-game-result {
+  text-align: center;
+}
+.word-game-kicker {
+  color: var(--muted, #758477);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .13em;
+}
+.word-game-result-icon {
+  margin: 13px 0 5px;
+  font-size: 38px;
+}
+.word-game-result h2 {
+  margin: 5px 0;
+  color: var(--text, #234735);
+  font-size: 25px;
+}
+.word-game-result-score {
+  margin: 8px 0;
+  color: var(--green, #285b45);
+  font-size: 20px;
+  font-weight: 850;
+}
+.word-game-muted {
+  color: var(--muted, #758477);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.word-game-best {
+  margin-top: 12px;
+  color: var(--text-soft, #607366);
+  font-size: 12px;
+  font-weight: 750;
+}
+:root[data-theme="dark"] .word-game-heading h2,
+:root[data-theme="dark"] .word-game-result h2 {
+  color: var(--text, #edf3e9);
+}
+:root[data-theme="dark"] .word-game-card,
+:root[data-theme="dark"] .word-game-best-pill {
+  border-color: var(--border, #344b3d);
+  background: var(--surface, #1d2b23);
+}
+:root[data-theme="dark"] .word-game-option {
+  border-color: var(--border, #344b3d);
+  background: var(--surface-soft, #223329);
+  color: var(--text, #edf3e9);
+}
+:root[data-theme="dark"] .word-game-option.is-correct {
+  border-color: #638d60;
+  background: #203d2b;
+  color: #c4e8c2;
+}
+:root[data-theme="dark"] .word-game-option.is-wrong {
+  border-color: #89554d;
+  background: #422a29;
+  color: #f2c5bd;
+}
+:root[data-theme="dark"] .word-game-feedback.is-correct {
+  background: #203d2b;
+  color: #c4e8c2;
+}
+:root[data-theme="dark"] .word-game-feedback.is-wrong {
+  background: #422a29;
+  color: #f2c5bd;
+}
+:root[data-theme="dark"] .word-game-topline strong,
+:root[data-theme="dark"] .word-game-arabic,
+:root[data-theme="dark"] .word-game-result-score {
+  color: #c7e9a6;
+}
+@media (max-width: 700px) {
+  .word-game-section { padding: 18px 2% 8px; }
+  .word-game-heading { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .word-game-card { padding: 18px 15px; border-radius: 20px; }
+  .word-game-options { gap: 8px; }
+  .word-game-option { min-height: 52px; padding: 11px 12px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .word-game-progress span,
+  .word-game-option { transition: none; }
+}
