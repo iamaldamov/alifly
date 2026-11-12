@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReadingTrainer from "./ReadingTrainer";
+import WordGame from "./WordGame";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
@@ -833,6 +834,9 @@ export default function App() {
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const stageDialogRef = useRef<HTMLElement | null>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const lastFocusedLessonRef = useRef<Lesson | null>(null);
   const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -870,7 +874,19 @@ export default function App() {
     if (!selectedStage) return;
 
     const previousOverflow = document.body.style.overflow;
+    restoreFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
     document.body.style.overflow = "hidden";
+
+    const focusDialog = () => {
+      const firstFocusable = stageDialogRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      (firstFocusable ?? stageDialogRef.current)?.focus();
+    };
+
+    focusDialog();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -883,6 +899,29 @@ export default function App() {
         setReviewMode(false);
         setReviewMistakeIds([]);
         setExamMode(false);
+        return;
+      }
+
+      if (event.key !== "Tab" || !stageDialogRef.current) return;
+      const focusable = Array.from(
+        stageDialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => element.offsetParent !== null);
+      if (focusable.length === 0) {
+        event.preventDefault();
+        stageDialogRef.current.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
@@ -890,8 +929,24 @@ export default function App() {
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      restoreFocusRef.current?.focus();
+      restoreFocusRef.current = null;
     };
   }, [selectedStage]);
+
+  useEffect(() => {
+    if (!selectedStage || !stageDialogRef.current) {
+      lastFocusedLessonRef.current = selectedLesson;
+      return;
+    }
+
+    const lessonChanged = lastFocusedLessonRef.current !== selectedLesson;
+    lastFocusedLessonRef.current = selectedLesson;
+    if (!lessonChanged && !lessonFinished) return;
+
+    const heading = stageDialogRef.current.querySelector<HTMLElement>("#stage-modal-title");
+    heading?.focus({ preventScroll: true });
+  }, [selectedLesson, lessonFinished, selectedStage]);
 
   useEffect(() => {
     try { localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds)); } catch { /* Storage may be unavailable. */ }
@@ -1200,21 +1255,6 @@ export default function App() {
           <span className="logo-mark">ا</span>
           <span>ALIFLY</span>
         </a>
-        <div className="topbar-right">
-          <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
-          <AuthPanel cloudStatus={cloudSaveStatus} />
-          <button
-            className="theme-toggle"
-            type="button"
-            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
-            aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
-            title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
-            aria-pressed={theme === "dark"}
-          >
-            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
-            <span className="theme-toggle-label">{theme === "dark" ? "Светлая" : "Тёмная"}</span>
-          </button>
-        </div>
       </header>
 
       <section className="hero">
@@ -1243,10 +1283,15 @@ export default function App() {
 
       <ReadingTrainer />
 
+      <WordGame />
+
       <section className="progress-section">
-        <div>
+        <div className="progress-heading">
           <span className="section-label">ТВОЙ ПРОГРЕСС</span>
           <h2>Каждый шаг важен</h2>
+          {streak > 0 && (
+            <span className="progress-streak" aria-label={`Серия занятий: ${streak}`}>🔥 Серия · {streak}</span>
+          )}
         </div>
         <div className="progress-card">
           <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
@@ -1266,6 +1311,9 @@ export default function App() {
             {dueMistakes.length === 0 && mistakes.length > 0 && (
               <p className="memory-next-review">Следующее повторение запланировано автоматически.</p>
             )}
+          </div>
+          <div className="progress-account">
+            <AuthPanel cloudStatus={cloudSaveStatus} />
           </div>
         </div>
       </section>
@@ -1295,6 +1343,19 @@ export default function App() {
       </section>
 
       <footer className="footer">
+        <div className="footer-controls">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
+            title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
+            aria-pressed={theme === "dark"}
+          >
+            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+            <span className="theme-toggle-label">{theme === "dark" ? "Светлая тема" : "Тёмная тема"}</span>
+          </button>
+        </div>
         <span className="footer-logo">ALIFLY</span>
         <p>Учись с интересом. Продвигайся с уверенностью.</p>
         <span>Создано с заботой о знаниях.</span>
@@ -1302,14 +1363,14 @@ export default function App() {
 
       {selectedStage && (
         <div className="modal-backdrop" onClick={closeStage}>
-          <section className={`stage-modal ${selectedLesson ? "lesson-modal" : ""}`} onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="stage-modal-title">
+          <section ref={stageDialogRef} tabIndex={-1} className={`stage-modal ${selectedLesson ? "lesson-modal" : ""}`} onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="stage-modal-title">
             <button className="modal-close" onClick={closeStage} aria-label="Закрыть">×</button>
 
             {!selectedLesson ? (
               <>
                 <div className="modal-icon">{selectedStage.icon}</div>
                 <span className="section-label">ЭТАП {selectedStage.id}</span>
-                <h2 id="stage-modal-title">{selectedStage.title}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{selectedStage.title}</h2>
                 <p>{selectedStage.description}</p>
                 {selectedStage.id === 2 && stageTwoUnlocked ? (
                   <div className="lesson-picker">
@@ -1380,7 +1441,7 @@ export default function App() {
                   <span className="section-label">СНАЧАЛА ИЗУЧИ</span>
                   <span className="lesson-step">{selectedLesson.studyCards?.length ?? selectedLesson.letters.length} элементов</span>
                 </div>
-                <h2 id="stage-modal-title">{selectedLesson.title}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <p className="study-guidance">
                   {selectedLesson.studyCards
@@ -1419,7 +1480,7 @@ export default function App() {
                   <>
                     <div className="result-symbol">{correctAnswers >= 8 ? "✓" : "↻"}</div>
                     <span className="section-label">ИТОГОВЫЙ ЭКЗАМЕН</span>
-                    <h2 id="stage-modal-title">{correctAnswers >= 8 ? "Этап пройден!" : "Попробуй ещё раз"}</h2>
+                    <h2 id="stage-modal-title" tabIndex={-1}>{correctAnswers >= 8 ? "Этап пройден!" : "Попробуй ещё раз"}</h2>
                     <p>Твой результат: {correctAnswers} из 10 правильных ответов.</p>
                     <div className="result-score">{correctAnswers}/10</div>
                     <p>{correctAnswers >= 8 ? "Ма ша Аллах! Ты открыл следующий этап — «Огласовки»." : "Для открытия следующего этапа нужно набрать не менее 8 правильных ответов. Повтори уроки и возвращайся."}</p>
@@ -1433,7 +1494,7 @@ export default function App() {
                   <>
                 <div className="result-symbol">✦</div>
                 <span className="section-label">{reviewMode ? "ТРЕНИРОВКА ПАМЯТИ ЗАВЕРШЕНА" : "УРОК ЗАВЕРШЁН"}</span>
-                <h2 id="stage-modal-title">{reviewMode ? "Повторение завершено!" : "Отличная работа!"}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{reviewMode ? "Повторение завершено!" : "Отличная работа!"}</h2>
                 <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
                 <div className="result-score">{correctAnswers}/{selectedLesson.questions.length}</div>
                 <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : reviewMode ? "Правильные ответы вернутся через более длинный интервал, а ошибки появятся раньше." : "Хорошее начало. Возвращайся к материалу по расписанию — так он лучше закрепится."}</p>
@@ -1448,7 +1509,7 @@ export default function App() {
                   <span className="lesson-step">{questionIndex + 1} из {selectedLesson.questions.length}</span>
                 </div>
                 <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / selectedLesson.questions.length) * 100}%` }} /></div>
-                <h2 id="stage-modal-title">{selectedLesson.title}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <div className="question-block">
                   <span className="question-label">ПРОВЕРЬ СЕБЯ</span>

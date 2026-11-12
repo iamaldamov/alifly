@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
 
@@ -14,6 +14,57 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const authDialogRef = useRef<HTMLElement | null>(null);
+  const restoreAuthFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    restoreAuthFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+    const firstFocusable = authDialogRef.current?.querySelector<HTMLElement>(
+      'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    (firstFocusable ?? authDialogRef.current)?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab" || !authDialogRef.current) return;
+      const focusable = Array.from(
+        authDialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => element.offsetParent !== null);
+      if (focusable.length === 0) {
+        event.preventDefault();
+        authDialogRef.current.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      restoreAuthFocusRef.current?.focus();
+      restoreAuthFocusRef.current = null;
+    };
+  }, [isOpen]);
 
   const clearFeedback = () => {
     setMessage("");
@@ -108,7 +159,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
       {isOpen && (
         <div className="auth-backdrop" onClick={() => setIsOpen(false)}>
-          <section className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}>
+          <section ref={authDialogRef} tabIndex={-1} className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}>
             <button className="auth-close" type="button" onClick={() => setIsOpen(false)} aria-label="Закрыть">×</button>
             {user ? (
               <>
