@@ -1418,3 +1418,33 @@ html, body {
   border-top-color: var(--border);
 }
 
+/* Touch-first polish: avoid sticky hover states on phones and give taps clear feedback. */
+@media (hover: none), (pointer: coarse) {
+  .stage-card:not(.stage-locked):hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .primary-button:hover {
+    transform: none;
+    background: var(--green);
+    box-shadow: 0 8px 18px #285b4524;
+  }
+
+  .theme-toggle:hover {
+    transform: none;
+    border-color: var(--border, var(--line));
+    box-shadow: 0 3px 10px rgba(32,55,46,.04);
+  }
+
+  .stage-card:not(.stage-locked):active {
+    transform: scale(.985);
+    box-shadow: 0 3px 0 rgba(32,55,46,.08);
+  }
+
+  .lesson-pick:not(:disabled):active {
+    transform: scale(.99);
+    border-color: #b7cdb5;
+    background: #f0f6ed;
+  }
+}
