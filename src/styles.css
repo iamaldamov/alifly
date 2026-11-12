@@ -1346,13 +1346,6 @@ html, body {
   border-top: 1px solid var(--line);
 }
 
-.progress-account-note {
-  color: #899188;
-  font-size: 11px;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
 .footer-controls {
   display: flex;
   justify-content: center;
@@ -1399,10 +1392,6 @@ html, body {
 .study-phrase-translation,
 .study-phrase-card small,
 .recall-stimulus-text,
-.progress-account-note {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
 
 .lesson-pick-state {
   max-width: 92px;
@@ -1426,6 +1415,3 @@ html, body {
   border-top-color: var(--border);
 }
 
-:root[data-theme="dark"] .progress-account-note {
-  color: var(--text-muted);
-}
