@@ -835,6 +835,7 @@ export default function App() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const stageDialogRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const lastFocusedLessonRef = useRef<Lesson | null>(null);
   const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -931,6 +932,20 @@ export default function App() {
       restoreFocusRef.current = null;
     };
   }, [selectedStage]);
+
+  useEffect(() => {
+    if (!selectedStage || !stageDialogRef.current) {
+      lastFocusedLessonRef.current = selectedLesson;
+      return;
+    }
+
+    const lessonChanged = lastFocusedLessonRef.current !== selectedLesson;
+    lastFocusedLessonRef.current = selectedLesson;
+    if (!lessonChanged && !lessonFinished) return;
+
+    const heading = stageDialogRef.current.querySelector<HTMLElement>("#stage-modal-title");
+    heading?.focus({ preventScroll: true });
+  }, [selectedLesson, lessonFinished, selectedStage]);
 
   useEffect(() => {
     try { localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds)); } catch { /* Storage may be unavailable. */ }
@@ -1352,7 +1367,7 @@ export default function App() {
               <>
                 <div className="modal-icon">{selectedStage.icon}</div>
                 <span className="section-label">ЭТАП {selectedStage.id}</span>
-                <h2 id="stage-modal-title">{selectedStage.title}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{selectedStage.title}</h2>
                 <p>{selectedStage.description}</p>
                 {selectedStage.id === 2 && stageTwoUnlocked ? (
                   <div className="lesson-picker">
@@ -1423,7 +1438,7 @@ export default function App() {
                   <span className="section-label">СНАЧАЛА ИЗУЧИ</span>
                   <span className="lesson-step">{selectedLesson.studyCards?.length ?? selectedLesson.letters.length} элементов</span>
                 </div>
-                <h2 id="stage-modal-title">{selectedLesson.title}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <p className="study-guidance">
                   {selectedLesson.studyCards
@@ -1462,7 +1477,7 @@ export default function App() {
                   <>
                     <div className="result-symbol">{correctAnswers >= 8 ? "✓" : "↻"}</div>
                     <span className="section-label">ИТОГОВЫЙ ЭКЗАМЕН</span>
-                    <h2 id="stage-modal-title">{correctAnswers >= 8 ? "Этап пройден!" : "Попробуй ещё раз"}</h2>
+                    <h2 id="stage-modal-title" tabIndex={-1}>{correctAnswers >= 8 ? "Этап пройден!" : "Попробуй ещё раз"}</h2>
                     <p>Твой результат: {correctAnswers} из 10 правильных ответов.</p>
                     <div className="result-score">{correctAnswers}/10</div>
                     <p>{correctAnswers >= 8 ? "Ма ша Аллах! Ты открыл следующий этап — «Огласовки»." : "Для открытия следующего этапа нужно набрать не менее 8 правильных ответов. Повтори уроки и возвращайся."}</p>
@@ -1476,7 +1491,7 @@ export default function App() {
                   <>
                 <div className="result-symbol">✦</div>
                 <span className="section-label">{reviewMode ? "ТРЕНИРОВКА ПАМЯТИ ЗАВЕРШЕНА" : "УРОК ЗАВЕРШЁН"}</span>
-                <h2 id="stage-modal-title">{reviewMode ? "Повторение завершено!" : "Отличная работа!"}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{reviewMode ? "Повторение завершено!" : "Отличная работа!"}</h2>
                 <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
                 <div className="result-score">{correctAnswers}/{selectedLesson.questions.length}</div>
                 <p>{correctAnswers === selectedLesson.questions.length ? "Прекрасно! Все ответы верные." : reviewMode ? "Правильные ответы вернутся через более длинный интервал, а ошибки появятся раньше." : "Хорошее начало. Возвращайся к материалу по расписанию — так он лучше закрепится."}</p>
@@ -1491,7 +1506,7 @@ export default function App() {
                   <span className="lesson-step">{questionIndex + 1} из {selectedLesson.questions.length}</span>
                 </div>
                 <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / selectedLesson.questions.length) * 100}%` }} /></div>
-                <h2 id="stage-modal-title">{selectedLesson.title}</h2>
+                <h2 id="stage-modal-title" tabIndex={-1}>{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <div className="question-block">
                   <span className="question-label">ПРОВЕРЬ СЕБЯ</span>
