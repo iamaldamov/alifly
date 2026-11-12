@@ -1652,3 +1652,20 @@ button:disabled {
     transition: none;
   }
 }
+
+
+/* Dark-mode contrast fixes for secondary learning and account text. */
+:root[data-theme="dark"] .recall-label {
+  color: var(--text-soft);
+}
+:root[data-theme="dark"] .weak-words-button {
+  border-color: #5a4a2d;
+  background: #342e20;
+  color: #f0cf8c;
+}
+:root[data-theme="dark"] .auth-kicker {
+  color: #a7c68f;
+}
+:root[data-theme="dark"] .auth-privacy {
+  color: var(--text-muted);
+}
