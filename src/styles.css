@@ -933,6 +933,8 @@ html, body {
 @media (max-width: 520px) {
   .account-button { min-height: 34px; gap: 5px; padding: 0 9px; font-size: 10px; }
   .auth-modal { padding: 31px 20px 21px; }
+  /* Prevent iOS Safari from zooming the page when an auth field receives focus. */
+  .auth-form input { min-height: 48px; font-size: 16px; }
 }
 
 
