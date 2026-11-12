@@ -1391,7 +1391,10 @@ html, body {
 .study-phrase-transliteration,
 .study-phrase-translation,
 .study-phrase-card small,
-.recall-stimulus-text,
+.recall-stimulus-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 
 .lesson-pick-state {
   max-width: 92px;
