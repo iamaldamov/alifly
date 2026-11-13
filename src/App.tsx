@@ -850,9 +850,9 @@ export default function App() {
 
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     try {
-      return localStorage.getItem("alifly-theme") === "dark" ? "dark" : "light";
+      return localStorage.getItem("alifly-theme") === "light" ? "light" : "dark";
     } catch {
-      return "light";
+      return "dark";
     }
   });
 
