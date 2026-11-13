@@ -852,7 +852,7 @@ export default function App() {
     try {
       return localStorage.getItem("alifly-theme") === "light" ? "light" : "dark";
     } catch {
-      return "light";
+      return "dark";
     }
   });
 
