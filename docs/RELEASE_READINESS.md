@@ -27,7 +27,7 @@
 | [#10](https://github.com/iamaldamov/alifly/pull/10) | Устойчивость синхронизации профиля | Draft; основан на ветке PR #8, не независим от него |
 | [#17](https://github.com/iamaldamov/alifly/pull/17) | Инструкция настройки auth providers | Draft; 1 впереди, 1 позади; `mergeable=true` |
 | [#18](https://github.com/iamaldamov/alifly/pull/18) | Мобильная компоновка и мини-игра слов | Draft; 19 впереди, 1 позади; `mergeable=true` |
-| [#20](https://github.com/iamaldamov/alifly/pull/20) | Документация готовности к запуску | Draft; 2 впереди, 0 позади (включая эту актуализацию); `mergeable=true` |
+| [#20](https://github.com/iamaldamov/alifly/pull/20) | Документация готовности к запуску | Draft; основан на текущей `main`; `mergeable=true` |
 | [#21](https://github.com/iamaldamov/alifly/pull/21) | Ограничение SQL-привилегий таблицы прогресса | Draft; 2 впереди, 0 позади; `mergeable=true` |
 
 Не объединять PR #9 и #10 напрямую в `main` до интеграции их базовой функциональности из PR #8. PR #7 и #8 сначала требуется согласовать с актуальной `main`: обе ветки отстают на семь коммитов и GitHub сейчас сообщает `mergeable=false`. PR #17 и #18 также основаны на более раннем состоянии `main`; перед интеграцией их следует обновить и перепроверить.
