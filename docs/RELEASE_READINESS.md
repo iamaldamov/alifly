@@ -12,7 +12,7 @@
 - Проверенный HEAD `main`: `a982c069cac23c8f8050016f1d97c5c97b2fcb6f` (Forest Glass visual system).
 - Сборка текущего HEAD `main`: [GitHub Actions #195](https://github.com/iamaldamov/alifly/actions/runs/43367127408) — успешно.
 - Публикация текущего HEAD `main`: [GitHub Pages deployment #14](https://github.com/iamaldamov/alifly/actions/runs/43367127516) — успешно.
-- Последняя проверка PR: [Build ALIFLY #200](https://github.com/iamaldamov/alifly/actions/runs/43745279843) для PR #21 — успешно; [Build ALIFLY #198](https://github.com/iamaldamov/alifly/actions/runs/43477460845) для PR #20 — успешно.
+- Последняя проверка PR: [Build ALIFLY #200](https://github.com/iamaldamov/alifly/actions/runs/43745279843) для PR #21 — успешно; [Build ALIFLY #206](https://github.com/iamaldamov/alifly/actions/runs/43930158695) для PR #20 — успешно.
 - Workflow сборки выполняет `npm install` и `npm run build`; скрипт build запускает `tsc --noEmit` и `vite build`. Отдельных SQL-, e2e- или браузерных тестов этот workflow не выполняет.
 
 ### Открытые PR и порядок интеграции
@@ -80,3 +80,50 @@ PR #18 содержит новый набор арабских слов, тра�
 ## Следующий безопасный приоритет
 
 Сначала обновить и согласовать интеграционный порядок PR #7 и #8 относительно текущей `main`, затем переносить/проверять callback и profile-resilience изменения из PR #9 и #10. Параллельно завершить изолированную проверку миграции PR #21 после подтверждения пользователя на создание платной тестовой ветки. Не переписывать рабочие уроки и прогресс; не менять арабские тексты без надёжных источников и отдельной лингвистической проверки.
+
+
+## Актуализация аудита — 17 ноября 2026 года
+
+### GitHub и Actions
+
+- Репозиторий доступен; default branch — `main`, проверенный HEAD по-прежнему `a982c069cac23c8f8050016f1d97c5c97b2fcb6f`.
+- Найдено восемь открытых PR: #7, #8, #9, #10, #17, #18, #20 и #21.
+- PR #7: 2 коммита впереди и 7 позади `main`; GitHub сообщает `mergeable=false`.
+- PR #8: 21 коммит впереди и 7 позади `main`; GitHub сообщает `mergeable=false`.
+- PR #17: 1 коммит впереди и 1 позади `main`; перед интеграцией требуется обновление базовой ветки.
+- PR #18: 19 коммитов впереди и 1 позади `main`; перед интеграцией требуется обновление базовой ветки. Набор слов в мини-игре по-прежнему требует отдельной языковой проверки и проверки на iPhone.
+- PR #9 и #10 остаются stacked PR, основанными на ветке PR #8.
+- PR #20 и #21 основаны на текущем `main`, открыты как Draft и отмечены GitHub как mergeable. Они не объединялись.
+
+Проверенные GitHub Actions:
+- [Build ALIFLY #195](https://github.com/iamaldamov/alifly/actions/runs/43367127408) для HEAD `main` — успешно; шаги установки зависимостей и сборки завершились успешно.
+- [GitHub Pages deployment #14](https://github.com/iamaldamov/alifly/actions/runs/43367127516) — успешно.
+- [Build ALIFLY #190](https://github.com/iamaldamov/alifly/actions/runs/43274079163) для ветки PR #18 — успешно.
+- [Build ALIFLY #200](https://github.com/iamaldamov/alifly/actions/runs/43745279843) для PR #21 — успешно.
+- [Build ALIFLY #206](https://github.com/iamaldamov/alifly/actions/runs/43930158695) для PR #20 — успешно.
+- Файл `.github/workflows/build.yml` подтверждает, что CI выполняет `npm install` и `npm run build`; отдельные SQL-, e2e- и браузерные тесты в этом workflow отсутствуют.
+- Для PR #17 и PR #9/#10 новые результаты Actions в этой проверке не подтверждены.
+
+### Дополнительная проверка Supabase
+
+- Проект `nmgyyrbqjfywxzweansj` — `ACTIVE_HEALTHY`, PostgreSQL 17.11, регион `eu-west-1`.
+- Список Supabase development branches пуст.
+- У `user_profiles` эффективные table-level права роли `anon` отсутствуют. У `authenticated` есть SELECT и UPDATE только для `display_name`, `age`, `gender`, `avatar_id`; `trial_started_at` и `trial_ends_at` доступны для SELECT, но не UPDATE.
+- На `auth.users` существует триггер `on_auth_user_created_alifly_profile`. Он вызывает `handle_new_alifly_user()`, функцию с `SECURITY DEFINER` и пустым `search_path`; функция создаёт профиль, задаёт начало trial по `auth.users.created_at` и окончание через семь дней.
+- Для `user_progress` подтверждены избыточные эффективные table-level права у `anon` и `authenticated`, включая DELETE, TRUNCATE, REFERENCES, TRIGGER и MAINTAIN. Пять RLS-политик продолжают ограничивать строки собственным `auth.uid()`; миграция PR #21 ещё не применена.
+- Security Advisor: единственное замечание — выключена Leaked Password Protection. Performance Advisor и Health Advisor не вернули замечаний.
+
+### Публичный сайт
+
+Прямое открытие `https://iamaldamov.github.io/alifly/` в текущей среде снова не удалось. Фактический внешний HTTP-ответ остаётся неподтверждённым; успешный Pages deployment подтверждает только успешное выполнение workflow публикации.
+
+### Изменения в production
+
+В ходе проверки 17 ноября production Supabase, `main` и опубликованный сайт не изменялись. PR не объединялись; OAuth/SMS credentials и платёжный провайдер не добавлялись; списания не запускались.
+
+### Следующий безопасный шаг
+
+1. Обновить PR #7, #8 и #17 относительно актуального `main` только после проверки diff и конфликтов.
+2. Сохранить PR #9 и #10 stacked до согласования базовой функциональности PR #8.
+3. Перед production применением PR #21 провести полное тестирование миграции в изолированной среде. Платную Supabase development branch без подтверждения стоимости не создавать.
+4. После интеграции auth/profile вручную проверить регистрацию, callback, trial и профиль на iPhone.
