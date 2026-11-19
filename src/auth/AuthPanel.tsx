@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { supabase } from "../lib/supabase";
+import { auth, db } from "../lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, confirmPasswordReset, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
 type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error";
@@ -101,6 +103,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [resetCode, setResetCode] = useState("");
   const [isRecovery, setIsRecovery] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -131,35 +134,31 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
     let active = true;
     const loadProfile = async () => {
-      const { data, error: readError } = await supabase
-        .from("user_profiles")
-        .select("avatar_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!active) return;
-      if (readError) {
-        setProfileMessage("Не удалось загрузить персонажа из аккаунта.");
+      let data: { avatarId?: unknown } | null = null;
+      try {
+        const profileSnapshot = await getDoc(doc(db, "users", user.uid));
+        data = profileSnapshot.exists() ? profileSnapshot.data() as { avatarId?: unknown } : null;
+      } catch {
+        if (active) setProfileMessage("Не удалось загрузить персонажа из аккаунта.");
         return;
       }
 
+      if (!active) return;
+
       const localAvatar = readStoredAvatar();
-      if (data && isAvatarId(data.avatar_id)) {
-        if (data.avatar_id === "duck" && hasStoredAvatar() && localAvatar !== "duck") {
-          const { error: updateError } = await supabase
-            .from("user_profiles")
-            .update({ avatar_id: localAvatar, updated_at: new Date().toISOString() })
-            .eq("user_id", user.id);
-          if (!active) return;
-          if (!updateError) {
+      if (data && isAvatarId(data.avatarId)) {
+        if (data.avatarId === "duck" && hasStoredAvatar() && localAvatar !== "duck") {
+          try {
+            await setDoc(doc(db, "users", user.uid), { avatarId: localAvatar, updatedAt: serverTimestamp() }, { merge: true });
+            if (!active) return;
             setAvatarId(localAvatar);
             setProfileMessage("Выбранный персонаж сохранён в аккаунте.");
             return;
           }
         }
 
-        setAvatarId(data.avatar_id);
-        try { localStorage.setItem(AVATAR_STORAGE_KEY, data.avatar_id); } catch { /* local storage is optional */ }
+        setAvatarId(data.avatarId);
+        try { localStorage.setItem(AVATAR_STORAGE_KEY, data.avatarId); } catch { /* local storage is optional */ }
       } else if (!data && hasStoredAvatar()) {
         setAvatarId(localAvatar);
       }
@@ -187,15 +186,16 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   }, [isOpen, busy, user?.id]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setIsRecovery(true);
-        setIsOpen(true);
-        setMessage("Придумай новый пароль для своего аккаунта.");
-        setError("");
-      }
-    });
-    return () => subscription.unsubscribe();
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    const code = params.get("oobCode");
+    if (mode === "resetPassword" && code) {
+      setResetCode(code);
+      setIsRecovery(true);
+      setIsOpen(true);
+      setMessage("Придумай новый пароль для своего аккаунта.");
+      setError("");
+    }
   }, []);
 
   const clearFeedback = () => {
@@ -228,15 +228,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
     setBusy(true);
     try {
-      const { data, error: updateError } = await supabase
-        .from("user_profiles")
-        .update({ avatar_id: nextAvatar, updated_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .select("user_id")
-        .maybeSingle();
-
-      if (updateError) throw updateError;
-      if (!data) throw new Error("Профиль не найден. Перезагрузи страницу и попробуй ещё раз.");
+      await setDoc(doc(db, "users", user.uid), { avatarId: nextAvatar, updatedAt: serverTimestamp() }, { merge: true });
       setProfileMessage("Персонаж сохранён в твоём аккаунте.");
     } catch (profileError) {
       setProfileMessage(profileError instanceof Error ? profileError.message : "Не удалось сохранить персонажа.");
@@ -256,26 +248,18 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { data, error: authError } = await supabase.auth.signUp({
-          email: email.trim().toLowerCase(),
-          password,
-          options: { emailRedirectTo: redirectUrl },
-        });
-        if (authError) throw authError;
-
-        if (data.session) {
-          markPromptDismissed();
-          setIsOpen(false);
-          setMessage("");
-        } else {
-          setMessage("Аккаунт создан. Проверь почту и подтверди адрес, чтобы войти в ALIFLY.");
-        }
+        const credential = await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+        await setDoc(doc(db, "users", credential.user.uid), {
+          email: credential.user.email,
+          avatarId,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+        markPromptDismissed();
+        setIsOpen(false);
+        setMessage("");
       } else {
-        const { error: authError } = await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
-          password,
-        });
-        if (authError) throw authError;
+        await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
         markPromptDismissed();
         setIsOpen(false);
         setMessage("");
@@ -295,10 +279,10 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     }
     setBusy(true);
     try {
-      const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: redirectUrl,
+      await sendPasswordResetEmail(auth, email.trim().toLowerCase(), {
+        url: redirectUrl,
+        handleCodeInApp: true,
       });
-      if (authError) throw authError;
       setMessage("Ссылка для смены пароля отправлена на почту.");
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : "Не удалось отправить ссылку.");
@@ -316,8 +300,8 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     }
     setBusy(true);
     try {
-      const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
-      if (authError) throw authError;
+      if (!resetCode) throw new Error("Ссылка для смены пароля недействительна. Запроси новую.");
+      await confirmPasswordReset(auth, resetCode, newPassword);
       setIsRecovery(false);
       setNewPassword("");
       markPromptDismissed();
@@ -334,8 +318,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     clearFeedback();
     setBusy(true);
     try {
-      const { error: authError } = await supabase.auth.signOut();
-      if (authError) throw authError;
+      await signOut(auth);
       markPromptDismissed();
       setIsOpen(false);
     } catch (authError) {
@@ -430,7 +413,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
               <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Подожди…" : mode === "signup" ? "Создать аккаунт" : "Войти в ALIFLY"}</button>
             </form>
             {mode === "signin" && <button className="auth-reset-button" type="button" onClick={sendPasswordReset} disabled={busy}>Забыли пароль? Отправить ссылку</button>}
-            <p className="auth-privacy">Пароль хранится в Supabase Auth. ALIFLY не видит и не сохраняет его в открытом виде.</p>
+            <p className="auth-privacy">Пароль безопасно хранится в Firebase Authentication. ALIFLY не видит и не сохраняет его в открытом виде.</p>
           </>
         )}
 
