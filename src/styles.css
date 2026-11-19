@@ -1511,3 +1511,14 @@ html, body {
   .topbar-right { gap: 6px; }
   .avatar-choice-name { font-size: 9px; }
 }
+
+
+/* Consistent illustrated ALIFLY characters */
+.avatar-choice-art { display: block; width: 47px; height: 47px; }
+.profile-avatar-art { display: block; width: 35px; height: 35px; }
+.avatar-choice { gap: 2px; }
+.profile-avatar-button { font-size: 0; }
+@media (max-width: 700px) {
+  .profile-avatar-art { width: 32px; height: 32px; }
+  .avatar-choice-art { width: 43px; height: 43px; }
+}
