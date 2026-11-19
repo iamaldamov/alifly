@@ -624,14 +624,23 @@ function shuffleQuestions(questions: Question[]): Question[] {
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 30) return shuffleQuestions(lesson.questions);
   if (lesson.id >= 6 && lesson.id <= 8) return lesson.questions;
-  const recall = lesson.letters.flatMap(buildLetterRecallQuestions);
-  const mixed: Question[] = [];
-  const total = Math.max(lesson.questions.length, recall.length);
-  for (let index = 0; index < total; index++) {
-    if (lesson.questions[index]) mixed.push(lesson.questions[index]);
-    if (recall[index]) mixed.push(recall[index]);
-  }
-  return shuffleQuestions(mixed);
+
+  // Alphabet lessons: first study every letter, then practise recognition.
+  // Do not begin with abstract questions about dot positions or free recall.
+  const letters = lesson.letters;
+  return shuffleQuestions(letters.map((letter) => {
+    const distractors = letters
+      .filter((item) => item.character !== letter.character)
+      .map((item) => item.character);
+    const options = shuffleQuestions([letter.character, ...distractors].slice(0, 4));
+    return {
+      prompt: `Найди букву «${letter.name}».`,
+      options,
+      correct: letter.character,
+      mode: "choice" as const,
+      explanation: `Это буква «${letter.name}» — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
+    };
+  }));
 }
 
 function buildExamRecallQuestions(): Question[] {
@@ -834,6 +843,7 @@ export default function App() {
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
+  const [showAlphabetTips, setShowAlphabetTips] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [typedAnswer, setTypedAnswer] = useState("");
@@ -1045,6 +1055,7 @@ export default function App() {
   const startLesson = (lesson: Lesson) => {
     setSelectedLesson({ ...lesson, questions: buildLessonQuestions(lesson) });
     setLessonPhase("study");
+    setShowAlphabetTips(false);
     setQuestionIndex(0);
     setSelectedAnswer(null);
     setTypedAnswer("");
@@ -1400,7 +1411,7 @@ export default function App() {
                 <p className="study-guidance">
                   {selectedLesson.studyCards
                     ? "Прочитай фразу, её звучание и значение. Затем попробуй вспомнить их без подсказки."
-                    : "Смотри на большую букву, запомни её название и отличительный знак. Затем проверь себя."}
+                    : "Сначала внимательно изучи карточки всех букв. Когда будешь готов, переходи к простой проверке."}
                 </p>
                 {selectedLesson.studyCards ? (
                   <div className="study-phrase-cards">
@@ -1414,26 +1425,36 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <div className="letter-learning-hint">
-                    <span className="letter-hint-icon">١</span>
-                    <p><strong>Читай справа налево</strong><small>Арабский текст начинается с правой стороны.</small></p>
-                  </div>
-                  <div className="letter-intro lesson-letters">
-                    {selectedLesson.letters.map((letter, index) => (
-                      <article className="letter-learning-card" key={letter.character}>
-                        <span className="letter-card-index">БУКВА {String(index + 1).padStart(2, "0")}</span>
-                        <strong className="letter-card-character" lang="ar" dir="rtl">{letter.character}</strong>
-                        <span className="letter-card-name">{letter.name}</span>
-                        <small className="letter-card-note">{letter.note ?? "Посмотри на форму и запомни название."}</small>
-                      </article>
-                    ))}
-                  </div>
-                  <div className="letter-learning-steps">
-                    <span>Как учить</span>
-                    <p><b>1.</b> Посмотри на форму буквы.</p>
-                    <p><b>2.</b> Обрати внимание на точки.</p>
-                    <p><b>3.</b> Произнеси название и попробуй запомнить.</p>
-                  </div>
+                  <>
+                    <div className="letter-learning-hint">
+                      <span className="letter-hint-icon">ا</span>
+                      <p><strong>Сначала изучи все буквы</strong><small>Посмотри на каждую букву, её название и отличительные особенности. Проверка будет только после этого.</small></p>
+                    </div>
+                    <div className="letter-intro lesson-letters">
+                      {selectedLesson.letters.map((letter, index) => (
+                        <article className="letter-learning-card" key={letter.character}>
+                          <span className="letter-card-index">БУКВА {String(index + 1).padStart(2, "0")}</span>
+                          <strong className="letter-card-character" lang="ar" dir="rtl">{letter.character}</strong>
+                          <span className="letter-card-name">{letter.name}</span>
+                          <small className="letter-card-note">{letter.note ?? "Посмотри на форму и запомни название."}</small>
+                        </article>
+                      ))}
+                    </div>
+                    <div className="alphabet-tips">
+                      <button className="alphabet-tips-toggle" type="button" aria-expanded={showAlphabetTips} onClick={() => setShowAlphabetTips((value) => !value)}>
+                        <span>Советы: как выучить буквы</span><span aria-hidden="true">{showAlphabetTips ? "−" : "+"}</span>
+                      </button>
+                      {showAlphabetTips && (
+                        <div className="alphabet-tips-content">
+                          <p><strong>1. Заведи отдельный блокнот.</strong> Записывай арабскую букву крупно, рядом — её название и произношение.</p>
+                          <p><strong>2. Отмечай точки.</strong> Нарисуй их так же, как в образце: сверху, снизу или без точек.</p>
+                          <p><strong>3. Пиши рукой.</strong> Повтори каждую букву 5 раз, не торопясь и сверяясь с карточкой.</p>
+                          <p><strong>4. Повторяй небольшими порциями.</strong> Выучи 2–4 буквы, сделай перерыв и вернись к ним позже.</p>
+                          <p><strong>5. Проверяй себя только после изучения.</strong> Сначала закрой карточки и попробуй назвать буквы по памяти.</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
                 <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
                   Начать вспоминание →
