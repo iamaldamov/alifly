@@ -929,7 +929,7 @@ export default function App() {
     const loadProgress = async () => {
       const { data, error } = await supabase
         .from("user_progress")
-        .select("completed_lesson_ids, mistakes, streak, last_study_date, exam_passed")
+        .select("completed_lesson_ids, mistakes, streak, last_study_date, exam_passed, daily_goal, daily_activity")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -955,6 +955,11 @@ export default function App() {
         setStreak(Number.isFinite(data.streak) ? data.streak : 0);
         setLastStudyDate(data.last_study_date ?? "");
         setExamPassed(Boolean(data.exam_passed));
+        setDailyGoal(data.daily_goal === 2 || data.daily_goal === 3 ? data.daily_goal : 1);
+        const cloudDailyActivity = data.daily_activity as DailyActivity | null;
+        setDailyActivity(cloudDailyActivity && typeof cloudDailyActivity.date === "string" && Array.isArray(cloudDailyActivity.lessonIds)
+          ? { date: cloudDailyActivity.date, lessonIds: normalizeDailyLessonIds(cloudDailyActivity.lessonIds) }
+          : { date: "", lessonIds: [] });
       } else if (previousCloudUserId && previousCloudUserId !== user.id) {
         // A different person signed in on this device. Do not copy the previous
         // person's local learning history into the new account.
@@ -963,6 +968,8 @@ export default function App() {
         setStreak(0);
         setLastStudyDate("");
         setExamPassed(false);
+        setDailyGoal(1);
+        setDailyActivity({ date: "", lessonIds: [] });
       }
 
       try {
@@ -993,6 +1000,8 @@ export default function App() {
         streak,
         last_study_date: lastStudyDate || null,
         exam_passed: examPassed,
+        daily_goal: dailyGoal,
+        daily_activity: dailyActivity,
         updated_at: new Date().toISOString(),
       });
 
@@ -1009,7 +1018,7 @@ export default function App() {
       cancelled = true;
       window.clearTimeout(timeout);
     };
-  }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed]);
+  }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity]);
 
 
   const updateDailyGoal = (goal: DailyGoal) => {

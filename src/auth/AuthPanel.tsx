@@ -1,101 +1,133 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
 
 type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error";
+type AuthMode = "signup" | "signin";
 
 export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus }) {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isRecovery, setIsRecovery] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const redirectUrl = window.location.origin + import.meta.env.BASE_URL;
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+        setIsOpen(true);
+        setMessage("Придумай новый пароль для своего аккаунта.");
+        setError("");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const clearFeedback = () => {
     setMessage("");
     setError("");
   };
 
-  const signInWithApple = async () => {
+  const submitEmailAuth = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     clearFeedback();
+    if (password.length < 8) {
+      setError("Пароль должен содержать не менее 8 символов.");
+      return;
+    }
+
     setBusy(true);
-    const { error: authError } = await supabase.auth.signInWithOAuth({
-      provider: "apple",
-      options: { redirectTo: window.location.origin + import.meta.env.BASE_URL },
-    });
-    if (authError) {
-      setError("Вход через Apple пока не настроен. Сначала подключи Apple в настройках Supabase.");
+    try {
+      if (mode === "signup") {
+        const { data, error: authError } = await supabase.auth.signUp({
+          email: email.trim().toLowerCase(),
+          password,
+          options: { emailRedirectTo: redirectUrl },
+        });
+        if (authError) throw authError;
+        if (data.session) {
+          setIsOpen(false);
+          setMessage("");
+        } else {
+          setMessage("Аккаунт создан. Проверь почту и подтверди адрес, затем войди в ALIFLY.");
+        }
+      } else {
+        const { error: authError } = await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+        if (authError) throw authError;
+        setIsOpen(false);
+        setMessage("");
+      }
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : "Не удалось выполнить вход. Попробуй ещё раз.");
+    } finally {
       setBusy(false);
     }
   };
 
-  const sendEmailLink = async () => {
+  const sendPasswordReset = async () => {
     clearFeedback();
     if (!email.trim()) {
-      setError("Введи адрес электронной почты.");
+      setError("Сначала введи адрес электронной почты.");
       return;
     }
     setBusy(true);
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: window.location.origin + import.meta.env.BASE_URL,
-        shouldCreateUser: true,
-      },
-    });
-    setBusy(false);
-    if (authError) setError(authError.message);
-    else setMessage("Ссылка для входа отправлена. Проверь почту и открой письмо на этом устройстве.");
+    try {
+      const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: redirectUrl,
+      });
+      if (authError) throw authError;
+      setMessage("Ссылка для смены пароля отправлена на почту.");
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : "Не удалось отправить ссылку.");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const sendPhoneCode = async () => {
+  const updatePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     clearFeedback();
-    if (!phone.trim()) {
-      setError("Введи номер телефона в международном формате, например +79990000000.");
+    if (newPassword.length < 8) {
+      setError("Новый пароль должен содержать не менее 8 символов.");
       return;
     }
     setBusy(true);
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      phone: phone.trim(),
-      options: { shouldCreateUser: true },
-    });
-    setBusy(false);
-    if (authError) setError(authError.message);
-    else {
-      setPhoneCodeSent(true);
-      setMessage("Код отправлен по SMS. Введи его ниже.");
-    }
-  };
-
-  const verifyPhoneCode = async () => {
-    clearFeedback();
-    setBusy(true);
-    const { error: authError } = await supabase.auth.verifyOtp({
-      phone: phone.trim(),
-      token: code.trim(),
-      type: "sms",
-    });
-    setBusy(false);
-    if (authError) setError(authError.message);
-    else {
-      setMessage("Телефон подтверждён. Прогресс будет сохранён в аккаунте.");
+    try {
+      const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
+      if (authError) throw authError;
+      setIsRecovery(false);
+      setNewPassword("");
       setIsOpen(false);
+      setMessage("");
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : "Не удалось изменить пароль.");
+    } finally {
+      setBusy(false);
     }
   };
 
   const signOut = async () => {
     clearFeedback();
     setBusy(true);
-    const { error: authError } = await supabase.auth.signOut();
-    setBusy(false);
-    if (authError) setError(authError.message);
-    else {
+    try {
+      const { error: authError } = await supabase.auth.signOut();
+      if (authError) throw authError;
       setIsOpen(false);
-      setMessage("");
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : "Не удалось выйти из аккаунта.");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -110,50 +142,50 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
         <div className="auth-backdrop" onClick={() => setIsOpen(false)}>
           <section className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}>
             <button className="auth-close" type="button" onClick={() => setIsOpen(false)} aria-label="Закрыть">×</button>
-            {user ? (
+            {user && !isRecovery ? (
               <>
                 <span className="auth-kicker">ТВОЙ АККАУНТ</span>
                 <h2 id="auth-title">Аккаунт ALIFLY</h2>
-                <p className="auth-description">Ты вошёл в ALIFLY. Твой прогресс привязан к этому аккаунту.</p>
-                <p className={cloudStatus === "error" ? "auth-error" : "auth-message"} role="status">{cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Проверь интернет и обнови страницу." : cloudStatus === "saved" ? "Прогресс успешно синхронизирован." : "Подключаем аккаунт…"}</p>
+                <p className="auth-description">Твой прогресс привязан к аккаунту и будет доступен после следующего входа.</p>
+                <p className={cloudStatus === "error" ? "auth-error" : "auth-message"} role="status">
+                  {cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Не закрывай страницу, пока соединение не восстановится." : cloudStatus === "saved" ? "Прогресс успешно сохранён в аккаунте." : "Подключаем аккаунт…"}
+                </p>
                 <p className="auth-user-email">{user.email || user.phone || "Аккаунт Apple"}</p>
                 <button className="auth-submit" type="button" onClick={signOut} disabled={busy}>{busy ? "Подожди…" : "Выйти из аккаунта"}</button>
+              </>
+            ) : isRecovery ? (
+              <>
+                <span className="auth-kicker">ВОССТАНОВЛЕНИЕ ДОСТУПА</span>
+                <h2 id="auth-title">Новый пароль</h2>
+                <p className="auth-description">Задай новый пароль, чтобы снова войти в свой аккаунт.</p>
+                <form className="auth-form" onSubmit={updatePassword}>
+                  <label htmlFor="auth-new-password">Новый пароль</label>
+                  <input id="auth-new-password" type="password" autoComplete="new-password" minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required />
+                  <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Сохраняем…" : "Сохранить новый пароль"}</button>
+                </form>
               </>
             ) : (
               <>
                 <span className="auth-kicker">ALIFLY · ТВОИ ЗНАНИЯ</span>
-                <h2 id="auth-title">Сохрани свой прогресс</h2>
-                <p className="auth-description">Войди, чтобы продолжить обучение с любого устройства — даже если сменишь iPhone.</p>
-
-                <button className="auth-apple" type="button" onClick={signInWithApple} disabled={busy}>
-                  <span aria-hidden="true">●</span> Продолжить с Apple
-                </button>
-
-                <div className="auth-divider"><span>или по почте</span></div>
-                <form className="auth-form" onSubmit={(event) => { event.preventDefault(); void sendEmailLink(); }}>
+                <h2 id="auth-title">{mode === "signup" ? "Создай аккаунт" : "С возвращением"}</h2>
+                <p className="auth-description">Сохраняй пройденные уроки и продолжай обучение с любого устройства.</p>
+                <div className="auth-mode-switch" role="group" aria-label="Выбор действия">
+                  <button type="button" className={mode === "signup" ? "active" : ""} onClick={() => { setMode("signup"); clearFeedback(); }}>Регистрация</button>
+                  <button type="button" className={mode === "signin" ? "active" : ""} onClick={() => { setMode("signin"); clearFeedback(); }}>Войти</button>
+                </div>
+                <form className="auth-form" onSubmit={submitEmailAuth}>
                   <label htmlFor="auth-email">Электронная почта</label>
                   <input id="auth-email" type="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
-                  <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Отправляем…" : "Получить ссылку для входа"}</button>
+                  <label htmlFor="auth-password">Пароль</label>
+                  <input id="auth-password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} placeholder="Не менее 8 символов" value={password} onChange={(event) => setPassword(event.target.value)} required />
+                  <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Подожди…" : mode === "signup" ? "Создать аккаунт" : "Войти в ALIFLY"}</button>
                 </form>
-
-                <div className="auth-divider"><span>или по номеру телефона</span></div>
-                <form className="auth-form" onSubmit={(event) => { event.preventDefault(); void (phoneCodeSent ? verifyPhoneCode() : sendPhoneCode()); }}>
-                  <label htmlFor="auth-phone">Номер телефона</label>
-                  <input id="auth-phone" type="tel" autoComplete="tel" placeholder="+79990000000" value={phone} onChange={(event) => setPhone(event.target.value)} />
-                  {phoneCodeSent && (
-                    <>
-                      <label htmlFor="auth-code">Код из SMS</label>
-                      <input id="auth-code" inputMode="numeric" autoComplete="one-time-code" placeholder="123456" value={code} onChange={(event) => setCode(event.target.value)} />
-                    </>
-                  )}
-                  <button className="auth-submit auth-submit-secondary" type="submit" disabled={busy}>{busy ? "Подожди…" : phoneCodeSent ? "Подтвердить код" : "Отправить SMS-код"}</button>
-                </form>
-                {message && <p className="auth-message" role="status">{message}</p>}
-                {error && <p className="auth-error" role="alert">{error}</p>}
-                <p className="auth-privacy">Твой прогресс доступен только после входа в твой аккаунт.</p>
+                {mode === "signin" && <button className="auth-apple auth-reset-button" type="button" onClick={sendPasswordReset} disabled={busy}>Забыли пароль? Отправить ссылку</button>}
+                <p className="auth-privacy">Пароль хранится в Supabase Auth. ALIFLY не видит и не сохраняет его в открытом виде.</p>
               </>
             )}
-            {user && error && <p className="auth-error" role="alert">{error}</p>}
+            {message && <p className="auth-message" role="status">{message}</p>}
+            {error && <p className="auth-error" role="alert">{error}</p>}
           </section>
         </div>
       )}
