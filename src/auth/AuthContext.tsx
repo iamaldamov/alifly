@@ -33,6 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!error) setSession(data.session);
         setIsLoading(false);
       }
+    }).catch(() => {
+      // Do not leave the onboarding screen waiting forever when the network is unavailable.
+      if (active && !receivedAuthEvent) setIsLoading(false);
     });
 
     return () => {
