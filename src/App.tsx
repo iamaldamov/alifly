@@ -1210,7 +1210,10 @@ export default function App() {
           <span>ALIFLY</span>
         </a>
         <div className="topbar-right">
-          <span className="streak" aria-label="Серия занятий">🔥 {streak}</span>
+          <span className={streak > 0 ? "streak is-active" : "streak"} aria-label={`Серия занятий: ${streak} дней`}>
+            <span className="streak-icon" aria-hidden="true">🔥</span>
+            <span className="streak-count">{streak}</span>
+          </span>
           <AuthPanel cloudStatus={cloudSaveStatus} />
           <button
             className="theme-toggle"
@@ -1306,6 +1309,9 @@ export default function App() {
       <footer className="footer">
         <span className="footer-logo">ALIFLY</span>
         <p>Учись с интересом. Продвигайся с уверенностью.</p>
+        <a className="support-project-button" href="https://t.me/share/url?url=https%3A%2F%2Fiamaldamov.github.io%2Falifly%2F&text=%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%B8%D1%82%D0%B5%20ALIFLY%20%E2%80%94%20%D0%BF%D0%BE%D0%B4%D0%B5%D0%BB%D0%B8%D1%82%D0%B5%D1%81%D1%8C%20%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BE%D0%BC%20%D1%81%20%D1%82%D0%B5%D0%BC%D0%B8%2C%20%D0%BA%D1%82%D0%BE%20%D1%85%D0%BE%D1%87%D0%B5%D1%82%20%D0%B8%D0%B7%D1%83%D1%87%D0%B0%D1%82%D1%8C%20%D0%B0%D1%80%D0%B0%D0%B1%D1%81%D0%BA%D0%B8%D0%B9." target="_blank" rel="noreferrer">
+          Поддержать проект <span aria-hidden="true">↗</span>
+        </a>
         <span>Создано с заботой о знаниях.</span>
       </footer>
 
