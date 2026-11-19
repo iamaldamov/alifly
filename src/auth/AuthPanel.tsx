@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from "../lib/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, confirmPasswordReset, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
@@ -102,8 +102,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [resetCode, setResetCode] = useState("");
   const [isRecovery, setIsRecovery] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -111,7 +109,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [profileMessage, setProfileMessage] = useState("");
   const [avatarId, setAvatarId] = useState<AvatarId>(readStoredAvatar);
 
-  const redirectUrl = window.location.origin + import.meta.env.BASE_URL;
   const avatar = AVATARS.find((item) => item.id === avatarId) ?? AVATARS[0];
 
   useEffect(() => {
@@ -127,7 +124,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     } catch {
       setIsOpen(true);
     }
-  }, [authLoading, user?.id]);
+  }, [authLoading, user?.uid]);
 
   useEffect(() => {
     if (!user) return;
@@ -154,6 +151,9 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
             setAvatarId(localAvatar);
             setProfileMessage("Выбранный персонаж сохранён в аккаунте.");
             return;
+          } catch {
+            if (active) setProfileMessage("Не удалось сохранить выбранного персонажа.");
+            return;
           }
         }
 
@@ -166,7 +166,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
     void loadProfile();
     return () => { active = false; };
-  }, [user?.id]);
+  }, [user?.uid]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -183,20 +183,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, busy, user?.id]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode");
-    const code = params.get("oobCode");
-    if (mode === "resetPassword" && code) {
-      setResetCode(code);
-      setIsRecovery(true);
-      setIsOpen(true);
-      setMessage("Придумай новый пароль для своего аккаунта.");
-      setError("");
-    }
-  }, []);
+  }, [isOpen, busy, user?.uid]);
 
   const clearFeedback = () => {
     setMessage("");
@@ -279,36 +266,10 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     }
     setBusy(true);
     try {
-      await sendPasswordResetEmail(auth, email.trim().toLowerCase(), {
-        url: redirectUrl,
-        handleCodeInApp: true,
-      });
+      await sendPasswordResetEmail(auth, email.trim().toLowerCase());
       setMessage("Ссылка для смены пароля отправлена на почту.");
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : "Не удалось отправить ссылку.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const updatePassword = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    clearFeedback();
-    if (newPassword.length < 8) {
-      setError("Новый пароль должен содержать не менее 8 символов.");
-      return;
-    }
-    setBusy(true);
-    try {
-      if (!resetCode) throw new Error("Ссылка для смены пароля недействительна. Запроси новую.");
-      await confirmPasswordReset(auth, resetCode, newPassword);
-      setIsRecovery(false);
-      setNewPassword("");
-      markPromptDismissed();
-      setIsOpen(false);
-      setMessage("");
-    } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "Не удалось изменить пароль.");
     } finally {
       setBusy(false);
     }
@@ -363,17 +324,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
             </p>
             <p className="auth-user-email">{user.email || user.phone || "Аккаунт ALIFLY"}</p>
             <button className="auth-submit" type="button" onClick={signOut} disabled={busy}>{busy ? "Подожди…" : "Выйти из аккаунта"}</button>
-          </>
-        ) : isRecovery ? (
-          <>
-            <span className="auth-kicker">ВОССТАНОВЛЕНИЕ ДОСТУПА</span>
-            <h2 id="auth-title">Новый пароль</h2>
-            <p className="auth-description">Задай новый пароль, чтобы снова войти в свой аккаунт.</p>
-            <form className="auth-form" onSubmit={updatePassword}>
-              <label htmlFor="auth-new-password">Новый пароль</label>
-              <input id="auth-new-password" type="password" autoComplete="new-password" minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required />
-              <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Сохраняем…" : "Сохранить новый пароль"}</button>
-            </form>
           </>
         ) : (
           <>
