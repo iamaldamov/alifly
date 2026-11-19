@@ -1621,3 +1621,66 @@ html, body {
 :root[data-theme="dark"] .alphabet-tips-content strong { color: var(--text); }
 :root[data-theme="dark"] .alphabet-tips-toggle span:last-child { background: #ffffff12; }
 :root[data-theme="dark"] .alphabet-tips-content p { color: var(--text-soft); }
+
+
+/* One-letter-at-a-time alphabet flashcards */
+.alphabet-flashcards { display:grid; gap:12px; }
+.letter-flashcard {
+  display:flex; min-height:330px; flex-direction:column; align-items:center; justify-content:center;
+  padding:22px 20px; border:1px solid #dfe8dc; border-radius:24px;
+  background:radial-gradient(circle at 50% 18%, #fffefa 0%, #f0f5ed 78%);
+  text-align:center; box-shadow:0 12px 28px #20372e0d;
+  touch-action:pan-y; user-select:none;
+}
+.letter-flashcard-top {
+  display:flex; width:100%; justify-content:space-between; gap:12px;
+  color:#91a092; font-size:10px; font-weight:850; letter-spacing:.12em;
+}
+.letter-flashcard-character {
+  display:grid; place-items:center; min-height:142px; margin:8px 0 0;
+  color:#285b45; font-family:"Noto Naskh Arabic","Amiri",serif;
+  font-size:clamp(92px, 23vw, 132px); font-weight:500; line-height:1.35;
+}
+.letter-flashcard-name { color:#285b45; font-size:24px; font-weight:850; }
+.letter-flashcard-note {
+  max-width:360px; min-height:38px; margin:8px 0 15px;
+  color:#718076; font-size:13px; line-height:1.55;
+}
+.letter-speak-button {
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  min-height:44px; padding:0 17px; border:1px solid #d6e2d3; border-radius:14px;
+  background:#fffefa; color:#285b45; font-size:13px; font-weight:800; cursor:pointer;
+}
+.letter-speak-button:active { transform:scale(.98); }
+.letter-flashcard-progress { display:flex; justify-content:center; gap:7px; padding:3px 0; }
+.letter-progress-dot {
+  width:8px; height:8px; padding:0; border:0; border-radius:50%;
+  background:#d8dfd5; cursor:pointer;
+}
+.letter-progress-dot.is-active { width:22px; border-radius:99px; background:#285b45; }
+.letter-flashcard-navigation { display:flex; justify-content:space-between; gap:12px; }
+.letter-nav-button {
+  min-height:43px; padding:0 15px; border:1px solid #dfe8dc; border-radius:13px;
+  background:#fffefa; color:#285b45; font-size:13px; font-weight:750; cursor:pointer;
+}
+.letter-nav-button:disabled { opacity:.35; cursor:not-allowed; }
+.letter-nav-next { margin-left:auto; }
+:root[data-theme="dark"] .letter-flashcard {
+  border-color:var(--border); background:linear-gradient(145deg,#202c26,#17221d);
+}
+:root[data-theme="dark"] .letter-flashcard-character,
+:root[data-theme="dark"] .letter-flashcard-name { color:#dcebdd; }
+:root[data-theme="dark"] .letter-flashcard-note,
+:root[data-theme="dark"] .letter-flashcard-top { color:var(--text-soft); }
+:root[data-theme="dark"] .letter-speak-button,
+:root[data-theme="dark"] .letter-nav-button {
+  border-color:var(--border); background:var(--surface); color:var(--text);
+}
+:root[data-theme="dark"] .letter-progress-dot { background:#526358; }
+:root[data-theme="dark"] .letter-progress-dot.is-active { background:#a8d2ae; }
+@media (max-width:480px) {
+  .letter-flashcard { min-height:300px; padding:18px 14px; }
+  .letter-flashcard-character { min-height:126px; }
+  .letter-flashcard-name { font-size:22px; }
+  .letter-flashcard-note { font-size:12px; }
+}
