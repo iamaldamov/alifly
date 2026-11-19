@@ -102,7 +102,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRecovery, setIsRecovery] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -294,7 +293,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
       <section className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}>
         <button className="auth-close" type="button" onClick={closePanel} aria-label="Закрыть">×</button>
 
-        {user && !isRecovery ? (
+        {user ? (
           <>
             <span className="auth-kicker">ТВОЙ АККАУНТ</span>
             <h2 id="auth-title">Аккаунт ALIFLY</h2>
@@ -370,7 +369,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
         {message && <p className="auth-message" role="status">{message}</p>}
         {error && <p className="auth-error" role="alert">{error}</p>}
 
-        {!user && !isRecovery && (
+        {!user && (
           <a className="auth-support-button" href={TELEGRAM_SUPPORT_URL} target="_blank" rel="noreferrer" aria-label="Поддержать проект ALIFLY в Telegram">
             Поддержать проект <span aria-hidden="true">↗</span>
           </a>
