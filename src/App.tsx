@@ -892,7 +892,7 @@ function readDailyGoal(userId: string): DailyGoal {
 
 export default function App() {
   const { user } = useAuth();
-  const dailyUserId = user?.id ?? "guest";
+  const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
   const [cloudReady, setCloudReady] = useState(false);
@@ -1052,7 +1052,7 @@ export default function App() {
 
     void loadProgress();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [user?.uid]);
 
   // Debounce writes and expose whether cloud sync actually succeeded.
   useEffect(() => {
@@ -1087,7 +1087,7 @@ export default function App() {
       cancelled = true;
       window.clearTimeout(timeout);
     };
-  }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity]);
+  }, [user?.uid, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity]);
 
 
   const updateDailyGoal = (goal: DailyGoal) => {
