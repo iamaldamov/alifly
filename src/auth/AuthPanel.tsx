@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { supabase } from "../lib/supabase";
+import { auth, db } from "../lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut as firebaseSignOut } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
 type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error";
@@ -100,15 +102,12 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [isRecovery, setIsRecovery] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
   const [avatarId, setAvatarId] = useState<AvatarId>(readStoredAvatar);
 
-  const redirectUrl = window.location.origin + import.meta.env.BASE_URL;
   const avatar = AVATARS.find((item) => item.id === avatarId) ?? AVATARS[0];
 
   useEffect(() => {
@@ -124,42 +123,41 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     } catch {
       setIsOpen(true);
     }
-  }, [authLoading, user?.id]);
+  }, [authLoading, user?.uid]);
 
   useEffect(() => {
     if (!user) return;
 
     let active = true;
     const loadProfile = async () => {
-      const { data, error: readError } = await supabase
-        .from("user_profiles")
-        .select("avatar_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!active) return;
-      if (readError) {
-        setProfileMessage("Не удалось загрузить персонажа из аккаунта.");
+      let data: { avatarId?: unknown } | null = null;
+      try {
+        const profileSnapshot = await getDoc(doc(db, "users", user.uid));
+        data = profileSnapshot.exists() ? profileSnapshot.data() as { avatarId?: unknown } : null;
+      } catch {
+        if (active) setProfileMessage("Не удалось загрузить персонажа из аккаунта.");
         return;
       }
 
+      if (!active) return;
+
       const localAvatar = readStoredAvatar();
-      if (data && isAvatarId(data.avatar_id)) {
-        if (data.avatar_id === "duck" && hasStoredAvatar() && localAvatar !== "duck") {
-          const { error: updateError } = await supabase
-            .from("user_profiles")
-            .update({ avatar_id: localAvatar, updated_at: new Date().toISOString() })
-            .eq("user_id", user.id);
-          if (!active) return;
-          if (!updateError) {
+      if (data && isAvatarId(data.avatarId)) {
+        if (data.avatarId === "duck" && hasStoredAvatar() && localAvatar !== "duck") {
+          try {
+            await setDoc(doc(db, "users", user.uid), { avatarId: localAvatar, updatedAt: serverTimestamp() }, { merge: true });
+            if (!active) return;
             setAvatarId(localAvatar);
             setProfileMessage("Выбранный персонаж сохранён в аккаунте.");
+            return;
+          } catch {
+            if (active) setProfileMessage("Не удалось сохранить выбранного персонажа.");
             return;
           }
         }
 
-        setAvatarId(data.avatar_id);
-        try { localStorage.setItem(AVATAR_STORAGE_KEY, data.avatar_id); } catch { /* local storage is optional */ }
+        setAvatarId(data.avatarId);
+        try { localStorage.setItem(AVATAR_STORAGE_KEY, data.avatarId); } catch { /* local storage is optional */ }
       } else if (!data && hasStoredAvatar()) {
         setAvatarId(localAvatar);
       }
@@ -167,7 +165,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
     void loadProfile();
     return () => { active = false; };
-  }, [user?.id]);
+  }, [user?.uid]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -184,19 +182,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, busy, user?.id]);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setIsRecovery(true);
-        setIsOpen(true);
-        setMessage("Придумай новый пароль для своего аккаунта.");
-        setError("");
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+  }, [isOpen, busy, user?.uid]);
 
   const clearFeedback = () => {
     setMessage("");
@@ -228,15 +214,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
     setBusy(true);
     try {
-      const { data, error: updateError } = await supabase
-        .from("user_profiles")
-        .update({ avatar_id: nextAvatar, updated_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .select("user_id")
-        .maybeSingle();
-
-      if (updateError) throw updateError;
-      if (!data) throw new Error("Профиль не найден. Перезагрузи страницу и попробуй ещё раз.");
+      await setDoc(doc(db, "users", user.uid), { avatarId: nextAvatar, updatedAt: serverTimestamp() }, { merge: true });
       setProfileMessage("Персонаж сохранён в твоём аккаунте.");
     } catch (profileError) {
       setProfileMessage(profileError instanceof Error ? profileError.message : "Не удалось сохранить персонажа.");
@@ -256,26 +234,18 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { data, error: authError } = await supabase.auth.signUp({
-          email: email.trim().toLowerCase(),
-          password,
-          options: { emailRedirectTo: redirectUrl },
-        });
-        if (authError) throw authError;
-
-        if (data.session) {
-          markPromptDismissed();
-          setIsOpen(false);
-          setMessage("");
-        } else {
-          setMessage("Аккаунт создан. Проверь почту и подтверди адрес, чтобы войти в ALIFLY.");
-        }
+        const credential = await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+        await setDoc(doc(db, "users", credential.user.uid), {
+          email: credential.user.email,
+          avatarId,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+        markPromptDismissed();
+        setIsOpen(false);
+        setMessage("");
       } else {
-        const { error: authError } = await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
-          password,
-        });
-        if (authError) throw authError;
+        await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
         markPromptDismissed();
         setIsOpen(false);
         setMessage("");
@@ -295,36 +265,10 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     }
     setBusy(true);
     try {
-      const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: redirectUrl,
-      });
-      if (authError) throw authError;
+      await sendPasswordResetEmail(auth, email.trim().toLowerCase());
       setMessage("Ссылка для смены пароля отправлена на почту.");
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : "Не удалось отправить ссылку.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const updatePassword = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    clearFeedback();
-    if (newPassword.length < 8) {
-      setError("Новый пароль должен содержать не менее 8 символов.");
-      return;
-    }
-    setBusy(true);
-    try {
-      const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
-      if (authError) throw authError;
-      setIsRecovery(false);
-      setNewPassword("");
-      markPromptDismissed();
-      setIsOpen(false);
-      setMessage("");
-    } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "Не удалось изменить пароль.");
     } finally {
       setBusy(false);
     }
@@ -334,8 +278,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     clearFeedback();
     setBusy(true);
     try {
-      const { error: authError } = await supabase.auth.signOut();
-      if (authError) throw authError;
+      await firebaseSignOut(auth);
       markPromptDismissed();
       setIsOpen(false);
     } catch (authError) {
@@ -350,7 +293,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
       <section className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}>
         <button className="auth-close" type="button" onClick={closePanel} aria-label="Закрыть">×</button>
 
-        {user && !isRecovery ? (
+        {user ? (
           <>
             <span className="auth-kicker">ТВОЙ АККАУНТ</span>
             <h2 id="auth-title">Аккаунт ALIFLY</h2>
@@ -378,19 +321,8 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
             <p className={cloudStatus === "error" ? "auth-error" : "auth-message"} role="status">
               {cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Проверь интернет." : cloudStatus === "saved" ? "Прогресс успешно сохранён в аккаунте." : "Аккаунт подключён."}
             </p>
-            <p className="auth-user-email">{user.email || user.phone || "Аккаунт ALIFLY"}</p>
+            <p className="auth-user-email">{user.email || user.phoneNumber || "Аккаунт ALIFLY"}</p>
             <button className="auth-submit" type="button" onClick={signOut} disabled={busy}>{busy ? "Подожди…" : "Выйти из аккаунта"}</button>
-          </>
-        ) : isRecovery ? (
-          <>
-            <span className="auth-kicker">ВОССТАНОВЛЕНИЕ ДОСТУПА</span>
-            <h2 id="auth-title">Новый пароль</h2>
-            <p className="auth-description">Задай новый пароль, чтобы снова войти в свой аккаунт.</p>
-            <form className="auth-form" onSubmit={updatePassword}>
-              <label htmlFor="auth-new-password">Новый пароль</label>
-              <input id="auth-new-password" type="password" autoComplete="new-password" minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required />
-              <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Сохраняем…" : "Сохранить новый пароль"}</button>
-            </form>
           </>
         ) : (
           <>
@@ -430,14 +362,14 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
               <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Подожди…" : mode === "signup" ? "Создать аккаунт" : "Войти в ALIFLY"}</button>
             </form>
             {mode === "signin" && <button className="auth-reset-button" type="button" onClick={sendPasswordReset} disabled={busy}>Забыли пароль? Отправить ссылку</button>}
-            <p className="auth-privacy">Пароль хранится в Supabase Auth. ALIFLY не видит и не сохраняет его в открытом виде.</p>
+            <p className="auth-privacy">Пароль безопасно хранится в Firebase Authentication. ALIFLY не видит и не сохраняет его в открытом виде.</p>
           </>
         )}
 
         {message && <p className="auth-message" role="status">{message}</p>}
         {error && <p className="auth-error" role="alert">{error}</p>}
 
-        {!user && !isRecovery && (
+        {!user && (
           <a className="auth-support-button" href={TELEGRAM_SUPPORT_URL} target="_blank" rel="noreferrer" aria-label="Поддержать проект ALIFLY в Telegram">
             Поддержать проект <span aria-hidden="true">↗</span>
           </a>

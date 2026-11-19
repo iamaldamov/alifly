@@ -1,51 +1,32 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "../lib/supabase";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { auth } from "../lib/firebase";
 
 type AuthContextValue = {
-  session: Session | null;
   user: User | null;
   isLoading: boolean;
 };
 
-const AuthContext = createContext<AuthContextValue>({ session: null, user: null, isLoading: true });
+const AuthContext = createContext<AuthContextValue>({ user: null, isLoading: true });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let active = true;
-    let receivedAuthEvent = false;
-
-    // Subscribe first: Supabase emits INITIAL_SESSION and later auth changes.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      receivedAuthEvent = true;
-      if (active) {
-        setSession(nextSession);
-        setIsLoading(false);
-      }
+    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser);
+      setIsLoading(false);
+    }, (error) => {
+      console.error("ALIFLY: Firebase authentication state failed", error);
+      setUser(null);
+      setIsLoading(false);
     });
 
-    // Ignore the async fallback if a newer auth event already supplied the session.
-    void supabase.auth.getSession().then(({ data, error }) => {
-      if (active && !receivedAuthEvent) {
-        if (!error) setSession(data.session);
-        setIsLoading(false);
-      }
-    }).catch(() => {
-      // Do not leave the onboarding screen waiting forever when the network is unavailable.
-      if (active && !receivedAuthEvent) setIsLoading(false);
-    });
-
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-    };
+    return unsubscribe;
   }, []);
 
-  const value = useMemo(() => ({ session, user: session?.user ?? null, isLoading }), [session, isLoading]);
-
+  const value = useMemo(() => ({ user, isLoading }), [user, isLoading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

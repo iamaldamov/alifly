@@ -3,7 +3,8 @@ import ReadingTrainer from "./ReadingTrainer";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
-import { supabase } from "./lib/supabase";
+import { db } from "./lib/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
 const arabicLetterNames: Record<string, string> = {
@@ -891,7 +892,7 @@ function readDailyGoal(userId: string): DailyGoal {
 
 export default function App() {
   const { user } = useAuth();
-  const dailyUserId = user?.id ?? "guest";
+  const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
   const [cloudReady, setCloudReady] = useState(false);
@@ -995,20 +996,20 @@ export default function App() {
     setCloudSaveStatus("loading");
 
     const loadProgress = async () => {
-      const { data, error } = await supabase
-        .from("user_progress")
-        .select("completed_lesson_ids, mistakes, streak, last_study_date, exam_passed, daily_goal, daily_activity")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (cancelled) return;
-
-      // Never overwrite cloud data with local defaults after a failed read.
-      if (error) {
+      type CloudProgress = { completed_lesson_ids?: unknown; mistakes?: unknown; streak?: number; last_study_date?: string | null; exam_passed?: boolean; daily_goal?: number; daily_activity?: unknown };
+      let data: CloudProgress | null = null;
+      try {
+        const progressRef = doc(db, "users", user.uid, "progress", "current");
+        const snapshot = await getDoc(progressRef);
+        if (snapshot.exists()) data = snapshot.data() as CloudProgress;
+      } catch (error) {
+        if (cancelled) return;
         console.error("ALIFLY: could not load cloud progress", error);
         setCloudSaveStatus("error");
         return;
       }
+
+      if (cancelled) return;
 
       let previousCloudUserId = "";
       try {
@@ -1020,7 +1021,7 @@ export default function App() {
       if (data) {
         setCompletedLessonIds(normalizeCompletedLessonIds(data.completed_lesson_ids));
         setMistakes(Array.isArray(data.mistakes) ? data.mistakes as Mistake[] : []);
-        setStreak(Number.isFinite(data.streak) ? data.streak : 0);
+        setStreak(typeof data.streak === "number" && Number.isFinite(data.streak) ? data.streak : 0);
         setLastStudyDate(data.last_study_date ?? "");
         setExamPassed(Boolean(data.exam_passed));
         setDailyGoal(data.daily_goal === 2 || data.daily_goal === 3 ? data.daily_goal : 1);
@@ -1028,7 +1029,7 @@ export default function App() {
         setDailyActivity(cloudDailyActivity && typeof cloudDailyActivity.date === "string" && Array.isArray(cloudDailyActivity.lessonIds)
           ? { date: cloudDailyActivity.date, lessonIds: normalizeDailyLessonIds(cloudDailyActivity.lessonIds) }
           : { date: "", lessonIds: [] });
-      } else if (previousCloudUserId && previousCloudUserId !== user.id) {
+      } else if (previousCloudUserId && previousCloudUserId !== user.uid) {
         // A different person signed in on this device. Do not copy the previous
         // person's local learning history into the new account.
         setCompletedLessonIds([]);
@@ -1041,7 +1042,7 @@ export default function App() {
       }
 
       try {
-        localStorage.setItem("alifly-last-cloud-user-id", user.id);
+        localStorage.setItem("alifly-last-cloud-user-id", user.uid);
       } catch {
         // The authenticated cloud account still works without local storage.
       }
@@ -1052,7 +1053,7 @@ export default function App() {
 
     void loadProgress();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [user?.uid]);
 
   // Debounce writes and expose whether cloud sync actually succeeded.
   useEffect(() => {
@@ -1061,24 +1062,25 @@ export default function App() {
     let cancelled = false;
     const timeout = window.setTimeout(async () => {
       setCloudSaveStatus("saving");
-      const { error } = await supabase.from("user_progress").upsert({
-        user_id: user.id,
-        completed_lesson_ids: completedLessonIds,
-        mistakes,
-        streak,
-        last_study_date: lastStudyDate || null,
-        exam_passed: examPassed,
-        daily_goal: dailyGoal,
-        daily_activity: dailyActivity,
-        updated_at: new Date().toISOString(),
-      });
+      try {
+        const progressRef = doc(db, "users", user.uid, "progress", "current");
+        await setDoc(progressRef, {
+          completed_lesson_ids: completedLessonIds,
+          mistakes,
+          streak,
+          last_study_date: lastStudyDate || null,
+          exam_passed: examPassed,
+          daily_goal: dailyGoal,
+          daily_activity: dailyActivity,
+          updated_at: serverTimestamp(),
+        }, { merge: true });
 
-      if (cancelled) return;
-      if (error) {
+        if (cancelled) return;
+        setCloudSaveStatus("saved");
+      } catch (error) {
+        if (cancelled) return;
         console.error("ALIFLY: could not save cloud progress", error);
         setCloudSaveStatus("error");
-      } else {
-        setCloudSaveStatus("saved");
       }
     }, 600);
 
@@ -1086,7 +1088,7 @@ export default function App() {
       cancelled = true;
       window.clearTimeout(timeout);
     };
-  }, [user?.id, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity]);
+  }, [user?.uid, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity]);
 
 
   const updateDailyGoal = (goal: DailyGoal) => {
