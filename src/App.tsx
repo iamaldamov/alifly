@@ -1457,7 +1457,7 @@ export default function App() {
                   </>
                 )}
                 <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
-                  Начать вспоминание →
+                  Я изучил — перейти к практике →
                 </button>
               </div>
             ) : lessonFinished ? (
