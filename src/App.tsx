@@ -1021,7 +1021,7 @@ export default function App() {
       if (data) {
         setCompletedLessonIds(normalizeCompletedLessonIds(data.completed_lesson_ids));
         setMistakes(Array.isArray(data.mistakes) ? data.mistakes as Mistake[] : []);
-        setStreak(Number.isFinite(data.streak) ? data.streak : 0);
+        setStreak(typeof data.streak === "number" && Number.isFinite(data.streak) ? data.streak : 0);
         setLastStudyDate(data.last_study_date ?? "");
         setExamPassed(Boolean(data.exam_passed));
         setDailyGoal(data.daily_goal === 2 || data.daily_goal === 3 ? data.daily_goal : 1);
