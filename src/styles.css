@@ -1564,3 +1564,60 @@ html, body {
   .letter-card-character { font-size:52px; }
   .letter-card-note { font-size:9px; }
 }
+
+
+/* Simple notebook tips for alphabet beginners */
+.alphabet-tips {
+  margin: 14px 0 20px;
+  overflow: hidden;
+  border: 1px solid #dfe8dc;
+  border-radius: 16px;
+  background: #f7f8f2;
+}
+.alphabet-tips-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 0;
+  background: transparent;
+  color: #285b45;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+.alphabet-tips-toggle span:last-child {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  border-radius: 8px;
+  background: #e5ede1;
+  font-size: 18px;
+}
+.alphabet-tips-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 15px 15px;
+}
+.alphabet-tips-content p {
+  margin: 0;
+  color: #68776c;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.alphabet-tips-content strong { color: #285b45; }
+:root[data-theme="dark"] .alphabet-tips {
+  border-color: var(--border);
+  background: var(--surface);
+}
+:root[data-theme="dark"] .alphabet-tips-toggle,
+:root[data-theme="dark"] .alphabet-tips-content strong { color: var(--text); }
+:root[data-theme="dark"] .alphabet-tips-toggle span:last-child { background: #ffffff12; }
+:root[data-theme="dark"] .alphabet-tips-content p { color: var(--text-soft); }
