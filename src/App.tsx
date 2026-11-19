@@ -1399,8 +1399,8 @@ export default function App() {
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <p className="study-guidance">
                   {selectedLesson.studyCards
-                    ? "Прочитай фразу, её звучание и значение. Перед проверкой карточки исчезнут — ответ придётся вспоминать."
-                    : "Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно."}
+                    ? "Прочитай фразу, её звучание и значение. Затем попробуй вспомнить их без подсказки."
+                    : "Смотри на большую букву, запомни её название и отличительный знак. Затем проверь себя."}
                 </p>
                 {selectedLesson.studyCards ? (
                   <div className="study-phrase-cards">
@@ -1414,14 +1414,25 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
+                  <div className="letter-learning-hint">
+                    <span className="letter-hint-icon">١</span>
+                    <p><strong>Читай справа налево</strong><small>Арабский текст начинается с правой стороны.</small></p>
+                  </div>
                   <div className="letter-intro lesson-letters">
-                    {selectedLesson.letters.map((letter) => (
-                      <div key={letter.character}>
-                        <strong lang="ar" dir="rtl">{letter.character}</strong>
-                        <span>{letter.name}</span>
-                        {letter.note && <small>{letter.note}</small>}
-                      </div>
+                    {selectedLesson.letters.map((letter, index) => (
+                      <article className="letter-learning-card" key={letter.character}>
+                        <span className="letter-card-index">БУКВА {String(index + 1).padStart(2, "0")}</span>
+                        <strong className="letter-card-character" lang="ar" dir="rtl">{letter.character}</strong>
+                        <span className="letter-card-name">{letter.name}</span>
+                        <small className="letter-card-note">{letter.note ?? "Посмотри на форму и запомни название."}</small>
+                      </article>
                     ))}
+                  </div>
+                  <div className="letter-learning-steps">
+                    <span>Как учить</span>
+                    <p><b>1.</b> Посмотри на форму буквы.</p>
+                    <p><b>2.</b> Обрати внимание на точки.</p>
+                    <p><b>3.</b> Произнеси название и попробуй запомнить.</p>
                   </div>
                 )}
                 <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
