@@ -263,7 +263,10 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
         });
         if (authError) throw authError;
 
-        if (data.session) {
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setMode("signin");
+          setMessage("У тебя уже есть аккаунт! Эта почта уже зарегистрирована. Войди в свой аккаунт или нажми «Забыли пароль?», если не помнишь пароль.");
+        } else if (data.session) {
           markPromptDismissed();
           setIsOpen(false);
           setMessage("");
