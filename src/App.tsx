@@ -37,6 +37,99 @@ const arabicLetterNames: Record<string, string> = {
   "ي": "يَاء",
 };
 
+type MakhrajInfo = {
+  point: [number, number];
+  title: string;
+  description: string;
+};
+
+const makhrajByLetter: Record<string, MakhrajInfo> = {
+  "ا": { point: [166, 83], title: "Полость рта", description: "Долгий звук алифа произносится свободным потоком воздуха, без смыкания языка с нёбом." },
+  "ب": { point: [39, 99], title: "Две губы", description: "Мягко сомкни обе губы и раскрой их, выпуская звук." },
+  "ت": { point: [76, 101], title: "Кончик языка и верхние зубы", description: "Кончик языка касается основания верхних передних зубов, затем быстро отходит." },
+  "ث": { point: [58, 91], title: "Кончик языка у края зубов", description: "Слегка покажи кончик языка между передними зубами и пропусти воздух без голоса." },
+  "ج": { point: [158, 105], title: "Середина языка", description: "Середина языка поднимается к твёрдому нёбу." },
+  "ح": { point: [286, 108], title: "Середина горла", description: "Звук формируется в средней части горла, без участия кончика языка." },
+  "خ": { point: [275, 82], title: "Верхняя часть горла", description: "Звук образуется в верхней части горла, ближе ко рту." },
+  "د": { point: [76, 101], title: "Кончик языка и верхние зубы", description: "Кончик языка касается основания верхних передних зубов и отходит со звонким звуком." },
+  "ذ": { point: [58, 91], title: "Кончик языка у края зубов", description: "Кончик языка слегка выходит между передними зубами; звук произносится с голосом." },
+  "ر": { point: [84, 108], title: "Кончик языка у дёсен", description: "Кончик языка касается участка дёсен сразу за верхними передними зубами." },
+  "ز": { point: [66, 96], title: "Кончик языка у передних зубов", description: "Кончик языка находится близко к нижней стороне верхних передних зубов; воздух проходит с голосом." },
+  "س": { point: [66, 96], title: "Кончик языка у передних зубов", description: "Кончик языка находится близко к передним зубам; воздух проходит узкой струёй без голоса." },
+  "ش": { point: [158, 105], title: "Середина языка", description: "Середина языка поднимается к нёбу, оставляя узкий проход для воздуха." },
+  "ص": { point: [66, 96], title: "Передняя часть языка", description: "Кончик языка находится у передних зубов, а задняя часть языка приподнята; звук твёрдый." },
+  "ض": { point: [122, 125], title: "Боковая сторона языка", description: "Одна из боковых сторон языка прижимается к верхним коренным зубам." },
+  "ط": { point: [76, 101], title: "Кончик языка и верхние зубы", description: "Кончик языка касается основания верхних передних зубов; задняя часть языка приподнята." },
+  "ظ": { point: [58, 91], title: "Кончик языка у края зубов", description: "Кончик языка касается края верхних передних зубов и слегка выходит между ними." },
+  "ع": { point: [286, 108], title: "Середина горла", description: "Звук формируется в средней части горла; это не обычный звук русского «а»." },
+  "غ": { point: [275, 82], title: "Верхняя часть горла", description: "Звук образуется в верхней части горла, ближе ко рту, с голосом." },
+  "ف": { point: [47, 109], title: "Нижняя губа и верхние зубы", description: "Край верхних передних зубов мягко касается внутренней стороны нижней губы." },
+  "ق": { point: [225, 94], title: "Корень языка", description: "Самая задняя часть языка поднимается к мягкому нёбу." },
+  "ك": { point: [204, 98], title: "Задняя часть языка", description: "Задняя часть языка касается нёба немного ближе ко рту, чем при ق." },
+  "ل": { point: [110, 118], title: "Боковая часть языка у дёсен", description: "Передняя боковая часть языка касается дёсен за верхними зубами." },
+  "م": { point: [39, 99], title: "Две губы", description: "Обе губы смыкаются; звук сопровождается носовым резонансом." },
+  "ن": { point: [84, 108], title: "Кончик языка у дёсен", description: "Кончик языка касается дёсен за верхними передними зубами; звук имеет носовой резонанс." },
+  "ه": { point: [298, 132], title: "Глубина горла", description: "Лёгкий выдох выходит из самой глубокой части горла." },
+  "و": { point: [39, 99], title: "Округлённые губы", description: "Округли губы вперёд, как будто произносишь короткое «у»." },
+  "ي": { point: [158, 105], title: "Середина языка", description: "При согласном ي середина языка поднимается к нёбу; в долгом звуке положение свободнее." },
+};
+
+function LetterMakhrajDiagram({ letter }: { letter: string }) {
+  const info = makhrajByLetter[letter] ?? {
+    point: [160, 105] as [number, number],
+    title: "Место образования звука",
+    description: "Посмотри на схему и повтори звук медленно.",
+  };
+  const [pointX, pointY] = info.point;
+
+  return (
+    <section className="letter-makhraj" aria-label={`Схема произношения буквы ${letter}`}>
+      <div className="letter-makhraj-heading">
+        <span className="letter-makhraj-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
+        </span>
+        <div><strong>Где рождается звук?</strong><small>Схема положения языка и органов речи</small></div>
+      </div>
+      <svg className="letter-mouth-diagram" viewBox="0 0 340 180" role="img" aria-label={`Упрощённый боковой разрез рта. Выделено место: ${info.title}.`}>
+        <path className="mouth-head-outline" d="M28 31 C75 7 181 9 242 31 C272 42 291 59 299 77 L316 91 L301 101 L309 109 L294 118 C293 142 275 157 248 164 C190 179 104 161 62 137 C43 126 30 106 28 83 Z" />
+        <path className="mouth-cavity" d="M42 86 C83 61 165 55 244 75 C263 80 277 91 283 105 C267 122 241 133 207 137 C147 143 91 126 49 111 Z" />
+        <path className="mouth-palate" d="M52 84 C104 58 184 57 251 78" />
+        <path className="mouth-throat" d="M276 77 C287 88 291 100 282 118 C277 129 271 137 262 143" />
+        <path className="mouth-tongue" d="M53 112 C94 119 139 125 176 115 C208 106 239 106 260 119 C235 140 194 147 145 139 C103 134 72 126 53 112 Z" />
+        <path className="mouth-lips" d="M29 88 C39 83 48 83 55 88 M29 108 C40 113 48 114 56 109" />
+        <path className="mouth-teeth" d="M54 84 L78 77 L86 91 L58 98 Z M56 111 L79 111 L86 123 L59 120 Z" />
+        <path className="mouth-gumline" d="M82 79 C112 69 138 68 160 70" />
+        <circle className="mouth-point-muted" cx="298" cy="132" r="4" />
+        <circle className="mouth-point-muted" cx="286" cy="108" r="4" />
+        <circle className="mouth-point-muted" cx="275" cy="82" r="4" />
+        <circle className="mouth-point-muted" cx="225" cy="94" r="4" />
+        <circle className="mouth-point-muted" cx="204" cy="98" r="4" />
+        <circle className="mouth-point-muted" cx="158" cy="105" r="4" />
+        <circle className="mouth-point-muted" cx="122" cy="125" r="4" />
+        <circle className="mouth-point-muted" cx="110" cy="118" r="4" />
+        <circle className="mouth-point-muted" cx="84" cy="108" r="4" />
+        <circle className="mouth-point-muted" cx="76" cy="101" r="4" />
+        <circle className="mouth-point-muted" cx="66" cy="96" r="4" />
+        <circle className="mouth-point-muted" cx="58" cy="91" r="4" />
+        <circle className="mouth-point-muted" cx="47" cy="109" r="4" />
+        <circle className="mouth-point-muted" cx="39" cy="99" r="4" />
+        <path className="mouth-pointer" d={`M${pointX} ${pointY} L${Math.max(22, pointX - 12)} ${Math.max(24, pointY - 23)}`} />
+        <circle className="mouth-point-active-halo" cx={pointX} cy={pointY} r="11" />
+        <circle className="mouth-point-active" cx={pointX} cy={pointY} r="5.5" />
+        <text className="mouth-side-label" x="25" y="173">ГУБЫ</text>
+        <text className="mouth-side-label" x="151" y="173">ЯЗЫК</text>
+        <text className="mouth-side-label" x="278" y="173">ГОРЛО</text>
+      </svg>
+      <div className="letter-makhraj-copy">
+        <strong>{info.title}</strong>
+        <p>{info.description}</p>
+      </div>
+      <p className="letter-makhraj-disclaimer">Схема упрощённая: точное произношение лучше сверять с учителем таджвида.</p>
+      <a className="letter-makhraj-source" href="https://tilawa.ai/en/tajweed-rules/group/makharij/" target="_blank" rel="noreferrer">Открыть интерактивную схему всех точек произношения ↗</a>
+    </section>
+  );
+}
+
 type Stage = {
   id: number;
   title: string;
@@ -1442,9 +1535,10 @@ export default function App() {
                             <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
-                            <button className="letter-speak-button" type="button" onClick={speakLetter}>
-                              <span aria-hidden="true">🔊</span> Послушать арабское название
+                            <button className="letter-speak-button" type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} title="Прослушать">
+                              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                             </button>
+                            <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
                             {selectedLesson.letters.map((item, index) => (

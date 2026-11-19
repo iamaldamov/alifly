@@ -1684,3 +1684,56 @@ html, body {
   .letter-flashcard-name { font-size:22px; }
   .letter-flashcard-note { font-size:12px; }
 }
+
+
+/* Compact audio control and per-letter articulation diagram */
+.letter-speak-button {
+  display:grid; place-items:center; width:44px; min-width:44px; height:44px; min-height:44px;
+  margin:0 auto 12px; padding:0; border:1px solid #d5e2d4; border-radius:12px;
+  background:#fffefa; color:#285b45; cursor:pointer; box-shadow:0 3px 9px #20372e0a;
+}
+.letter-speak-button svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.letter-speak-button:focus-visible { outline:3px solid #8bb99a; outline-offset:3px; }
+.letter-makhraj {
+  width:100%; max-width:420px; margin:0 auto; padding:15px 14px 13px;
+  border:1px solid #e1e9df; border-radius:19px; background:#fbfcf8; text-align:left;
+}
+.letter-makhraj-heading { display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+.letter-makhraj-heading > div { display:grid; gap:2px; }
+.letter-makhraj-heading strong { color:#285b45; font-size:13px; font-weight:850; }
+.letter-makhraj-heading small { color:#7a887d; font-size:10px; }
+.letter-makhraj-icon { display:grid; place-items:center; width:34px; height:34px; flex:none; border-radius:11px; background:#e9f0e6; color:#285b45; }
+.letter-makhraj-icon svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.letter-mouth-diagram { display:block; width:100%; height:auto; max-height:205px; margin:0 auto; overflow:visible; }
+.mouth-head-outline { fill:#f2e9dc; stroke:#c7b9a7; stroke-width:1.5; }
+.mouth-cavity { fill:#fffdf8; stroke:#d5c8b7; stroke-width:1.2; }
+.mouth-palate { fill:none; stroke:#bd9f8a; stroke-width:5; stroke-linecap:round; }
+.mouth-throat { fill:none; stroke:#bd9f8a; stroke-width:7; stroke-linecap:round; }
+.mouth-tongue { fill:#e8a5a0; stroke:#bd7774; stroke-width:1.5; }
+.mouth-lips { fill:none; stroke:#bd7774; stroke-width:5; stroke-linecap:round; }
+.mouth-teeth { fill:#fff; stroke:#b9b1a5; stroke-width:1.1; }
+.mouth-gumline { fill:none; stroke:#d8a6a0; stroke-width:2; stroke-linecap:round; }
+.mouth-point-muted { fill:#9aa99c; stroke:#fff; stroke-width:1; opacity:.65; }
+.mouth-pointer { fill:none; stroke:#2d7953; stroke-width:1.7; stroke-dasharray:3 2; stroke-linecap:round; }
+.mouth-point-active-halo { fill:#e3a34e; opacity:.27; }
+.mouth-point-active { fill:#d58a2e; stroke:#fff; stroke-width:2; }
+.mouth-side-label { fill:#879287; font-size:8px; font-weight:800; letter-spacing:1px; }
+.letter-makhraj-copy { padding:9px 11px; border-radius:12px; background:#edf3e9; }
+.letter-makhraj-copy strong { color:#285b45; font-size:12px; }
+.letter-makhraj-copy p { margin:4px 0 0; color:#596a5d; font-size:11px; line-height:1.5; }
+.letter-makhraj-disclaimer { margin:9px 2px 4px; color:#829084; font-size:9px; line-height:1.45; }
+.letter-makhraj-source { display:inline-block; margin:3px 2px 0; color:#347454; font-size:10px; font-weight:750; text-decoration:underline; text-underline-offset:2px; }
+:root[data-theme="dark"] .letter-speak-button { border-color:var(--border); background:var(--surface); color:var(--text); }
+:root[data-theme="dark"] .letter-makhraj { border-color:var(--border); background:#1c2922; }
+:root[data-theme="dark"] .letter-makhraj-heading strong,
+:root[data-theme="dark"] .letter-makhraj-copy strong { color:#dcebdd; }
+:root[data-theme="dark"] .letter-makhraj-heading small,
+:root[data-theme="dark"] .letter-makhraj-disclaimer { color:var(--text-soft); }
+:root[data-theme="dark"] .letter-makhraj-icon { background:#2b4034; color:#cde5d0; }
+:root[data-theme="dark"] .letter-makhraj-copy { background:#26382d; }
+:root[data-theme="dark"] .letter-makhraj-copy p { color:#c0d0c2; }
+:root[data-theme="dark"] .letter-makhraj-source { color:#a8d2ae; }
+@media (max-width:480px) {
+  .letter-makhraj { padding:12px 10px; }
+  .letter-mouth-diagram { max-height:180px; }
+}
