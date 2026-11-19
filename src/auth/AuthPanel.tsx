@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from "../lib/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut as firebaseSignOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
@@ -278,7 +278,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     clearFeedback();
     setBusy(true);
     try {
-      await signOut(auth);
+      await firebaseSignOut(auth);
       markPromptDismissed();
       setIsOpen(false);
     } catch (authError) {
@@ -321,7 +321,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
             <p className={cloudStatus === "error" ? "auth-error" : "auth-message"} role="status">
               {cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Проверь интернет." : cloudStatus === "saved" ? "Прогресс успешно сохранён в аккаунте." : "Аккаунт подключён."}
             </p>
-            <p className="auth-user-email">{user.email || user.phone || "Аккаунт ALIFLY"}</p>
+            <p className="auth-user-email">{user.email || user.phoneNumber || "Аккаунт ALIFLY"}</p>
             <button className="auth-submit" type="button" onClick={signOut} disabled={busy}>{busy ? "Подожди…" : "Выйти из аккаунта"}</button>
           </>
         ) : (
