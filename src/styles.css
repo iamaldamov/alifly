@@ -1307,3 +1307,14 @@ html, body {
     font-size: clamp(25px, 7.2vw, 33px);
   }
 }
+
+
+/* Account mode switch */
+.auth-mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 4px; margin: 0 0 15px; border: 1px solid #e2e9df; border-radius: 13px; background: #f3f6ef; }
+.auth-mode-switch button { min-height: 36px; border: 0; border-radius: 9px; background: transparent; color: #718075; font: inherit; font-size: 11px; font-weight: 750; cursor: pointer; }
+.auth-mode-switch button.active { background: #fffefa; color: #285b45; box-shadow: 0 2px 8px rgba(25,55,38,.09); }
+.auth-reset-button { margin-top: 10px; background: transparent; color: #315b40; border: 1px solid #dfe6dc; }
+:root[data-theme="dark"] .auth-mode-switch { border-color: #344b3d; background: #1e3027; }
+:root[data-theme="dark"] .auth-mode-switch button { color: #a9b9ad; }
+:root[data-theme="dark"] .auth-mode-switch button.active { background: #2b4635; color: #d5edc5; }
+:root[data-theme="dark"] .auth-reset-button { border-color: #344b3d; color: #c7e9a6; }
