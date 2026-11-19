@@ -538,13 +538,17 @@ function buildLetterRecallQuestions(letter: Lesson["letters"][number]): Question
   }];
 }
 
-function shuffleQuestions(questions: Question[]): Question[] {
-  const shuffled = [...questions];
+function shuffleItems<T>(items: T[]): T[] {
+  const shuffled = [...items];
   for (let index = shuffled.length - 1; index > 0; index--) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
     [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
   }
   return shuffled;
+}
+
+function shuffleQuestions(questions: Question[]): Question[] {
+  return shuffleItems(questions);
 }
 
 function buildLessonQuestions(lesson: Lesson): Question[] {
@@ -555,14 +559,14 @@ function buildLessonQuestions(lesson: Lesson): Question[] {
   // Dot-count and dot-position questions are deliberately excluded.
   const allLetters = lessons.flatMap((item) => item.letters);
   return shuffleQuestions(lesson.letters.map((letter) => {
-    const distractors = shuffleQuestions(
+    const distractors = shuffleItems(
       allLetters
         .filter((item) => item.character !== letter.character)
         .map((item) => item.character),
     ).slice(0, 3);
     return {
       prompt: `Найди букву «${letter.name.split(" (")[0]}».`,
-      options: shuffleQuestions([letter.character, ...distractors]),
+      options: shuffleItems([letter.character, ...distractors]),
       correct: letter.character,
       mode: "choice" as const,
       explanation: `Верно! Это буква «${letter.name}» — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
