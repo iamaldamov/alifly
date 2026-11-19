@@ -5,6 +5,38 @@ import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { supabase } from "./lib/supabase";
 
+// Arabic letter names are spoken in Arabic, not through Russian transliteration.
+const arabicLetterNames: Record<string, string> = {
+  "ا": "أَلِف",
+  "ب": "بَاء",
+  "ت": "تَاء",
+  "ث": "ثَاء",
+  "ج": "جِيم",
+  "ح": "حَاء",
+  "خ": "خَاء",
+  "د": "دَال",
+  "ذ": "ذَال",
+  "ر": "رَاء",
+  "ز": "زَاي",
+  "س": "سِين",
+  "ش": "شِين",
+  "ص": "صَاد",
+  "ض": "ضَاد",
+  "ط": "طَاء",
+  "ظ": "ظَاء",
+  "ع": "عَيْن",
+  "غ": "غَيْن",
+  "ف": "فَاء",
+  "ق": "قَاف",
+  "ك": "كَاف",
+  "ل": "لَام",
+  "م": "مِيم",
+  "ن": "نُون",
+  "ه": "هَاء",
+  "و": "وَاو",
+  "ي": "يَاء",
+};
+
 type Stage = {
   id: number;
   title: string;
@@ -1365,10 +1397,23 @@ export default function App() {
                       if (!letter) return null;
                       const speakLetter = () => {
                         if (!("speechSynthesis" in window)) return;
+                        const arabicName = arabicLetterNames[letter.character];
+                        if (!arabicName) return;
+
                         window.speechSynthesis.cancel();
-                        const utterance = new SpeechSynthesisUtterance(letter.name.split(" (")[0]);
-                        utterance.lang = "ru-RU";
-                        utterance.rate = 0.82;
+                        const utterance = new SpeechSynthesisUtterance(arabicName);
+                        const arabicVoices = window.speechSynthesis.getVoices()
+                          .filter((voice) => voice.lang.toLowerCase().startsWith("ar"));
+                        const preferredVoice =
+                          arabicVoices.find((voice) => voice.lang.toLowerCase() === "ar-sa") ??
+                          arabicVoices.find((voice) => voice.lang.toLowerCase() === "ar") ??
+                          arabicVoices[0];
+
+                        utterance.lang = "ar-SA";
+                        if (preferredVoice) utterance.voice = preferredVoice;
+                        utterance.rate = 0.78;
+                        utterance.pitch = 1;
+                        utterance.volume = 1;
                         window.speechSynthesis.speak(utterance);
                       };
                       const moveLetter = (direction: -1 | 1) => {
@@ -1398,7 +1443,7 @@ export default function App() {
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
                             <button className="letter-speak-button" type="button" onClick={speakLetter}>
-                              <span aria-hidden="true">🔊</span> Послушать произношение
+                              <span aria-hidden="true">🔊</span> Послушать арабское название
                             </button>
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
