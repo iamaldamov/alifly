@@ -996,11 +996,12 @@ export default function App() {
     setCloudSaveStatus("loading");
 
     const loadProgress = async () => {
-      let data: Record<string, unknown> | null = null;
+      type CloudProgress = { completed_lesson_ids?: unknown; mistakes?: unknown; streak?: number; last_study_date?: string | null; exam_passed?: boolean; daily_goal?: number; daily_activity?: unknown };
+      let data: CloudProgress | null = null;
       try {
         const progressRef = doc(db, "users", user.uid, "progress", "current");
         const snapshot = await getDoc(progressRef);
-        if (snapshot.exists()) data = snapshot.data();
+        if (snapshot.exists()) data = snapshot.data() as CloudProgress;
       } catch (error) {
         if (cancelled) return;
         console.error("ALIFLY: could not load cloud progress", error);
