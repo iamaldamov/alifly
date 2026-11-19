@@ -1522,3 +1522,165 @@ html, body {
   .profile-avatar-art { width: 32px; height: 32px; }
   .avatar-choice-art { width: 43px; height: 43px; }
 }
+
+
+/* Clear, guided Arabic alphabet lesson cards */
+.letter-learning-hint {
+  display:flex; align-items:center; gap:12px; margin:18px 0 14px;
+  padding:13px 15px; border:1px solid #dfe8dc; border-radius:16px;
+  background:linear-gradient(110deg,#edf4eb,#f8f7ef);
+}
+.letter-hint-icon { display:grid; place-items:center; flex:0 0 38px; height:38px; border-radius:12px; background:#285b45; color:#fff8e8; font-family:Georgia,serif; font-size:23px; }
+.letter-learning-hint p { display:flex; flex-direction:column; gap:3px; margin:0; }
+.letter-learning-hint strong { color:#285b45; font-size:13px; }
+.letter-learning-hint small { color:#77847a; font-size:11px; line-height:1.4; }
+.letter-intro.letter-learning-card-grid { display:grid; }
+.letter-intro.lesson-letters { grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; margin:0 0 15px; }
+.letter-learning-card { position:relative; display:flex; min-width:0; min-height:174px; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:13px 12px 14px; overflow:hidden; border:1px solid #e4e9df; border-radius:19px; background:linear-gradient(155deg,#fffefa 0%,#f3f6ef 100%); text-align:center; box-shadow:0 5px 16px #20372e0a; }
+.letter-learning-card:after { position:absolute; top:-28px; right:-25px; width:86px; height:86px; border-radius:50%; background:#e8efe4; content:""; opacity:.65; }
+.letter-card-index { position:relative; z-index:1; color:#91a092; font-size:9px; font-weight:850; letter-spacing:.14em; }
+.letter-card-character { position:relative; z-index:1; display:grid; place-items:center; min-height:70px; color:#285b45; font-family:"Noto Naskh Arabic","Amiri",serif; font-size:59px; font-weight:500; line-height:1.3; }
+.letter-card-name { position:relative; z-index:1; color:#285b45; font-size:14px; font-weight:850; }
+.letter-card-note { position:relative; z-index:1; max-width:100%; color:#77847a; font-size:10px; line-height:1.45; }
+.letter-learning-steps { display:grid; gap:7px; margin:0 0 22px; padding:14px 16px; border-radius:16px; background:#f3f4ec; }
+.letter-learning-steps > span { margin-bottom:2px; color:#285b45; font-size:12px; font-weight:850; }
+.letter-learning-steps p { margin:0; color:#68776c; font-size:11px; line-height:1.45; }
+.letter-learning-steps b { display:inline-grid; place-items:center; width:19px; height:19px; margin-right:5px; border-radius:7px; background:#e1eadf; color:#285b45; }
+:root[data-theme="dark"] .letter-learning-hint { border-color:var(--border); background:var(--surface); }
+:root[data-theme="dark"] .letter-learning-hint strong,
+:root[data-theme="dark"] .letter-card-name,
+:root[data-theme="dark"] .letter-learning-steps > span { color:var(--text); }
+:root[data-theme="dark"] .letter-learning-hint small,
+:root[data-theme="dark"] .letter-card-note,
+:root[data-theme="dark"] .letter-learning-steps p { color:var(--text-soft); }
+:root[data-theme="dark"] .letter-learning-card { border-color:var(--border); background:var(--surface); box-shadow:none; }
+:root[data-theme="dark"] .letter-learning-card:after { background:#ffffff0b; }
+:root[data-theme="dark"] .letter-card-character { color:#c2dec9; }
+:root[data-theme="dark"] .letter-learning-steps { background:var(--surface); }
+:root[data-theme="dark"] .letter-learning-steps b { background:#ffffff12; color:#c2dec9; }
+@media (max-width:380px) {
+  .letter-intro.lesson-letters { gap:8px; }
+  .letter-learning-card { min-height:162px; padding:11px 8px; }
+  .letter-card-character { font-size:52px; }
+  .letter-card-note { font-size:9px; }
+}
+
+
+/* Simple notebook tips for alphabet beginners */
+.alphabet-tips {
+  margin: 14px 0 20px;
+  overflow: hidden;
+  border: 1px solid #dfe8dc;
+  border-radius: 16px;
+  background: #f7f8f2;
+}
+.alphabet-tips-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 0;
+  background: transparent;
+  color: #285b45;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+.alphabet-tips-toggle span:last-child {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  border-radius: 8px;
+  background: #e5ede1;
+  font-size: 18px;
+}
+.alphabet-tips-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 15px 15px;
+}
+.alphabet-tips-content p {
+  margin: 0;
+  color: #68776c;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.alphabet-tips-content strong { color: #285b45; }
+:root[data-theme="dark"] .alphabet-tips {
+  border-color: var(--border);
+  background: var(--surface);
+}
+:root[data-theme="dark"] .alphabet-tips-toggle,
+:root[data-theme="dark"] .alphabet-tips-content strong { color: var(--text); }
+:root[data-theme="dark"] .alphabet-tips-toggle span:last-child { background: #ffffff12; }
+:root[data-theme="dark"] .alphabet-tips-content p { color: var(--text-soft); }
+
+
+/* One-letter-at-a-time alphabet flashcards */
+.alphabet-flashcards { display:grid; gap:12px; }
+.letter-flashcard {
+  display:flex; min-height:330px; flex-direction:column; align-items:center; justify-content:center;
+  padding:22px 20px; border:1px solid #dfe8dc; border-radius:24px;
+  background:radial-gradient(circle at 50% 18%, #fffefa 0%, #f0f5ed 78%);
+  text-align:center; box-shadow:0 12px 28px #20372e0d;
+  touch-action:pan-y; user-select:none;
+}
+.letter-flashcard-top {
+  display:flex; width:100%; justify-content:space-between; gap:12px;
+  color:#91a092; font-size:10px; font-weight:850; letter-spacing:.12em;
+}
+.letter-flashcard-character {
+  display:grid; place-items:center; min-height:142px; margin:8px 0 0;
+  color:#285b45; font-family:"Noto Naskh Arabic","Amiri",serif;
+  font-size:clamp(92px, 23vw, 132px); font-weight:500; line-height:1.35;
+}
+.letter-flashcard-name { color:#285b45; font-size:24px; font-weight:850; }
+.letter-flashcard-note {
+  max-width:360px; min-height:38px; margin:8px 0 15px;
+  color:#718076; font-size:13px; line-height:1.55;
+}
+.letter-speak-button {
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  min-height:44px; padding:0 17px; border:1px solid #d6e2d3; border-radius:14px;
+  background:#fffefa; color:#285b45; font-size:13px; font-weight:800; cursor:pointer;
+}
+.letter-speak-button:active { transform:scale(.98); }
+.letter-flashcard-progress { display:flex; justify-content:center; gap:7px; padding:3px 0; }
+.letter-progress-dot {
+  width:8px; height:8px; padding:0; border:0; border-radius:50%;
+  background:#d8dfd5; cursor:pointer;
+}
+.letter-progress-dot.is-active { width:22px; border-radius:99px; background:#285b45; }
+.letter-flashcard-navigation { display:flex; justify-content:space-between; gap:12px; }
+.letter-nav-button {
+  min-height:43px; padding:0 15px; border:1px solid #dfe8dc; border-radius:13px;
+  background:#fffefa; color:#285b45; font-size:13px; font-weight:750; cursor:pointer;
+}
+.letter-nav-button:disabled { opacity:.35; cursor:not-allowed; }
+.letter-nav-next { margin-left:auto; }
+:root[data-theme="dark"] .letter-flashcard {
+  border-color:var(--border); background:linear-gradient(145deg,#202c26,#17221d);
+}
+:root[data-theme="dark"] .letter-flashcard-character,
+:root[data-theme="dark"] .letter-flashcard-name { color:#dcebdd; }
+:root[data-theme="dark"] .letter-flashcard-note,
+:root[data-theme="dark"] .letter-flashcard-top { color:var(--text-soft); }
+:root[data-theme="dark"] .letter-speak-button,
+:root[data-theme="dark"] .letter-nav-button {
+  border-color:var(--border); background:var(--surface); color:var(--text);
+}
+:root[data-theme="dark"] .letter-progress-dot { background:#526358; }
+:root[data-theme="dark"] .letter-progress-dot.is-active { background:#a8d2ae; }
+@media (max-width:480px) {
+  .letter-flashcard { min-height:300px; padding:18px 14px; }
+  .letter-flashcard-character { min-height:126px; }
+  .letter-flashcard-name { font-size:22px; }
+  .letter-flashcard-note { font-size:12px; }
+}

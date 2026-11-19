@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReadingTrainer from "./ReadingTrainer";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
@@ -525,95 +525,21 @@ function isCorrectAnswer(question: Question, answer: string): boolean {
     .some((candidate) => normalizeTypedAnswer(candidate) === normalized);
 }
 
-const letterDotDetails: Record<string, { count: string; position: "сверху" | "снизу" | "нет точек" }> = {
-  "ا": { count: "0", position: "нет точек" },
-  "ب": { count: "1", position: "снизу" },
-  "ت": { count: "2", position: "сверху" },
-  "ث": { count: "3", position: "сверху" },
-  "ج": { count: "1", position: "снизу" },
-  "ح": { count: "0", position: "нет точек" },
-  "خ": { count: "1", position: "сверху" },
-  "د": { count: "0", position: "нет точек" },
-  "ذ": { count: "1", position: "сверху" },
-  "ر": { count: "0", position: "нет точек" },
-  "ز": { count: "1", position: "сверху" },
-  "س": { count: "0", position: "нет точек" },
-  "ش": { count: "3", position: "сверху" },
-  "ص": { count: "0", position: "нет точек" },
-  "ض": { count: "1", position: "сверху" },
-  "ط": { count: "0", position: "нет точек" },
-  "ظ": { count: "1", position: "сверху" },
-  "ع": { count: "0", position: "нет точек" },
-  "غ": { count: "1", position: "сверху" },
-  "ف": { count: "1", position: "сверху" },
-  "ق": { count: "2", position: "сверху" },
-  "ك": { count: "0", position: "нет точек" },
-  "ل": { count: "0", position: "нет точек" },
-  "م": { count: "0", position: "нет точек" },
-  "ن": { count: "1", position: "сверху" },
-  "ه": { count: "0", position: "нет точек" },
-  "و": { count: "0", position: "нет точек" },
-  "ي": { count: "2", position: "снизу" },
-};
-
-const dotCountAliases: Record<string, string[]> = {
-  "0": ["0", "ноль", "ни одной"],
-  "1": ["1", "одна", "одну", "один"],
-  "2": ["2", "две", "два"],
-  "3": ["3", "три"],
-};
-
 function buildLetterRecallQuestions(letter: Lesson["letters"][number]): Question[] {
   const acceptedNames = recallAliases[letter.character] ?? [letter.name];
-  const details = letterDotDetails[letter.character];
-
-  const questions: Question[] = [{
-    prompt: "Как называется эта буква? Напиши название по памяти.",
+  return [{
+    prompt: "Как называется эта буква?",
     options: [],
     correct: acceptedNames[0],
     acceptedAnswers: acceptedNames,
     mode: "recall",
     stimulus: letter.character,
-    explanation: `Это ${letter.name} — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
+    explanation: `Это буква ${letter.name} — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
   }];
-
-  if (!details) return questions;
-
-  questions.push({
-    prompt: "Сколько точек у этой буквы? Ответь числом или словом.",
-    options: [],
-    correct: details.count,
-    acceptedAnswers: dotCountAliases[details.count],
-    mode: "recall",
-    stimulus: letter.character,
-    explanation: details.count === "0"
-      ? "У этой буквы нет точек."
-      : `У этой буквы ${details.count} ${details.count === "1" ? "точка" : details.count === "2" ? "точки" : "точки"}.`,
-  });
-
-  questions.push({
-    prompt: details.position === "нет точек"
-      ? "Есть ли у этой буквы точки? Напиши «нет»."
-      : "Где расположены точки? Ответь «сверху» или «снизу».",
-    options: [],
-    correct: details.position,
-    acceptedAnswers: details.position === "сверху"
-      ? ["сверху", "над буквой", "сверху над буквой"]
-      : details.position === "снизу"
-        ? ["снизу", "под буквой", "снизу под буквой"]
-        : ["нет", "нет точек", "точек нет", "без точек"],
-    mode: "recall",
-    stimulus: letter.character,
-    explanation: details.position === "нет точек"
-      ? "У этой буквы нет точек."
-      : `Точки этой буквы расположены ${details.position}.`,
-  });
-
-  return questions;
 }
 
-function shuffleQuestions(questions: Question[]): Question[] {
-  const shuffled = [...questions];
+function shuffleItems<T>(items: T[]): T[] {
+  const shuffled = [...items];
   for (let index = shuffled.length - 1; index > 0; index--) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
     [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
@@ -621,17 +547,31 @@ function shuffleQuestions(questions: Question[]): Question[] {
   return shuffled;
 }
 
+function shuffleQuestions(questions: Question[]): Question[] {
+  return shuffleItems(questions);
+}
+
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 30) return shuffleQuestions(lesson.questions);
   if (lesson.id >= 6 && lesson.id <= 8) return lesson.questions;
-  const recall = lesson.letters.flatMap(buildLetterRecallQuestions);
-  const mixed: Question[] = [];
-  const total = Math.max(lesson.questions.length, recall.length);
-  for (let index = 0; index < total; index++) {
-    if (lesson.questions[index]) mixed.push(lesson.questions[index]);
-    if (recall[index]) mixed.push(recall[index]);
-  }
-  return shuffleQuestions(mixed);
+
+  // Alphabet practice only checks whether the learner can recognise a letter by name.
+  // Dot-count and dot-position questions are deliberately excluded.
+  const allLetters = lessons.flatMap((item) => item.letters);
+  return shuffleQuestions(lesson.letters.map((letter) => {
+    const distractors = shuffleItems(
+      allLetters
+        .filter((item) => item.character !== letter.character)
+        .map((item) => item.character),
+    ).slice(0, 3);
+    return {
+      prompt: `Найди букву «${letter.name.split(" (")[0]}».`,
+      options: shuffleItems([letter.character, ...distractors]),
+      correct: letter.character,
+      mode: "choice" as const,
+      explanation: `Верно! Это буква «${letter.name}» — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
+    };
+  }));
 }
 
 function buildExamRecallQuestions(): Question[] {
@@ -834,6 +774,9 @@ export default function App() {
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
+  const [showAlphabetTips, setShowAlphabetTips] = useState(false);
+  const [activeLetterIndex, setActiveLetterIndex] = useState(0);
+  const letterTouchStartX = useRef<number | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [typedAnswer, setTypedAnswer] = useState("");
@@ -1045,6 +988,8 @@ export default function App() {
   const startLesson = (lesson: Lesson) => {
     setSelectedLesson({ ...lesson, questions: buildLessonQuestions(lesson) });
     setLessonPhase("study");
+    setShowAlphabetTips(false);
+    setActiveLetterIndex(0);
     setQuestionIndex(0);
     setSelectedAnswer(null);
     setTypedAnswer("");
@@ -1399,8 +1344,8 @@ export default function App() {
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <p className="study-guidance">
                   {selectedLesson.studyCards
-                    ? "Прочитай фразу, её звучание и значение. Перед проверкой карточки исчезнут — ответ придётся вспоминать."
-                    : "Изучи буквы и их особенности. Перед проверкой карточки исчезнут — придётся вспоминать самостоятельно."}
+                    ? "Прочитай фразу, её звучание и значение. Затем попробуй вспомнить их без подсказки."
+                    : "Сначала внимательно изучи карточки всех букв. Когда будешь готов, переходи к простой проверке."}
                 </p>
                 {selectedLesson.studyCards ? (
                   <div className="study-phrase-cards">
@@ -1414,19 +1359,91 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <div className="letter-intro lesson-letters">
-                    {selectedLesson.letters.map((letter) => (
-                      <div key={letter.character}>
-                        <strong lang="ar" dir="rtl">{letter.character}</strong>
-                        <span>{letter.name}</span>
-                        {letter.note && <small>{letter.note}</small>}
-                      </div>
-                    ))}
-                  </div>
+                  <>
+                    {(() => {
+                      const letter = selectedLesson.letters[activeLetterIndex];
+                      if (!letter) return null;
+                      const speakLetter = () => {
+                        if (!("speechSynthesis" in window)) return;
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance(letter.name.split(" (")[0]);
+                        utterance.lang = "ru-RU";
+                        utterance.rate = 0.82;
+                        window.speechSynthesis.speak(utterance);
+                      };
+                      const moveLetter = (direction: -1 | 1) => {
+                        setActiveLetterIndex((current) => Math.max(0, Math.min(selectedLesson.letters.length - 1, current + direction)));
+                      };
+                      return (
+                        <div className="alphabet-flashcards">
+                          <div className="letter-learning-hint">
+                            <span className="letter-hint-icon">ا</span>
+                            <p><strong>Изучай по одной букве</strong><small>Посмотри на форму, послушай название и повтори его вслух. Листай карточки в своём темпе.</small></p>
+                          </div>
+                          <div
+                            className="letter-flashcard"
+                            onTouchStart={(event) => { letterTouchStartX.current = event.touches[0]?.clientX ?? null; }}
+                            onTouchEnd={(event) => {
+                              if (letterTouchStartX.current === null) return;
+                              const delta = event.changedTouches[0].clientX - letterTouchStartX.current;
+                              if (Math.abs(delta) > 45) moveLetter(delta < 0 ? 1 : -1);
+                              letterTouchStartX.current = null;
+                            }}
+                          >
+                            <div className="letter-flashcard-top">
+                              <span>БУКВА {String(activeLetterIndex + 1).padStart(2, "0")}</span>
+                              <span>{activeLetterIndex + 1} / {selectedLesson.letters.length}</span>
+                            </div>
+                            <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
+                            <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
+                            <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
+                            <button className="letter-speak-button" type="button" onClick={speakLetter}>
+                              <span aria-hidden="true">🔊</span> Послушать произношение
+                            </button>
+                          </div>
+                          <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
+                            {selectedLesson.letters.map((item, index) => (
+                              <button
+                                key={item.character}
+                                type="button"
+                                className={index === activeLetterIndex ? "letter-progress-dot is-active" : "letter-progress-dot"}
+                                aria-label={`Перейти к букве ${index + 1}`}
+                                aria-current={index === activeLetterIndex ? "step" : undefined}
+                                onClick={() => setActiveLetterIndex(index)}
+                              />
+                            ))}
+                          </div>
+                          <div className="letter-flashcard-navigation">
+                            <button type="button" className="letter-nav-button" onClick={() => moveLetter(-1)} disabled={activeLetterIndex === 0}>← Назад</button>
+                            <button type="button" className="letter-nav-button letter-nav-next" onClick={() => moveLetter(1)} disabled={activeLetterIndex === selectedLesson.letters.length - 1}>Следующая →</button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    <div className="alphabet-tips">
+                      <button className="alphabet-tips-toggle" type="button" aria-expanded={showAlphabetTips} onClick={() => setShowAlphabetTips((value) => !value)}>
+                        <span>Советы: как выучить буквы</span><span aria-hidden="true">{showAlphabetTips ? "−" : "+"}</span>
+                      </button>
+                      {showAlphabetTips && (
+                        <div className="alphabet-tips-content">
+                          <p><strong>1. Заведи отдельный блокнот.</strong> Записывай букву крупно, рядом — её название и произношение.</p>
+                          <p><strong>2. Слушай и повторяй.</strong> Нажми на звук, затем произнеси название самостоятельно.</p>
+                          <p><strong>3. Пиши рукой.</strong> Повтори каждую букву 5 раз, сверяясь с карточкой.</p>
+                          <p><strong>4. Повторяй понемногу.</strong> Изучи 2–4 буквы, сделай перерыв и вернись к ним позже.</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
-                <button className="primary-button modal-button study-start" type="button" onClick={() => setLessonPhase("practice")}>
-                  Начать вспоминание →
-                </button>
+                {!selectedLesson.studyCards && activeLetterIndex < selectedLesson.letters.length - 1 ? (
+                  <button className="primary-button modal-button study-start" type="button" onClick={() => setActiveLetterIndex((current) => Math.min(selectedLesson.letters.length - 1, current + 1))}>
+                    Следующая буква →
+                  </button>
+                ) : (
+                  <button className="primary-button modal-button study-start" type="button" onClick={() => { setLessonPhase("practice"); setQuestionIndex(0); setSelectedAnswer(null); setTypedAnswer(""); }}>
+                    Перейти к закреплению →
+                  </button>
+                )}
               </div>
             ) : lessonFinished ? (
               <div className="lesson-result">
