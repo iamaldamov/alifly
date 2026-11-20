@@ -1,4 +1,3 @@
-import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { after, beforeEach, test } from "node:test";
 import {
