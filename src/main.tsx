@@ -4,10 +4,17 @@ import App from "./App";
 import { AuthProvider } from "./auth/AuthContext";
 import "./styles.css";
 import "./forest-glass.css";
+import "./experience-polish.css";
+import MotionEnhancements from "./MotionEnhancements";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AuthProvider><App /></AuthProvider>
+    <AuthProvider>
+      <>
+        <App />
+        <MotionEnhancements />
+      </>
+    </AuthProvider>
   </React.StrictMode>
 );
 

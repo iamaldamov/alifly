@@ -1289,6 +1289,7 @@ export default function App() {
           <AuthPanel cloudStatus={cloudSaveStatus} />
           <button
             className="theme-toggle"
+            data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
             type="button"
             onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
             aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
@@ -1537,7 +1538,7 @@ export default function App() {
                             <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
-                            <button className="letter-speak-button" type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} title="Прослушать">
+                            <button className="letter-speak-button" type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} data-touch-hint="Прослушай произношение этой буквы на арабском" title="Прослушать">
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                             </button>
                             <LetterMakhrajDiagram letter={letter.character} />
@@ -1548,6 +1549,7 @@ export default function App() {
                                 key={item.character}
                                 type="button"
                                 className={index === activeLetterIndex ? "letter-progress-dot is-active" : "letter-progress-dot"}
+                                data-touch-hint={`Перейти к букве ${index + 1}`}
                                 aria-label={`Перейти к букве ${index + 1}`}
                                 aria-current={index === activeLetterIndex ? "step" : undefined}
                                 onClick={() => setActiveLetterIndex(index)}
