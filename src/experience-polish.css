@@ -1,0 +1,429 @@
+/* ALIFLY experience polish — editorial rhythm, tactile feedback and restrained motion.
+   Loaded after the base and forest-glass themes so the original learning UI stays intact. */
+
+:root {
+  --alifly-ease: cubic-bezier(.22, 1, .36, 1);
+  --alifly-motion-fast: 180ms;
+  --alifly-motion-smooth: 620ms;
+}
+
+html {
+  scroll-padding-top: 22px;
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  animation: alifly-ambient-drift 26s ease-in-out infinite alternate;
+  transform-origin: 50% 50%;
+}
+
+@keyframes alifly-ambient-drift {
+  0% { transform: translate3d(-1.2%, -.7%, 0) scale(1); opacity: .78; }
+  100% { transform: translate3d(1.3%, 1%, 0) scale(1.045); opacity: 1; }
+}
+
+.app {
+  width: min(1160px, 100%);
+  padding-inline: clamp(17px, 3.1vw, 36px);
+  isolation: isolate;
+}
+
+/* Quiet field-guide rails. They add structure without competing with the lesson. */
+.app::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(25% - .5px), rgba(199, 203, 184, .045) 25%, transparent calc(25% + .5px)),
+    linear-gradient(90deg, transparent calc(50% - .5px), rgba(199, 203, 184, .045) 50%, transparent calc(50% + .5px)),
+    linear-gradient(90deg, transparent calc(75% - .5px), rgba(199, 203, 184, .045) 75%, transparent calc(75% + .5px));
+}
+
+.topbar {
+  min-height: 72px;
+  transition: background var(--alifly-motion-smooth) ease, border-color var(--alifly-motion-smooth) ease;
+}
+
+.hero {
+  min-height: 470px;
+  border-radius: 34px;
+  isolation: isolate;
+  transition: border-color var(--alifly-motion-smooth) ease, box-shadow var(--alifly-motion-smooth) ease;
+}
+
+.hero::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 8% 8%, rgba(199, 203, 184, .12), transparent 33%),
+    linear-gradient(112deg, rgba(15, 31, 23, .18), transparent 62%);
+}
+
+.hero-content,
+.hero-art {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-content {
+  max-width: 560px;
+}
+
+.hero h1 {
+  max-width: 11ch;
+  font-size: clamp(3.35rem, 7vw, 5rem);
+  font-weight: 540;
+  line-height: .99;
+  letter-spacing: -.065em;
+  text-wrap: balance;
+}
+
+.hero-content > p {
+  max-width: 37ch;
+  font-size: 16px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.eyebrow,
+.section-label {
+  font-size: 11px;
+  letter-spacing: .18em;
+  line-height: 1.5;
+}
+
+.hero-note {
+  font-size: 12px;
+  letter-spacing: .01em;
+}
+
+.art-circle {
+  animation: alifly-float 8s ease-in-out infinite;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.art-circle span {
+  display: block;
+  animation: alifly-letter-breathe 6.5s ease-in-out infinite;
+  transform-origin: 50% 56%;
+}
+
+.art-star {
+  animation: alifly-star-glint 5.5s ease-in-out infinite;
+}
+
+.star-two {
+  animation-delay: -2.4s;
+}
+
+@keyframes alifly-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(1.2deg); }
+}
+
+@keyframes alifly-letter-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.025); }
+}
+
+@keyframes alifly-star-glint {
+  0%, 100% { opacity: .68; transform: scale(.94) rotate(-5deg); }
+  50% { opacity: 1; transform: scale(1.08) rotate(7deg); }
+}
+
+.primary-button,
+.review-button,
+.theme-toggle,
+.account-button,
+.word-game-primary,
+.daily-quest-option,
+.auth-submit,
+.letter-speak-button,
+.letter-nav-button,
+.alphabet-tips-toggle,
+.support-project-button {
+  transition:
+    transform var(--alifly-motion-fast) var(--alifly-ease),
+    box-shadow var(--alifly-motion-smooth) ease,
+    border-color var(--alifly-motion-smooth) ease,
+    background-color var(--alifly-motion-smooth) ease;
+  touch-action: manipulation;
+}
+
+.stage-card,
+.progress-card,
+.reading-card,
+.daily-quest-card,
+.study-phrase-card,
+.word-game-card {
+  transition:
+    transform 420ms var(--alifly-ease),
+    border-color 360ms ease,
+    box-shadow 420ms ease,
+    background-color 360ms ease;
+}
+
+.stage-card {
+  min-height: 132px;
+  border-radius: 24px;
+}
+
+.stage-card:not(:disabled):active,
+.primary-button:active,
+.review-button:active,
+.theme-toggle:active,
+.account-button:active,
+.word-game-primary:active,
+.daily-quest-option:active,
+.letter-speak-button:active,
+.letter-nav-button:active,
+.answer-option:active {
+  transform: scale(.975);
+}
+
+.progress-track,
+.lesson-progress,
+.reading-progress {
+  overflow: hidden;
+}
+
+.progress-fill,
+.lesson-progress span,
+.reading-progress span {
+  transform-origin: left center;
+  transition: width 900ms var(--alifly-ease);
+}
+
+.answer-option,
+.reading-option {
+  min-height: 58px;
+  transition:
+    transform 180ms var(--alifly-ease),
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.letter-speak-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 16px;
+}
+
+.letter-nav-button,
+.alphabet-tips-toggle {
+  min-height: 48px;
+}
+
+.stage-modal {
+  animation: alifly-modal-in 420ms var(--alifly-ease);
+}
+
+@keyframes alifly-modal-in {
+  from { opacity: 0; transform: translateY(18px) scale(.975); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* JS adds reveal classes only after mount, so content is never hidden without JS. */
+.alifly-reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 760ms var(--alifly-ease) var(--alifly-reveal-delay, 0ms),
+    transform 760ms var(--alifly-ease) var(--alifly-reveal-delay, 0ms);
+}
+
+.alifly-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.alifly-touch-hint {
+  position: fixed;
+  z-index: 20;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
+  left: max(16px, env(safe-area-inset-left));
+  width: fit-content;
+  max-width: min(420px, calc(100vw - 32px));
+  margin-inline: auto;
+  padding: 12px 17px;
+  border: 1px solid rgba(199, 203, 184, .32);
+  border-radius: 16px;
+  background: rgba(15, 31, 23, .88);
+  color: #F0F1E7;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .12);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(.98);
+  transition: opacity 220ms ease, transform 320ms var(--alifly-ease);
+}
+
+.alifly-touch-hint.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+:root[data-theme="light"] .alifly-touch-hint {
+  border-color: rgba(30, 58, 46, .18);
+  background: rgba(30, 58, 46, .92);
+  color: #F0F1E7;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #C7CBB8;
+  outline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .stage-card:not(:disabled):hover,
+  .progress-card:hover,
+  .reading-card:hover,
+  .daily-quest-card:hover,
+  .study-phrase-card:hover,
+  .word-game-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .letter-speak-button:hover,
+  .letter-nav-button:hover,
+  .alphabet-tips-toggle:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 700px) {
+  .app {
+    padding-inline: 16px;
+  }
+
+  .app::before {
+    background:
+      linear-gradient(90deg, transparent calc(50% - .5px), rgba(199, 203, 184, .035) 50%, transparent calc(50% + .5px));
+  }
+
+  .topbar {
+    min-height: 64px;
+    height: auto;
+    gap: 10px;
+  }
+
+  .hero {
+    min-height: unset;
+    padding: 34px 23px 18px;
+    margin-top: 15px;
+    border-radius: 26px;
+  }
+
+  .hero h1 {
+    max-width: 10ch;
+    font-size: clamp(2.8rem, 11vw, 3.7rem);
+    line-height: .99;
+  }
+
+  .hero-content > p {
+    max-width: 34ch;
+    font-size: 15px;
+    line-height: 1.68;
+  }
+
+  .hero-art {
+    min-height: 218px;
+  }
+
+  .art-circle {
+    width: min(184px, 58vw);
+  }
+
+  .stage-card {
+    min-height: 116px;
+    padding: 17px;
+    border-radius: 21px;
+  }
+
+  .progress-card,
+  .reading-card,
+  .daily-quest-card {
+    border-radius: 20px;
+  }
+
+  .answer-option,
+  .reading-option {
+    min-height: 60px;
+  }
+
+  .stage-modal {
+    animation-duration: 340ms;
+  }
+
+  .alifly-touch-hint {
+    font-size: 13px;
+    padding: 13px 17px;
+  }
+}
+
+@media (max-width: 390px) {
+  .app { padding-inline: 13px; }
+  .hero { padding-inline: 19px; }
+  .hero h1 { font-size: clamp(2.65rem, 10.8vw, 3.25rem); }
+  .topbar-right { gap: 8px; }
+  .stage-card { gap: 12px; }
+}
+
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .art-circle,
+  .art-circle span,
+  .art-star {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  body::before { animation: none; }
+  .alifly-reveal,
+  .alifly-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .stage-modal { animation: none; }
+  .art-circle,
+  .art-circle span,
+  .art-star { animation: none; }
+  .primary-button,
+  .review-button,
+  .theme-toggle,
+  .account-button,
+  .word-game-primary,
+  .daily-quest-option,
+  .letter-speak-button,
+  .letter-nav-button,
+  .stage-card,
+  .progress-card,
+  .reading-card,
+  .daily-quest-card,
+  .study-phrase-card,
+  .word-game-card,
+  .answer-option,
+  .reading-option {
+    transition: none;
+  }
+}
