@@ -36,6 +36,7 @@ export default function DailyQuest({
                 key={option}
                 type="button"
                 className={`daily-quest-option ${goal === option ? "is-selected" : ""}`}
+                data-touch-hint={`Дневная цель: ${option} ${option === 1 ? "урок" : "урока"}. Меняй её под свой темп`}
                 onClick={() => onGoalChange(option)}
                 aria-pressed={goal === option}
               >
