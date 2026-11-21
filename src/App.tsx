@@ -1304,19 +1304,31 @@ export default function App() {
 
       <section className="hero">
         <div className="hero-content">
-          <span className="eyebrow">ТВОЙ ПУТЬ К ЗНАНИЯМ</span>
-          <h1>Арабский язык <span>с нуля</span></h1>
-          <p>Начни изучать современный литературный арабский постепенно. Маленькие уроки — большие достижения.</p>
-          <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
-            Начать обучение <span>→</span>
-          </button>
-          <div className="hero-note"><span>✦</span> Девять коротких уроков бесплатно</div>
+          <div className="hero-overline">
+            <span className="hero-overline-line" />
+            <span>АРАБСКИЙ · С НУЛЯ</span>
+            <span className="hero-overline-index">01 / 03</span>
+          </div>
+          <h1>Открой для себя <span>арабский язык.</span></h1>
+          <p>Понятный путь от первой буквы до уверенного чтения. Короткие занятия, практика и заметный прогресс — в твоём темпе.</p>
+          <div className="hero-actions">
+            <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
+              Начать обучение <span>↗</span>
+            </button>
+            <span className="hero-action-note">Первые уроки доступны бесплатно</span>
+          </div>
+          <div className="hero-bottomline">
+            <span>БУКВЫ</span><i />
+            <span>ЧТЕНИЕ</span><i />
+            <span>ПРАКТИКА</span>
+          </div>
         </div>
-        <div className="hero-art" aria-label="Арабская буква Алиф">
-          <div className="art-circle"><span>ا</span></div>
-          <div className="art-star star-one">✦</div>
-          <div className="art-star star-two">✧</div>
-          <div className="art-dot" />
+        <div className="hero-index-art" aria-hidden="true">
+          <span className="hero-index-caption">THE ARABIC<br/>LEARNING JOURNEY</span>
+          <span className="hero-index-number">ا</span>
+          <span className="hero-index-orbit hero-index-orbit-one" />
+          <span className="hero-index-orbit hero-index-orbit-two" />
+          <span className="hero-index-foot">ALIFLY® · EST. FOR LEARNERS</span>
         </div>
       </section>
 
