@@ -1307,7 +1307,7 @@ export default function App() {
           <span className="eyebrow">ТВОЙ ПУТЬ К ЗНАНИЯМ</span>
           <h1>Арабский язык <span>с нуля</span></h1>
           <p>Начни изучать современный литературный арабский постепенно. Маленькие уроки — большие достижения.</p>
-          <button className="primary-button" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
+          <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
             Начать обучение <span>→</span>
           </button>
           <div className="hero-note"><span>✦</span> Девять коротких уроков бесплатно</div>
@@ -1364,7 +1364,7 @@ export default function App() {
           {stages.map((stage) => {
             const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked) || (stage.id === 3 && stageThreeUnlocked);
             return (
-              <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
+              <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} data-touch-hint={unlocked ? `Открой этап «${stage.title}» и выбери доступный урок` : undefined} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
                 <span className="stage-icon">{stage.icon}</span>
                 <span className="stage-info">
                   <span className="stage-number">ЭТАП {stage.id}</span>

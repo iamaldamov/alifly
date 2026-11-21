@@ -125,7 +125,7 @@ export default function ReadingTrainer() {
                 disabled={submitted !== null}
               />
               {submitted === null && (
-                <button className="primary-button reading-next" type="submit" disabled={!draft.trim()}>
+                <button className="primary-button reading-next" type="submit" data-touch-hint="Проверь ответ и узнай, правильно ли прочитал сочетание" disabled={!draft.trim()}>
                   Проверить
                 </button>
               )}
@@ -137,7 +137,7 @@ export default function ReadingTrainer() {
               </div>
             )}
             {submitted !== null && (
-              <button type="button" className="primary-button reading-next" onClick={next}>
+              <button type="button" className="primary-button reading-next" data-touch-hint="Перейди к следующему упражнению по чтению" onClick={next}>
                 {index === exercises.length - 1 ? "Завершить тренировку" : "Дальше →"}
               </button>
             )}
@@ -148,7 +148,7 @@ export default function ReadingTrainer() {
             <div className="reading-result-score">{correct} / {exercises.length}</div>
             <h3>{correct === exercises.length ? "Ма ша Аллах! Отлично!" : "Хорошая работа!"}</h3>
             <p>Повтори фатху, кясру и дамму, а затем попробуй снова без вариантов ответа.</p>
-            <button type="button" className="primary-button reading-next" onClick={restart}>Повторить тренировку</button>
+            <button type="button" className="primary-button reading-next" data-touch-hint="Начни тренировку чтения с первого упражнения" onClick={restart}>Повторить тренировку</button>
           </div>
         )}
       </div>
