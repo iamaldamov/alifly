@@ -1325,7 +1325,7 @@ export default function App() {
         </div>
         <div className="hero-index-art" aria-hidden="true">
           <span className="hero-index-caption">THE ARABIC<br/>LEARNING JOURNEY</span>
-          <span className="hero-index-number">ا</span>
+          <span className="hero-index-number">01</span>
           <span className="hero-index-orbit hero-index-orbit-one" />
           <span className="hero-index-orbit hero-index-orbit-two" />
           <span className="hero-index-foot">ALIFLY® · EST. FOR LEARNERS</span>
