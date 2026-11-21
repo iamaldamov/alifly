@@ -9,6 +9,29 @@ type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error"
 type AuthMode = "signup" | "signin";
 type AvatarId = "duck" | "owl" | "turtle" | "fox" | "cat" | "panda";
 
+function getFirebaseAuthErrorCode(error: unknown): string | null {
+  if (typeof error !== "object" || error === null || !("code" in error)) return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
+
+function getFirebaseAuthErrorMessage(error: unknown): string {
+  switch (getFirebaseAuthErrorCode(error)) {
+    case "auth/invalid-email":
+      return "Проверь адрес электронной почты.";
+    case "auth/weak-password":
+      return "Пароль слишком простой. Используй не менее 8 символов.";
+    case "auth/invalid-credential":
+      return "Не удалось войти. Проверь почту и пароль или восстанови пароль.";
+    case "auth/too-many-requests":
+      return "Слишком много попыток. Подожди немного и попробуй снова.";
+    case "auth/network-request-failed":
+      return "Нет соединения. Проверь интернет и попробуй снова.";
+    default:
+      return "Не удалось выполнить действие. Попробуй ещё раз.";
+  }
+}
+
 const AVATARS: { id: AvatarId; emoji: string; name: string }[] = [
   { id: "duck", emoji: "🐤", name: "Утёнок" },
   { id: "owl", emoji: "🦉", name: "Сова" },
@@ -251,7 +274,13 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
         setMessage("");
       }
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "Не удалось выполнить вход. Проверь почту и пароль.");
+      if (mode === "signup" && getFirebaseAuthErrorCode(authError) === "auth/email-already-in-use") {
+        setMode("signin");
+        setPassword("");
+        setMessage("Эта почта уже зарегистрирована. Войди в аккаунт или воспользуйся восстановлением пароля.");
+      } else {
+        setError(getFirebaseAuthErrorMessage(authError));
+      }
     } finally {
       setBusy(false);
     }
