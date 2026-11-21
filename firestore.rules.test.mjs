@@ -7,9 +7,11 @@ import {
 } from "@firebase/rules-unit-testing";
 import {
   Timestamp,
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -100,6 +102,10 @@ test("a learner can change their avatar but cannot edit protected profile fields
     trialEndsAt: Timestamp.fromDate(new Date("2026-11-27T00:00:00Z")),
     updatedAt: serverTimestamp(),
   }));
+  await assertFails(updateDoc(profileRef, {
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }));
 });
 
 test("a learner cannot read another learner's profile", async () => {
@@ -115,6 +121,38 @@ test("a learner cannot read another learner's profile", async () => {
 
   await assertFails(getDoc(doc(bob.firestore(), "users/alice")));
   await assertSucceeds(getDoc(doc(alice.firestore(), "users/alice")));
+});
+
+test("learners cannot list the profiles collection", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+  await assertFails(getDocs(collection(alice.firestore(), "users")));
+});
+
+test("a learner cannot create a profile with an avatar outside the allowlist", async () => {
+  const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
+
+  await assertFails(setDoc(doc(alice.firestore(), "users/alice"), {
+    ...profileDocument(),
+    avatarId: "dragon",
+  }));
+});
+
+test("a learner cannot create a profile with another email address", async () => {
+  const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
+
+  await assertFails(setDoc(doc(alice.firestore(), "users/alice"), {
+    ...profileDocument(),
+    email: "bob@example.com",
+  }));
+});
+
+test("a learner cannot choose a client-controlled profile creation timestamp", async () => {
+  const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
+
+  await assertFails(setDoc(doc(alice.firestore(), "users/alice"), {
+    ...profileDocument(),
+    createdAt: Timestamp.fromDate(new Date("2020-01-01T00:00:00Z")),
+  }));
 });
 
 test("a learner can create their own current progress document", async () => {
@@ -148,6 +186,18 @@ test("progress writes reject unknown or server-owned fields", async () => {
     {
       ...progressDocument(),
       trialEndsAt: Timestamp.fromDate(new Date("2026-11-27T00:00:00Z")),
+    },
+  ));
+});
+
+test("progress writes reject an unsupported daily goal", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+
+  await assertFails(setDoc(
+    doc(alice.firestore(), "users/alice/progress/current"),
+    {
+      ...progressDocument(),
+      daily_goal: 99,
     },
   ));
 });
