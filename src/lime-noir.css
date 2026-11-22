@@ -12,6 +12,8 @@
 }
 
 :root[data-theme="dark"] {
+  --text-soft: #C2C2C7;
+  --muted: #C2C2C7;
   --green: #C6F432;
   --green-dark: #D8FF59;
   --green-soft: rgba(198, 244, 50, .12);
@@ -240,6 +242,8 @@
 
 /* Light mode keeps the same brand colors while preserving comfortable contrast. */
 :root[data-theme="light"] {
+  --text-soft: #55555A;
+  --muted: #55555A;
   --green: #0B0B0C;
   --green-dark: #0B0B0C;
   --green-soft: rgba(198,244,50,.2);
@@ -307,4 +311,16 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .primary-button, .stage-card, .answer-option, .reading-option { transition: none !important; }
+}
+
+/* Contrast safety net: readable supporting text across both themes. */
+:root[data-theme="dark"] {
+  --text-soft: #C2C2C7;
+  --text-muted: #B6B6BB;
+  --muted: #C2C2C7;
+}
+:root[data-theme="light"] {
+  --text-soft: #55555A;
+  --text-muted: #55555A;
+  --muted: #55555A;
 }
