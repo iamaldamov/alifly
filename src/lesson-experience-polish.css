@@ -1,0 +1,77 @@
+/* ALIFLY lesson experience — spacious, readable, mobile-first. */
+.stage-modal:has(.lesson-study),.stage-modal.lesson-modal{width:min(760px,100%);max-height:min(92dvh,940px);padding:clamp(28px,4vw,48px);border-radius:28px;text-align:left;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.stage-modal.lesson-modal h2,.lesson-modal h2{max-width:18ch;margin:12px 0 10px;font-size:clamp(28px,4vw,38px);line-height:1.12;letter-spacing:-.035em}
+.lesson-topline{min-height:32px;padding-right:42px}
+.lesson-topline .section-label{font-size:10px;letter-spacing:.15em}
+.lesson-step{font-size:12px;font-variant-numeric:tabular-nums}
+.lesson-progress{height:8px;margin:14px 0 28px;border-radius:99px}
+.lesson-intro{max-width:62ch;margin-bottom:18px;font-size:15px;line-height:1.7}
+.study-guidance{margin:0 0 22px;padding:14px 16px;border:1px solid var(--line,rgba(140,160,140,.2));border-radius:15px;background:var(--surface-soft,rgba(140,160,140,.08));font-size:13px!important;line-height:1.65!important}
+.alphabet-flashcards{gap:16px}
+.letter-flashcard{position:relative;min-height:clamp(360px,52vh,500px);padding:clamp(24px,4vw,42px);border-radius:26px;background:radial-gradient(circle at 50% 34%,rgba(198,244,50,.11),transparent 42%),linear-gradient(145deg,var(--surface,#fffefa),var(--surface-soft,#f0f5ed))}
+.letter-flashcard-character{min-height:clamp(170px,24vh,230px);margin:14px 0 4px;font-size:clamp(128px,24vw,190px);line-height:1.5}
+.letter-flashcard-name{font-size:clamp(24px,3vw,30px)}
+.letter-flashcard-note{max-width:44ch;min-height:0;margin:12px 0 18px;font-size:14px;line-height:1.7}
+.letter-speak-button{min-height:48px;padding-inline:20px;border-radius:15px}
+.letter-speak-button svg{width:20px;height:20px}
+.letter-flashcard-progress{gap:8px;padding:7px 0}
+.letter-progress-dot{width:9px;height:9px}
+.letter-progress-dot.is-active{width:26px}
+.letter-flashcard-navigation{gap:12px}
+.letter-nav-button{min-height:48px;padding-inline:20px;border-radius:15px;font-size:13px}
+.study-phrase-cards{max-height:min(55vh,560px);gap:13px;padding:2px 3px 10px}
+.study-phrase-card{gap:9px;padding:clamp(18px,3vw,26px);border-radius:20px}
+.study-phrase-arabic{font-size:clamp(36px,6vw,52px);line-height:1.85}
+.study-phrase-transliteration{font-size:13px}
+.study-phrase-translation{font-size:16px}
+.study-phrase-card small{font-size:12px}
+.question-block{padding-top:24px;border-top-color:var(--line,rgba(140,160,140,.2))}
+.question-label{font-size:10px;letter-spacing:.16em}
+.question-block h3{max-width:58ch;margin:12px 0 20px;font-size:clamp(20px,3vw,26px);line-height:1.4}
+.answer-options{gap:12px;grid-template-columns:repeat(auto-fit,minmax(92px,1fr))}
+.answer-option{min-height:clamp(84px,12vh,112px);border-radius:18px;font-size:clamp(42px,7vw,56px)}
+.answer-muted{opacity:.42;filter:saturate(.55)}
+.recall-stimulus-text{max-width:100%;min-height:90px;font-family:inherit;font-size:clamp(22px,4vw,30px);line-height:1.5;text-align:center;overflow-wrap:anywhere}
+.recall-stimulus-long{font-size:clamp(42px,9vw,68px);line-height:1.45;overflow-wrap:anywhere}
+.answer-feedback{margin-top:18px;padding:16px 18px;border-radius:16px;font-size:14px;line-height:1.65}
+.answer-feedback strong{font-size:15px}
+.recall-stimulus{min-height:120px;font-size:clamp(72px,13vw,104px)}
+.recall-form{display:grid;gap:12px}
+.recall-label{font-size:13px;font-weight:700}
+.recall-input{min-height:58px;border-radius:16px;font-size:18px}
+.lesson-modal .modal-button{min-height:58px;margin-top:20px;border-radius:17px;font-size:15px}
+.lesson-result{padding:24px 8px 8px}
+.result-symbol{width:76px;height:76px;border-radius:25px;font-size:38px}
+.result-score{width:104px;height:104px;font-size:27px}
+:root[data-theme="dark"] .study-guidance{border-color:var(--border,#3e5145);background:rgba(255,255,255,.045)}
+:root[data-theme="dark"] .letter-flashcard{border-color:var(--border,#3e5145);background:radial-gradient(circle at 50% 34%,rgba(198,244,50,.09),transparent 42%),linear-gradient(145deg,#202c26,#17221d)}
+:root[data-theme="dark"] .letter-flashcard-character,:root[data-theme="dark"] .letter-flashcard-name{color:#e5efe7}
+:root[data-theme="dark"] .letter-speak-button,:root[data-theme="dark"] .letter-nav-button{border-color:var(--border,#3e5145);background:#24352b;color:#e5efe7}
+:root[data-theme="dark"] .answer-option{border-color:var(--border,#3e5145);background:#1d2b23;color:#e5efe7}
+:root[data-theme="dark"] .answer-option.answer-correct{border-color:#6eaa76;background:#1d3a29;color:#b9efbd}
+:root[data-theme="dark"] .answer-option.answer-wrong{border-color:#c87970;background:#422825;color:#ffd2cb}
+:root[data-theme="dark"] .answer-option.answer-muted{opacity:.38;filter:saturate(.45)}
+:root[data-theme="dark"] .feedback-correct{background:#1d3a29;color:#b9efbd}
+:root[data-theme="dark"] .feedback-wrong{background:#422825;color:#ffd2cb}
+@media(max-width:700px){
+.modal-backdrop{display:flex;align-items:stretch;justify-content:center;padding:0;background:rgba(8,17,12,.72);backdrop-filter:blur(12px)}
+.stage-modal.lesson-modal,.stage-modal:has(.lesson-study){position:relative;width:100%;max-width:none;height:100%;max-height:100dvh;min-height:100dvh;margin:0;padding:calc(28px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));border:0;border-radius:0;box-shadow:none;overflow-y:auto}
+.lesson-modal .modal-close{position:absolute;z-index:3;top:calc(14px + env(safe-area-inset-top));right:16px;float:none;margin:0}
+.lesson-topline{padding-right:42px}
+.lesson-modal h2{clear:both;padding-top:8px;font-size:clamp(27px,7vw,34px)}
+.lesson-intro{font-size:14px}
+.study-guidance{padding:12px 14px;font-size:12px!important}
+.letter-flashcard{min-height:clamp(330px,52svh,440px);padding:22px 16px;border-radius:22px}
+.letter-flashcard-character{min-height:clamp(150px,24svh,190px);font-size:clamp(120px,32vw,160px)}
+.letter-flashcard-name{font-size:24px}
+.letter-flashcard-note{font-size:13px}
+.study-phrase-cards{max-height:none;overflow:visible}
+.study-phrase-card{padding:17px 14px}
+.study-phrase-arabic{font-size:clamp(34px,9vw,44px)}
+.answer-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.answer-option{min-height:82px;font-size:44px}
+.question-block h3{font-size:20px}
+.lesson-modal .modal-button{min-height:56px}
+}
+@media(max-width:380px){.stage-modal.lesson-modal,.stage-modal:has(.lesson-study){padding-inline:16px}.answer-options{gap:8px}.answer-option{min-height:74px}}
+@media(prefers-reduced-motion:reduce){.stage-modal.lesson-modal{animation:none}}

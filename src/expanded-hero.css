@@ -1,0 +1,37 @@
+/* ALIFLY — expanded editorial hero. Presentation only. */
+.app{width:min(1480px,100%);max-width:none;margin-inline:auto;padding-inline:clamp(20px,4.2vw,68px)}
+.hero{width:100%;grid-template-columns:minmax(0,1.12fr) minmax(240px,.88fr);gap:clamp(18px,3vw,52px);min-height:clamp(500px,54vw,720px);margin-top:clamp(18px,2.4vw,30px);padding:clamp(44px,6vw,88px) clamp(28px,6vw,84px);border-radius:clamp(24px,3vw,38px)}
+.hero-content{width:100%;max-width:680px}
+.hero h1{max-width:10.5ch;margin-block:clamp(34px,4.4vw,58px) 24px;font-size:clamp(64px,7.6vw,112px);line-height:.98;letter-spacing:-.07em;text-wrap:balance}
+.hero-content>p{max-width:48ch;font-size:clamp(17px,1.45vw,20px);line-height:1.78}
+.hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px 22px;margin-top:clamp(24px,3vw,34px)}
+.hero .primary-button{min-height:62px;padding-inline:clamp(25px,3vw,36px);font-size:16px}
+.hero-action-note{font-size:13px}
+.hero-bottomline{margin-top:clamp(46px,6vw,76px)}
+.hero-index-art{position:relative;min-height:340px;width:100%}
+.hero-index-number{font-size:clamp(180px,23vw,330px)}
+.hero-content,.hero-index-art{animation:alifly-hero-arrive 780ms cubic-bezier(.22,1,.36,1) both}
+.hero-index-art{animation-delay:180ms}
+.hero-content>*{animation:alifly-hero-arrive 760ms cubic-bezier(.22,1,.36,1) both}
+.hero-content>:nth-child(1){animation-delay:70ms}.hero-content>:nth-child(2){animation-delay:160ms}.hero-content>:nth-child(3){animation-delay:250ms}.hero-content>:nth-child(4){animation-delay:340ms}.hero-content>:nth-child(5){animation-delay:430ms}
+@keyframes alifly-hero-arrive{from{opacity:0;transform:translate3d(0,22px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@media(max-width:760px){
+.app{width:100%;padding-inline:0}
+.topbar{padding-inline:16px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;width:100%;min-height:min(780px,calc(100svh - 70px));margin:0;padding:clamp(38px,9vw,58px) 7vw 30px;overflow:hidden;border:0;border-radius:0;box-shadow:none}
+.hero-content{position:relative;z-index:1;width:100%;max-width:none;isolation:isolate}
+.hero-content:before,.hero-content:after{position:absolute;z-index:-1;display:block;color:#C6F432;font-family:"Noto Naskh Arabic","Amiri",Georgia,serif;font-weight:400;line-height:1;pointer-events:none;user-select:none;opacity:.16}
+.hero-content:before{content:"ا";top:16%;right:-1vw;font-size:clamp(88px,23vw,132px);transform:rotate(7deg)}
+.hero-content:after{content:"ع";bottom:0;left:-4vw;font-size:clamp(90px,24vw,138px);transform:rotate(-8deg)}
+.hero-overline{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.16em}
+.hero-overline-index{margin-left:auto}
+.hero h1{position:relative;z-index:1;width:100%;max-width:10.5ch;margin:clamp(38px,10vw,58px) 0 22px;font-size:clamp(58px,14.2vw,80px);line-height:.99;letter-spacing:-.068em}
+.hero-content>p{position:relative;z-index:1;width:100%;max-width:40ch;font-size:clamp(16px,4.25vw,18px);line-height:1.72}
+.hero-actions{position:relative;z-index:1;width:100%;align-items:flex-start;gap:14px;margin-top:24px}
+.hero .primary-button{min-height:60px;padding-inline:clamp(22px,6vw,30px);font-size:16px}
+.hero-action-note{font-size:12px;line-height:1.5}
+.hero-bottomline{position:relative;z-index:1;display:flex;width:100%;flex-wrap:wrap;margin-top:clamp(42px,11vw,68px);padding-top:0;gap:12px;font-size:9px}
+.hero-index-art{display:none}
+}
+@media(max-width:390px){.hero{padding-inline:6vw}.hero h1{max-width:10.5ch;font-size:clamp(54px,14vw,64px)}.hero-actions{gap:12px}.hero-action-note{max-width:125px}.hero-bottomline{gap:9px;letter-spacing:.14em}}
+@media(prefers-reduced-motion:reduce){.hero-content,.hero-index-art,.hero-content>*{animation:none!important}}
