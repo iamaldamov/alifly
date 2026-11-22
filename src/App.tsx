@@ -38,77 +38,55 @@ const arabicLetterNames: Record<string, string> = {
   "ي": "يَاء",
 };
 
-type MakhrajInfo = {
-  point: [number, number];
-  title: string;
-  description: string;
-};
+type MakhrajArea = "air" | "throat" | "back" | "middle" | "side" | "tip" | "lips";
 
-const makhrajByLetter: Record<string, MakhrajInfo> = {
-  "ا": { point: [166, 83], title: "Полость рта", description: "Долгий звук алифа произносится свободным потоком воздуха, без смыкания языка с нёбом." },
-  "ب": { point: [39, 99], title: "Две губы", description: "Мягко сомкни обе губы и раскрой их, выпуская звук." },
-  "ت": { point: [76, 101], title: "Кончик языка и верхние зубы", description: "Кончик языка касается основания верхних передних зубов, затем быстро отходит." },
-  "ث": { point: [58, 91], title: "Кончик языка у края зубов", description: "Слегка покажи кончик языка между передними зубами и пропусти воздух без голоса." },
-  "ج": { point: [158, 105], title: "Середина языка", description: "Середина языка поднимается к твёрдому нёбу." },
-  "ح": { point: [286, 108], title: "Середина горла", description: "Звук формируется в средней части горла, без участия кончика языка." },
-  "خ": { point: [275, 82], title: "Верхняя часть горла", description: "Звук образуется в верхней части горла, ближе ко рту." },
-  "د": { point: [76, 101], title: "Кончик языка и верхние зубы", description: "Кончик языка касается основания верхних передних зубов и отходит со звонким звуком." },
-  "ذ": { point: [58, 91], title: "Кончик языка у края зубов", description: "Кончик языка слегка выходит между передними зубами; звук произносится с голосом." },
-  "ر": { point: [84, 108], title: "Кончик языка у дёсен", description: "Кончик языка касается участка дёсен сразу за верхними передними зубами." },
-  "ز": { point: [66, 96], title: "Кончик языка у передних зубов", description: "Кончик языка находится близко к нижней стороне верхних передних зубов; воздух проходит с голосом." },
-  "س": { point: [66, 96], title: "Кончик языка у передних зубов", description: "Кончик языка находится близко к передним зубам; воздух проходит узкой струёй без голоса." },
-  "ش": { point: [158, 105], title: "Середина языка", description: "Середина языка поднимается к нёбу, оставляя узкий проход для воздуха." },
-  "ص": { point: [66, 96], title: "Передняя часть языка", description: "Кончик языка находится у передних зубов, а задняя часть языка приподнята; звук твёрдый." },
-  "ض": { point: [122, 125], title: "Боковая сторона языка", description: "Одна из боковых сторон языка прижимается к верхним коренным зубам." },
-  "ط": { point: [76, 101], title: "Кончик языка и верхние зубы", description: "Кончик языка касается основания верхних передних зубов; задняя часть языка приподнята." },
-  "ظ": { point: [58, 91], title: "Кончик языка у края зубов", description: "Кончик языка касается края верхних передних зубов и слегка выходит между ними." },
-  "ع": { point: [286, 108], title: "Середина горла", description: "Звук формируется в средней части горла; это не обычный звук русского «а»." },
-  "غ": { point: [275, 82], title: "Верхняя часть горла", description: "Звук образуется в верхней части горла, ближе ко рту, с голосом." },
-  "ف": { point: [47, 109], title: "Нижняя губа и верхние зубы", description: "Край верхних передних зубов мягко касается внутренней стороны нижней губы." },
-  "ق": { point: [225, 94], title: "Корень языка", description: "Самая задняя часть языка поднимается к мягкому нёбу." },
-  "ك": { point: [204, 98], title: "Задняя часть языка", description: "Задняя часть языка касается нёба немного ближе ко рту, чем при ق." },
-  "ل": { point: [110, 118], title: "Боковая часть языка у дёсен", description: "Передняя боковая часть языка касается дёсен за верхними зубами." },
-  "م": { point: [39, 99], title: "Две губы", description: "Обе губы смыкаются; звук сопровождается носовым резонансом." },
-  "ن": { point: [84, 108], title: "Кончик языка у дёсен", description: "Кончик языка касается дёсен за верхними передними зубами; звук имеет носовой резонанс." },
-  "ه": { point: [298, 132], title: "Глубина горла", description: "Лёгкий выдох выходит из самой глубокой части горла." },
-  "و": { point: [39, 99], title: "Округлённые губы", description: "Округли губы вперёд, как будто произносишь короткое «у»." },
-  "ي": { point: [158, 105], title: "Середина языка", description: "При согласном ي середина языка поднимается к нёбу; в долгом звуке положение свободнее." },
+const makhrajAreaByLetter: Record<string, MakhrajArea> = {
+  "ا": "air",
+  "ء": "throat", "ه": "throat", "ح": "throat", "ع": "throat", "خ": "throat", "غ": "throat",
+  "ق": "back", "ك": "back",
+  "ج": "middle", "ش": "middle", "ي": "middle",
+  "ض": "side",
+  "ل": "tip", "ن": "tip", "ر": "tip", "ت": "tip", "د": "tip", "ط": "tip",
+  "ث": "tip", "ذ": "tip", "ظ": "tip", "س": "tip", "ز": "tip", "ص": "tip",
+  "ف": "lips", "ب": "lips", "م": "lips", "و": "lips",
 };
 
 function LetterMakhrajDiagram({ letter }: { letter: string }) {
-  const info = makhrajByLetter[letter] ?? {
-    point: [160, 105] as [number, number],
-    title: "Место образования звука",
-    description: "",
+  const area = makhrajAreaByLetter[letter] ?? "middle";
+  const highlight: Record<MakhrajArea, { cx: number; cy: number; rx: number; ry: number }> = {
+    air: { cx: 218, cy: 105, rx: 70, ry: 24 },
+    throat: { cx: 350, cy: 145, rx: 31, ry: 43 },
+    back: { cx: 266, cy: 151, rx: 37, ry: 24 },
+    middle: { cx: 205, cy: 163, rx: 39, ry: 23 },
+    side: { cx: 174, cy: 174, rx: 35, ry: 18 },
+    tip: { cx: 126, cy: 163, rx: 31, ry: 20 },
+    lips: { cx: 72, cy: 142, rx: 26, ry: 25 },
   };
-  const [pointX, pointY] = info.point;
-  const isOpenCavity = letter === "ا";
+  const mark = highlight[area];
 
   return (
-    <section className="letter-makhraj" aria-label={`Место образования звука буквы ${letter}`}>
-      <svg
-        className="letter-mouth-diagram"
-        viewBox="0 0 340 180"
-        role="img"
-        aria-label={`Боковой разрез ротовой полости. Выделена область артикуляции буквы ${letter}.`}
-      >
-        <path className="mouth-head-outline" d="M18 23 C66 3 173 4 239 26 C273 37 295 56 304 76 L324 91 L307 101 L317 111 L299 122 C296 148 275 164 245 169 C183 181 94 164 49 137 C28 124 17 102 18 78 Z" />
-        <path className="mouth-cavity" d="M31 82 C76 56 163 50 245 72 C267 78 283 91 290 106 C272 127 240 141 201 145 C137 150 78 129 39 109 Z" />
-        <path className="mouth-palate" d="M39 81 C91 54 177 54 251 76" />
-        <path className="mouth-throat" d="M278 76 C291 88 296 103 286 122 C280 136 272 145 261 151" />
-        <path className="mouth-tongue" d="M39 110 C78 121 126 132 170 120 C207 110 246 109 271 124 C246 145 202 153 151 145 C100 138 61 126 39 110 Z" />
-        <path className="mouth-lips" d="M18 83 C28 78 39 78 48 84 M18 108 C29 115 39 116 49 110" />
-        <path className="mouth-teeth" d="M42 78 L69 70 L83 87 L50 96 Z M44 111 L73 111 L85 126 L51 120 Z" />
-        <path className="mouth-gumline" d="M78 74 C117 62 148 62 174 66" />
-        {isOpenCavity ? (
-          <path className="mouth-airflow" d="M55 101 C112 91 187 92 263 105" />
-        ) : (
-          <>
-            <path className="mouth-highlight" d={`M${pointX - 9} ${pointY} Q${pointX} ${pointY - 8} ${pointX + 9} ${pointY}`} />
-            <circle className="mouth-point-active-halo" cx={pointX} cy={pointY} r="12" />
-            <circle className="mouth-point-active" cx={pointX} cy={pointY} r="5.5" />
-          </>
-        )}
+    <section className="letter-makhraj" aria-label={`Иллюстрация артикуляционной области буквы ${letter}`}>
+      <svg className="letter-mouth-diagram" viewBox="0 0 420 250" role="img" aria-label={`Профиль ротовой полости с выделенной областью произношения буквы ${letter}`}>
+        <defs>
+          <linearGradient id="mouthSkin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f3e6d7" />
+            <stop offset="1" stopColor="#d9c7b5" />
+          </linearGradient>
+          <linearGradient id="mouthTongue" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#e8a29e" />
+            <stop offset="1" stopColor="#c97878" />
+          </linearGradient>
+        </defs>
+        <path d="M24 42 C95 9 228 11 304 48 C343 67 364 91 371 119 L402 139 L378 151 L394 164 L367 177 C356 215 317 235 257 235 L105 235 C54 225 27 194 22 151 C19 112 19 73 24 42Z" fill="url(#mouthSkin)" stroke="#b9a795" strokeWidth="3" />
+        <path d="M42 127 C102 86 219 76 305 108 C331 118 347 137 350 157 C325 183 286 194 234 197 C157 201 88 178 42 153Z" fill="#fffdf7" stroke="#c8b9a9" strokeWidth="2.5" />
+        <path d="M55 123 C119 88 223 83 306 111" fill="none" stroke="#b8957f" strokeWidth="11" strokeLinecap="round" />
+        <path d="M343 111 C362 130 366 151 352 175 C343 190 334 199 322 206" fill="none" stroke="#b8957f" strokeWidth="13" strokeLinecap="round" />
+        <path d="M54 154 C103 170 151 186 204 178 C252 169 300 164 334 181 C309 205 258 218 197 210 C131 202 81 181 54 154Z" fill="url(#mouthTongue)" stroke="#b96f70" strokeWidth="2.5" />
+        <path d="M25 126 C39 118 51 119 62 128 M25 151 C40 160 52 161 64 153" fill="none" stroke="#b96f70" strokeWidth="8" strokeLinecap="round" />
+        <path d="M56 118 L89 108 L105 130 L65 141Z M58 157 L93 158 L108 179 L65 170Z" fill="#fff" stroke="#b9afa4" strokeWidth="2" />
+        <path d="M105 109 C149 95 191 93 225 98" fill="none" stroke="#d7a4a0" strokeWidth="3" strokeLinecap="round" />
+        <ellipse cx={mark.cx} cy={mark.cy} rx={mark.rx} ry={mark.ry} fill="#b9e94a" fillOpacity=".38" stroke="#a6d52f" strokeWidth="4" />
+        {area === "air" && <path d="M88 143 C153 119 247 123 323 147" fill="none" stroke="#82b8a0" strokeWidth="5" strokeDasharray="5 10" strokeLinecap="round" />}
       </svg>
     </section>
   );
@@ -1307,6 +1285,17 @@ export default function App() {
   };
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
+  const practiceOptions = currentQuestion?.mode === "recall"
+    ? (() => {
+        const samePrompt = selectedLesson?.questions
+          .filter((item) => item.mode === "recall" && item.prompt === currentQuestion.prompt)
+          .map((item) => item.correct) ?? [];
+        const letterNames = selectedLesson?.letters.map((item) => item.name.split(" (")[0]) ?? [];
+        const vowelChoices = ["Фатха", "Кясра", "Дамма", "ба", "би", "бу", "та", "ти", "ту", "ма", "ми", "му"];
+        const candidates = [...new Set([currentQuestion.correct, ...samePrompt, ...letterNames, ...vowelChoices])];
+        return [currentQuestion.correct, ...candidates.filter((item) => item !== currentQuestion.correct)].slice(0, 3);
+      })()
+    : currentQuestion?.options ?? [];
   const currentQuestionCorrect = currentQuestion && selectedAnswer !== null
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
     : false;
@@ -1679,54 +1668,28 @@ export default function App() {
                 </div>
                 <div className="lesson-progress"><span style={{ width: `${((questionIndex + (selectedAnswer ? 1 : 0)) / selectedLesson.questions.length) * 100}%` }} /></div>
                 <h2 id="stage-modal-title">{selectedLesson.title}</h2>
-                <p className="lesson-intro">{selectedLesson.goal}</p>
-                <div className="question-block">
-                  <span className="question-label">ПРОВЕРЬ СЕБЯ</span>
-                  <h3>{currentQuestion.prompt}</h3>
-                  {currentQuestion.mode === "recall" ? (
-                    <>
-                      {currentQuestion.stimulus && (
-                        <div
-                          className={`recall-stimulus ${currentQuestion.stimulusLang === "ru" ? "recall-stimulus-text" : ""} ${currentQuestion.stimulus.length > 24 ? "recall-stimulus-long" : ""}`}
-                          lang={currentQuestion.stimulusLang ?? "ar"}
-                          dir={currentQuestion.stimulusDir ?? "rtl"}
-                        >{currentQuestion.stimulus}</div>
-                      )}
-                      <form className="recall-form" onSubmit={(event) => { event.preventDefault(); if (typedAnswer.trim()) answerQuestion(typedAnswer.trim()); }}>
-                        <label className="recall-label" htmlFor="recall-answer">Твой ответ по памяти</label>
-                        <input
-                          id="recall-answer"
-                          className="recall-input"
-                          type="text"
-                          value={typedAnswer}
-                          onChange={(event) => setTypedAnswer(event.target.value)}
-                          placeholder="Введи ответ..."
-                          autoComplete="off"
-                          autoCapitalize="none"
-                          spellCheck={false}
-                          disabled={selectedAnswer !== null}
-                        />
-                        {selectedAnswer === null && (
-                          <button className="primary-button modal-button" type="submit" disabled={!typedAnswer.trim()}>
-                            Проверить ответ
-                          </button>
-                        )}
-                      </form>
-                    </>
-                  ) : (
-                    <div className="answer-options">
-                      {currentQuestion.options.map((option) => {
-                        const isCorrect = option === currentQuestion.correct;
-                        const isSelected = option === selectedAnswer;
-                        const stateClass = selectedAnswer === null ? "" : isCorrect ? "answer-correct" : isSelected ? "answer-wrong" : "answer-muted";
-                        return (
-                          <button key={option} className={`answer-option ${stateClass}`} onClick={() => answerQuestion(option)} disabled={selectedAnswer !== null} lang="ar" dir="rtl">
-                            {option}
-                          </button>
-                        );
-                      })}
-                    </div>
+                <div className="question-block practice-question-card">
+                  <span className="question-label">ВОПРОС {questionIndex + 1}</span>
+                  {currentQuestion.stimulus && (
+                    <div
+                      className={`recall-stimulus practice-stimulus ${currentQuestion.stimulusLang === "ru" ? "recall-stimulus-text" : ""} ${currentQuestion.stimulus.length > 24 ? "recall-stimulus-long" : ""}`}
+                      lang={currentQuestion.stimulusLang ?? "ar"}
+                      dir={currentQuestion.stimulusDir ?? "rtl"}
+                    >{currentQuestion.stimulus}</div>
                   )}
+                  <h3>{currentQuestion.prompt}</h3>
+                  <div className="answer-options">
+                    {practiceOptions.map((option) => {
+                      const isCorrect = isCorrectAnswer(currentQuestion, option);
+                      const isSelected = option === selectedAnswer;
+                      const stateClass = selectedAnswer === null ? "" : isCorrect ? "answer-correct" : isSelected ? "answer-wrong" : "answer-muted";
+                      return (
+                        <button key={option} className={`answer-option ${stateClass}`} onClick={() => answerQuestion(option)} disabled={selectedAnswer !== null} lang="ru" dir="auto">
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
                   {selectedAnswer !== null && (
                     <div className={`answer-feedback ${currentQuestionCorrect ? "feedback-correct" : "feedback-wrong"}`} aria-live="polite">
                       <strong>{currentQuestionCorrect ? "Правильно!" : "Правильный ответ"}</strong>
