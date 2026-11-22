@@ -222,8 +222,8 @@ export default function LevelPlacement({ currentLevel, onSelectLevel, onClose }:
                       ? "level-diagnostic-option is-correct"
                       : "level-diagnostic-option"
                 }
-                lang={currentQuestion.stimulusLang === "ar" ? "ar" : undefined}
-                dir={currentQuestion.stimulusLang === "ar" ? "rtl" : undefined}
+                lang={/[\u0600-\u06FF]/.test(option) ? "ar" : undefined}
+                dir={/[\u0600-\u06FF]/.test(option) ? "rtl" : undefined}
               >
                 {option}
               </button>
