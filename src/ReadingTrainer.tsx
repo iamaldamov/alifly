@@ -308,18 +308,17 @@ export default function ReadingTrainer() {
               </>
             )}
 
-            {complete && (
-              <div className={`practice-feedback ${exercise.type === "build" ? (buildIsCorrect ? "is-correct" : "is-wrong") : "is-correct"}`} aria-live="polite">
+            {(exercise.type === "match" && complete) || (exercise.type === "build" && buildChecked) ? (
+              <div className={`practice-feedback ${exercise.type === "build" && !buildIsCorrect ? "is-wrong" : "is-correct"}`} aria-live="polite">
                 <strong>
-                  {exercise.type === "choice" ? (choice === exercise.answer ? "Верно!" : "Попробуй ещё раз в следующем задании") :
-                    exercise.type === "match" ? "Все пары найдены!" : (buildIsCorrect ? "Отлично, получилось!" : "Почти! Правильный вариант показан ниже.")}
+                  {exercise.type === "match" ? "Все пары найдены!" : (buildIsCorrect ? "Отлично, получилось!" : "Почти! Правильный вариант показан ниже.")}
                 </strong>
                 <span>{exercise.explanation}</span>
                 {exercise.type === "build" && !buildIsCorrect && (
                   <span className="practice-correct-answer">Правильно: {exercise.answer.join(" · ")}</span>
                 )}
               </div>
-            )}
+            ) : null}
 
             {exercise.type === "choice" && choice !== null && (
               <div className={`practice-feedback ${choice === exercise.answer ? "is-correct" : "is-wrong"}`} aria-live="polite">
