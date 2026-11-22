@@ -1768,3 +1768,52 @@ html, body {
   .practice-match-tile { min-height: 54px; border-radius: 12px; }
   .practice-arabic-target { min-height: 86px; margin: 6px 0 12px; }
 }
+
+
+:root[data-theme="dark"] .practice-task-head h3,
+:root[data-theme="dark"] .practice-meta,
+:root[data-theme="dark"] .practice-small-label { color: #FFFFFF; }
+:root[data-theme="dark"] .practice-task-kind,
+:root[data-theme="dark"] .practice-column-label { color: #C6F432; }
+:root[data-theme="dark"] .practice-choice,
+:root[data-theme="dark"] .practice-match-tile,
+:root[data-theme="dark"] .practice-token {
+  border-color: rgba(255,255,255,.16);
+  background: #202024;
+  color: #FFFFFF;
+}
+:root[data-theme="dark"] .practice-choice.is-correct,
+:root[data-theme="dark"] .practice-match-tile.is-matched,
+:root[data-theme="dark"] .practice-token.is-in-answer {
+  border-color: #C6F432;
+  background: rgba(198,244,50,.14);
+  color: #E2FF8A;
+}
+:root[data-theme="dark"] .practice-choice.is-wrong {
+  border-color: #E57A73;
+  background: rgba(229,122,115,.14);
+  color: #FFB0A9;
+}
+:root[data-theme="dark"] .practice-match-tile.is-selected {
+  border-color: #C6F432;
+  background: rgba(198,244,50,.12);
+}
+:root[data-theme="dark"] .practice-arabic-target { color: #D8FF59; }
+:root[data-theme="dark"] .practice-build-answer {
+  border-color: rgba(198,244,50,.4);
+  background: rgba(255,255,255,.035);
+}
+:root[data-theme="dark"] .practice-build-placeholder,
+:root[data-theme="dark"] .practice-inline-hint { color: #B6B6BB; }
+:root[data-theme="dark"] .practice-feedback {
+  border-color: rgba(198,244,50,.28);
+  background: rgba(198,244,50,.1);
+  color: #E2FF8A;
+}
+:root[data-theme="dark"] .practice-feedback.is-wrong {
+  border-color: rgba(229,122,115,.35);
+  background: rgba(229,122,115,.12);
+  color: #FFB0A9;
+}
+:root[data-theme="light"] .practice-task-head h3 { color: #0B0B0C; }
+:root[data-theme="light"] .practice-arabic-target { color: #5E7F00; }
