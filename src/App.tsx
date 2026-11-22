@@ -677,27 +677,87 @@ function shuffleQuestions(questions: Question[]): Question[] {
   return shuffleItems(questions);
 }
 
+const letterDotCounts: Record<string, number> = {
+  "ا": 0, "ب": 1, "ت": 2, "ث": 3, "ج": 1, "ح": 0, "خ": 1,
+  "د": 0, "ذ": 1, "ر": 0, "ز": 1, "س": 0, "ش": 3, "ص": 0,
+  "ض": 1, "ط": 0, "ظ": 1, "ع": 0, "غ": 1, "ف": 1, "ق": 2,
+  "ك": 0, "ل": 0, "م": 0, "ن": 1, "ه": 0, "و": 0, "ي": 2,
+};
+
+const dotCountLabels = ["Нет точек", "Одна точка", "Две точки", "Три точки"];
+
+function buildVowelPracticeQuestions(lesson: Lesson): Question[] {
+  const letterQuestions = lesson.letters.map((letter) => ({
+    prompt: "Посмотри на сочетание и введи его звучание.",
+    options: [],
+    correct: letter.name,
+    acceptedAnswers: [letter.name],
+    mode: "recall" as const,
+    stimulus: letter.character,
+    explanation: `${letter.character} читается «${letter.name}». ${letter.note ?? ""}`.trim(),
+  }));
+
+  const syllableSets: Record<number, { text: string; answer: string; explanation: string }[]> = {
+    6: [
+      { text: "بَتَ", answer: "бата", explanation: "Справа налево: بَ — «ба», затем تَ — «та». Это учебная цепочка слогов, не слово." },
+      { text: "مَنَ", answer: "мана", explanation: "Справа налево: مَ — «ма», затем نَ — «на». Это учебная цепочка слогов, не слово." },
+    ],
+    7: [
+      { text: "بِتِ", answer: "бити", explanation: "Справа налево: بِ — «би», затем تِ — «ти». Это учебная цепочка слогов, не слово." },
+      { text: "مِتِ", answer: "мити", explanation: "Справа налево: مِ — «ми», затем تِ — «ти». Это учебная цепочка слогов, не слово." },
+    ],
+    8: [
+      { text: "بُتُ", answer: "буту", explanation: "Справа налево: بُ — «бу», затем تُ — «ту». Это учебная цепочка слогов, не слово." },
+      { text: "مُتُ", answer: "муту", explanation: "Справа налево: مُ — «му», затем تُ — «ту». Это учебная цепочка слогов, не слово." },
+    ],
+  };
+
+  const sequenceQuestions = (syllableSets[lesson.id] ?? []).map((item) => ({
+    prompt: "Прочитай всю цепочку справа налево и введи звучание.",
+    options: [],
+    correct: item.answer,
+    acceptedAnswers: [item.answer],
+    mode: "recall" as const,
+    stimulus: item.text,
+    explanation: item.explanation,
+  }));
+
+  return shuffleQuestions([...lesson.questions, ...letterQuestions, ...sequenceQuestions]);
+}
+
 function buildLessonQuestions(lesson: Lesson): Question[] {
   if (lesson.id >= 30) return shuffleQuestions(lesson.questions);
-  if (lesson.id >= 6 && lesson.id <= 8) return lesson.questions;
+  if (lesson.id >= 6 && lesson.id <= 8) return buildVowelPracticeQuestions(lesson);
 
-  // Alphabet practice only checks whether the learner can recognise a letter by name.
-  // Dot-count and dot-position questions are deliberately excluded.
   const allLetters = lessons.flatMap((item) => item.letters);
-  return shuffleQuestions(lesson.letters.map((letter) => {
+  const questions = lesson.letters.flatMap((letter) => {
     const distractors = shuffleItems(
       allLetters
         .filter((item) => item.character !== letter.character)
         .map((item) => item.character),
     ).slice(0, 3);
-    return {
+
+    const recognition: Question = {
       prompt: `Найди букву «${letter.name.split(" (")[0]}».`,
       options: shuffleItems([letter.character, ...distractors]),
       correct: letter.character,
-      mode: "choice" as const,
-      explanation: `Верно! Это буква «${letter.name}» — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
+      mode: "choice",
+      explanation: `Это буква «${letter.name}» — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
     };
-  }));
+    const dotCount = letterDotCounts[letter.character] ?? 0;
+    const dotQuestion: Question = {
+      prompt: `Сколько точек у буквы ${letter.character}?`,
+      options: shuffleItems(dotCountLabels),
+      correct: dotCountLabels[dotCount],
+      mode: "choice",
+      explanation: dotCount === 0
+        ? `У буквы ${letter.character} нет точек.`
+        : `У буквы ${letter.character} — ${dotCountLabels[dotCount].toLocaleLowerCase("ru-RU")}.`,
+    };
+    return [recognition, dotQuestion, ...buildLetterRecallQuestions(letter)];
+  });
+
+  return shuffleQuestions(questions);
 }
 
 function buildExamRecallQuestions(): Question[] {
