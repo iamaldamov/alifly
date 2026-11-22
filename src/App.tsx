@@ -147,10 +147,6 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
         <path d="M26 191 Q44 207 66 213" fill="none" stroke="#B9A28F" strokeWidth="2" strokeLinecap="round" opacity=".65" />
         <circle cx="372" cy="194" r="4" fill="#B9A28F" opacity=".6" />
       </svg>
-      <div className="letter-makhraj-legend" aria-hidden="true">
-        <span><i className="legend-highlight" /> Зона образования звука</span>
-        <span><i className="legend-air" /> Направление воздуха</span>
-      </div>
     </section>
   );
 }
