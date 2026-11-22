@@ -5,6 +5,7 @@ import { AuthProvider } from "./auth/AuthContext";
 import "./styles.css";
 import "./forest-glass.css";
 import "./experience-polish.css";
+import "./lime-noir.css";
 import MotionEnhancements from "./MotionEnhancements";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
