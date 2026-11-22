@@ -1494,7 +1494,7 @@ export default function App() {
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed || (startingLevel !== null && startingLevel >= 2);
   const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 3);
-  const stageFourUnlocked = stageThreeLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 4);
+  const stageFourUnlocked = stageThreeLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 4) || (startingLevel === null && stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id))) || stageFourLessons.some((lesson) => completedLessonIds.includes(lesson.id));
   const activeRoute = stageFourUnlocked
     ? { title: "диалогов", stageTitle: "Первые диалоги", lessons: stageFourLessons }
     : stageThreeUnlocked
