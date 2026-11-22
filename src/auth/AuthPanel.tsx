@@ -2,13 +2,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from "../lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut as firebaseSignOut } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
 type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error";
 type AuthMode = "signup" | "signin";
 const AUTH_PROMPT_KEY = "alifly-auth-prompt-dismissed";
-const AVATAR_STORAGE_KEY = "alifly-avatar-id";
 const TELEGRAM_SUPPORT_URL = "https://t.me/share/url?url=https%3A%2F%2Fiamaldamov.github.io%2Falifly%2F&text=%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%B8%D1%82%D0%B5%20ALIFLY%20%E2%80%94%20%D0%BF%D0%BE%D0%B4%D0%B5%D0%BB%D0%B8%D1%82%D0%B5%D1%81%D1%8C%20%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BE%D0%BC%20%D1%81%20%D1%82%D0%B5%D0%BC%D0%B8%2C%20%D0%BA%D1%82%D0%BE%20%D1%85%D0%BE%D1%87%D0%B5%D1%82%20%D0%B8%D0%B7%D1%83%D1%87%D0%B0%D1%82%D1%8C%20%D0%B0%D1%80%D0%B0%D0%B1%D1%81%D0%BA%D0%B8%D0%B9.";
 
 function PersonIcon({ className }: { className: string }) {
@@ -29,7 +28,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [profileMessage, setProfileMessage] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -66,7 +64,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   const clearFeedback = () => {
     setMessage("");
     setError("");
-    setProfileMessage("");
   };
 
   const markPromptDismissed = () => {
