@@ -377,7 +377,7 @@ function makeVocabularyLesson(
       options: [],
       correct: card.transliteration,
       acceptedAnswers: card.acceptedTransliterations,
-      mode: "recall",
+      mode: "recall" as const,
       stimulus: card.arabic,
       stimulusLang: "ar",
       stimulusDir: "rtl",
@@ -387,7 +387,7 @@ function makeVocabularyLesson(
       prompt: "Что означает это слово?",
       options: cards.map((item) => item.translation),
       correct: card.translation,
-      mode: "choice",
+      mode: "choice" as const,
       stimulus: card.arabic,
       stimulusLang: "ar",
       stimulusDir: "rtl",
@@ -1229,7 +1229,11 @@ export default function App() {
         setDailyActivity(cloudDailyActivity && typeof cloudDailyActivity.date === "string" && Array.isArray(cloudDailyActivity.lessonIds)
           ? { date: cloudDailyActivity.date, lessonIds: normalizeDailyLessonIds(cloudDailyActivity.lessonIds) }
           : { date: "", lessonIds: [] });
-      } else if (previousCloudUserId && previousCloudUserId !== user.uid) {
+      } else if (!previousCloudUserId) {
+        // Preserve only the guest's chosen starting level when the first account is created.
+        const guestLevel = readStartingLevel(user.uid) ?? readStartingLevel("guest");
+        setStartingLevel(guestLevel);
+      } else if (previousCloudUserId !== user.uid) {
         // A different person signed in on this device. Do not copy the previous
         // person's local learning history into the new account.
         setStartingLevel(readStartingLevel(user.uid));
@@ -1330,7 +1334,7 @@ export default function App() {
   };
 
   const startLearningLevel = (level: LearningLevel) => {
-    const stage = stages[level - 1];
+    const stage = level === 1 ? stages[0] : level === 2 ? stages[1] : level === 3 ? stages[2] : stages[3];
     const firstLesson = level === 1
       ? lessons[0]
       : level === 2
