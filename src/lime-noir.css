@@ -324,3 +324,148 @@
   --text-muted: #55555A;
   --muted: #55555A;
 }
+
+
+/* ALIFLY button refinement — rounded, tactile, and consistent on touch screens. */
+.primary-button,
+.word-game-primary,
+.auth-submit,
+.auth-apple,
+.hero .primary-button {
+  min-height: 54px;
+  padding-inline: 25px;
+  border-radius: 999px;
+  border-width: 1px;
+  box-shadow:
+    0 9px 22px rgba(19, 43, 29, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .28);
+  letter-spacing: .005em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.review-button,
+.weak-words-button,
+.theme-toggle,
+.account-button,
+.letter-nav-button,
+.alphabet-tips-toggle,
+.support-project-button {
+  min-height: 44px;
+  padding-inline: 17px;
+  border-radius: 999px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.daily-quest-option,
+.lesson-pick,
+.exam-pick {
+  border-radius: 18px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.answer-option,
+.reading-option {
+  min-height: 58px;
+  border-radius: 19px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.letter-speak-button {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+}
+
+.hero .primary-button {
+  min-height: 56px;
+  padding-inline: 29px;
+  border-radius: 999px;
+  box-shadow: 0 9px 24px rgba(0, 0, 0, .17), inset 0 1px 0 rgba(255,255,255,.45);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #9fb58f;
+  outline-offset: 4px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .primary-button:not(:disabled):hover,
+  .word-game-primary:not(:disabled):hover,
+  .auth-submit:not(:disabled):hover,
+  .auth-apple:not(:disabled):hover,
+  .review-button:not(:disabled):hover,
+  .weak-words-button:not(:disabled):hover,
+  .theme-toggle:not(:disabled):hover,
+  .account-button:not(:disabled):hover,
+  .letter-nav-button:not(:disabled):hover,
+  .alphabet-tips-toggle:not(:disabled):hover,
+  .support-project-button:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+}
+
+.primary-button:active,
+.word-game-primary:active,
+.auth-submit:active,
+.auth-apple:active,
+.review-button:active,
+.weak-words-button:active,
+.theme-toggle:active,
+.account-button:active,
+.letter-nav-button:active,
+.alphabet-tips-toggle:active,
+.support-project-button:active,
+.daily-quest-option:active {
+  transform: scale(.975);
+}
+
+@media (max-width: 700px) {
+  .primary-button,
+  .word-game-primary,
+  .auth-submit,
+  .auth-apple,
+  .hero .primary-button {
+    min-height: 52px;
+    padding-inline: 22px;
+  }
+
+  .review-button,
+  .weak-words-button,
+  .theme-toggle,
+  .account-button,
+  .letter-nav-button,
+  .alphabet-tips-toggle,
+  .support-project-button {
+    min-height: 44px;
+  }
+
+  .answer-option,
+  .reading-option {
+    min-height: 60px;
+    border-radius: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-button,
+  .word-game-primary,
+  .auth-submit,
+  .auth-apple,
+  .review-button,
+  .weak-words-button,
+  .theme-toggle,
+  .account-button,
+  .letter-nav-button,
+  .alphabet-tips-toggle,
+  .support-project-button,
+  .daily-quest-option {
+    transition: none !important;
+  }
+}
