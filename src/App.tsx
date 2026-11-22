@@ -1292,7 +1292,15 @@ export default function App() {
           .map((item) => item.correct) ?? [];
         const letterNames = selectedLesson?.letters.map((item) => item.name.split(" (")[0]) ?? [];
         const vowelChoices = ["Фатха", "Кясра", "Дамма", "ба", "би", "бу", "та", "ти", "ту", "ма", "ми", "му"];
-        const candidates = [...new Set([currentQuestion.correct, ...samePrompt, ...letterNames, ...vowelChoices])];
+        const chainChoices = ["бата", "мана", "биту", "бити", "мута", "мата"];
+        const isSyllableChain = Boolean(currentQuestion.stimulus && currentQuestion.stimulus.length > 3);
+        const candidates = [...new Set([
+          currentQuestion.correct,
+          ...samePrompt,
+          ...(isSyllableChain ? chainChoices : []),
+          ...letterNames,
+          ...vowelChoices,
+        ])];
         return [currentQuestion.correct, ...candidates.filter((item) => item !== currentQuestion.correct)].slice(0, 3);
       })()
     : currentQuestion?.options ?? [];
