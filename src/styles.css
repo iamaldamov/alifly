@@ -1820,3 +1820,123 @@ html, body {
 
 .practice-match-instruction { margin: 0 0 2px; color: #78847c; font-size: 12px; text-align: center; }
 :root[data-theme="dark"] .practice-match-instruction { color: #B6B6BB; }
+
+
+/* ALIFLY practice v2 — clear, tactile lesson-game layout */
+.practice-card { overflow: hidden; }
+.practice-task-head h3 { color: #111512; }
+.practice-task-kind, .practice-column-label { color: #537B27; }
+.practice-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.practice-choice { color: #17251B; background: #FFFFFF; border-color: #D4DFD2; }
+.practice-match-tile { color: #17251B; background: #FFFFFF; border-color: #D4DFD2; }
+.practice-token { color: #17251B; background: #FFFFFF; border-color: #D4DFD2; }
+.practice-arabic-target { color: #234D36; }
+.practice-build-answer { flex-direction: row-reverse; }
+.practice-word-bank { flex-direction: row-reverse; }
+.practice-feedback { color: #205B36; }
+.practice-feedback.is-wrong { color: #873A32; }
+.practice-match-instruction, .practice-inline-hint { color: #505B53; }
+.letter-flashcard-character { color: #174A32; }
+.letter-flashcard-name { color: #174A32; }
+.letter-flashcard-note { color: #4D5B51; }
+.letter-flashcard-top { color: #59685D; }
+.letter-makhraj {
+  border-color: #D8E1D6;
+  background: linear-gradient(160deg, #F9FBF5, #EDF3E9);
+}
+.letter-mouth-diagram { max-height: 300px; }
+.letter-makhraj-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+  padding: 4px 0 2px;
+  color: #4C5A50;
+  font-size: 10px;
+  font-weight: 700;
+}
+.letter-makhraj-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.letter-makhraj-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+.legend-highlight { background: #A5D95B; border: 1px solid #548B36; }
+.legend-air { background: #36885D; }
+
+:root[data-theme="light"] .practice-card { background: #FFFFFF; color: #111512; }
+:root[data-theme="light"] .practice-task-head h3 { color: #111512 !important; }
+:root[data-theme="light"] .practice-arabic-target { color: #174A32 !important; }
+:root[data-theme="light"] .practice-choice,
+:root[data-theme="light"] .practice-match-tile,
+:root[data-theme="light"] .practice-token {
+  color: #17251B !important;
+  background: #FFFFFF;
+  border-color: #D4DFD2;
+}
+:root[data-theme="light"] .practice-task-kind,
+:root[data-theme="light"] .practice-column-label { color: #426D22 !important; }
+:root[data-theme="light"] .practice-small-label,
+:root[data-theme="light"] .practice-match-instruction,
+:root[data-theme="light"] .practice-inline-hint { color: #505B53 !important; }
+:root[data-theme="light"] .practice-feedback { color: #205B36 !important; }
+:root[data-theme="light"] .practice-feedback.is-wrong { color: #873A32 !important; }
+:root[data-theme="light"] .letter-flashcard-character,
+:root[data-theme="light"] .letter-card-character { color: #174A32 !important; }
+:root[data-theme="light"] .letter-flashcard-name,
+:root[data-theme="light"] .letter-card-name { color: #174A32 !important; }
+:root[data-theme="light"] .letter-flashcard-note,
+:root[data-theme="light"] .letter-card-note { color: #4D5B51 !important; }
+:root[data-theme="light"] .letter-flashcard-top { color: #59685D !important; }
+:root[data-theme="light"] .letter-makhraj {
+  border-color: #D8E1D6;
+  background: linear-gradient(160deg, #F9FBF5, #EDF3E9);
+}
+:root[data-theme="light"] .letter-makhraj-legend { color: #4C5A50 !important; }
+
+:root[data-theme="dark"] .practice-card { background: #17191A; color: #FFFFFF; }
+:root[data-theme="dark"] .practice-task-head h3 { color: #FFFFFF !important; }
+:root[data-theme="dark"] .practice-arabic-target { color: #D8FF59 !important; }
+:root[data-theme="dark"] .practice-choice,
+:root[data-theme="dark"] .practice-match-tile,
+:root[data-theme="dark"] .practice-token {
+  color: #FFFFFF !important;
+  background: #25282A;
+  border-color: rgba(255,255,255,.2);
+}
+:root[data-theme="dark"] .practice-task-kind,
+:root[data-theme="dark"] .practice-column-label { color: #C6F432 !important; }
+:root[data-theme="dark"] .practice-small-label,
+:root[data-theme="dark"] .practice-match-instruction,
+:root[data-theme="dark"] .practice-inline-hint { color: #C3C8C4 !important; }
+:root[data-theme="dark"] .practice-choice.is-correct,
+:root[data-theme="dark"] .practice-match-tile.is-matched,
+:root[data-theme="dark"] .practice-token.is-in-answer {
+  color: #E8FFB0 !important;
+  background: rgba(198,244,50,.13);
+  border-color: #A7D62A;
+}
+:root[data-theme="dark"] .practice-choice.is-wrong {
+  color: #FFD0CB !important;
+  background: rgba(229,122,115,.14);
+  border-color: #D97C73;
+}
+:root[data-theme="dark"] .practice-feedback { color: #E5F7D7 !important; }
+:root[data-theme="dark"] .practice-feedback.is-wrong { color: #FFD0CB !important; }
+:root[data-theme="dark"] .practice-build-answer { background: #202426; border-color: rgba(198,244,50,.42); }
+:root[data-theme="dark"] .letter-flashcard-character,
+:root[data-theme="dark"] .letter-card-character { color: #D8FF59 !important; }
+:root[data-theme="dark"] .letter-flashcard-name,
+:root[data-theme="dark"] .letter-card-name { color: #FFFFFF !important; }
+:root[data-theme="dark"] .letter-flashcard-note,
+:root[data-theme="dark"] .letter-card-note,
+:root[data-theme="dark"] .letter-flashcard-top { color: #C4C9C5 !important; }
+:root[data-theme="dark"] .letter-makhraj {
+  border-color: rgba(255,255,255,.14);
+  background: linear-gradient(160deg, #202B24, #17211B);
+}
+:root[data-theme="dark"] .letter-makhraj-legend { color: #D4DDD5 !important; }
+
+@media (max-width: 520px) {
+  .practice-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .practice-choice { min-height: 54px; }
+  .practice-card { padding: 16px 13px; }
+  .letter-mouth-diagram { max-height: 240px; }
+  .letter-makhraj-legend { font-size: 9px; }
+}
