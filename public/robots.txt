@@ -1,0 +1,6 @@
+# ALIFLY GitHub Pages project path.
+# Note: crawlers check robots.txt at the origin root, not this /alifly/ path.
+User-agent: *
+Allow: /
+
+Sitemap: https://iamaldamov.github.io/alifly/sitemap.xml
