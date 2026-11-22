@@ -1,0 +1,288 @@
+/* ALIFLY — premium typography, layered surfaces and tactile controls.
+   Presentation-only layer. Existing lesson, authentication and progress logic is untouched. */
+
+:root {
+  --alifly-radius-card: 26px;
+  --alifly-radius-control: 17px;
+  --alifly-depth-card: 0 18px 48px rgba(8, 18, 12, .10), inset 0 1px rgba(255,255,255,.58);
+  --alifly-depth-card-hover: 0 26px 58px rgba(8, 18, 12, .16), inset 0 1px rgba(255,255,255,.72);
+  --alifly-control-shadow: 0 9px 22px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.2);
+}
+
+/* Editorial hierarchy: bold, calm headings with comfortable reading measure. */
+.hero h1 {
+  max-width: 10ch;
+  font-size: clamp(3.6rem, 7.7vw, 6.35rem);
+  line-height: .96;
+  letter-spacing: -.072em;
+  text-wrap: balance;
+}
+
+.hero-content > p {
+  max-width: 42ch;
+  font-size: clamp(1rem, 1.25vw, 1.12rem);
+  line-height: 1.82;
+}
+
+.progress-section h2,
+.section-heading h2,
+.reading-heading h2 {
+  font-size: clamp(2rem, 3.8vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -.052em;
+  text-wrap: balance;
+}
+
+.section-label,
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: .2em;
+}
+
+/* Cards gain depth and softer geometry without changing their content. */
+.progress-card,
+.stage-card,
+.reading-card,
+.daily-quest-card,
+.study-phrase-card,
+.word-game-card {
+  border-radius: var(--alifly-radius-card);
+  box-shadow: var(--alifly-depth-card);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+  backdrop-filter: blur(14px) saturate(125%);
+}
+
+.stage-card {
+  min-height: 148px;
+  padding: clamp(20px, 2.5vw, 28px);
+  border-width: 1px;
+}
+
+.stage-info strong {
+  font-size: clamp(1rem, 1.35vw, 1.16rem);
+  line-height: 1.3;
+}
+
+.stage-description {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.progress-card {
+  padding: clamp(22px, 3vw, 30px);
+}
+
+/* Buttons: tactile, rounded, clearly interactive, and consistent across screens. */
+.primary-button,
+.auth-submit,
+.word-game-primary,
+.daily-quest-option {
+  min-height: 54px;
+  padding-inline: 25px;
+  border-radius: var(--alifly-radius-control);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  box-shadow: var(--alifly-control-shadow);
+  transform: translateZ(0);
+  transition:
+    transform 220ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 260ms ease,
+    filter 220ms ease,
+    background-color 220ms ease;
+}
+
+.review-button,
+.theme-toggle,
+.account-button,
+.letter-nav-button,
+.alphabet-tips-toggle,
+.letter-speak-button,
+.support-project-button {
+  min-height: 46px;
+  border-radius: 15px;
+  font-weight: 750;
+  transition:
+    transform 200ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease;
+}
+
+.modal-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.answer-option,
+.reading-option {
+  min-height: 66px;
+  border-radius: 18px;
+  font-weight: 700;
+}
+
+.lesson-pick,
+.exam-pick {
+  border-radius: 18px;
+  transition: transform 200ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .primary-button:hover,
+  .auth-submit:hover,
+  .word-game-primary:hover,
+  .daily-quest-option:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.045);
+    box-shadow: 0 16px 32px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.24);
+  }
+
+  .review-button:hover,
+  .theme-toggle:hover,
+  .account-button:hover,
+  .letter-nav-button:hover,
+  .alphabet-tips-toggle:hover,
+  .letter-speak-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 20px rgba(0,0,0,.12);
+  }
+
+  .stage-card:not(:disabled):not(.stage-locked):hover,
+  .progress-card:hover,
+  .reading-card:hover,
+  .daily-quest-card:hover,
+  .study-phrase-card:hover,
+  .word-game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--alifly-depth-card-hover);
+  }
+
+  .lesson-pick:not(:disabled):hover,
+  .exam-pick:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.1);
+  }
+}
+
+.primary-button:active,
+.auth-submit:active,
+.word-game-primary:active,
+.daily-quest-option:active,
+.review-button:active,
+.theme-toggle:active,
+.account-button:active,
+.letter-nav-button:active,
+.letter-speak-button:active,
+.answer-option:active,
+.reading-option:active {
+  transform: scale(.965);
+  box-shadow: 0 4px 10px rgba(0,0,0,.13);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:root[data-theme="dark"] .progress-card,
+:root[data-theme="dark"] .stage-card,
+:root[data-theme="dark"] .reading-card,
+:root[data-theme="dark"] .daily-quest-card,
+:root[data-theme="dark"] .study-phrase-card,
+:root[data-theme="dark"] .word-game-card {
+  box-shadow: 0 20px 52px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.055);
+}
+
+:root[data-theme="light"] .progress-card,
+:root[data-theme="light"] .stage-card,
+:root[data-theme="light"] .reading-card,
+:root[data-theme="light"] .daily-quest-card,
+:root[data-theme="light"] .study-phrase-card,
+:root[data-theme="light"] .word-game-card {
+  box-shadow: 0 16px 38px rgba(22,34,20,.08), inset 0 1px rgba(255,255,255,.9);
+}
+
+/* More deliberate rhythm between large learning sections. */
+.progress-section {
+  padding-top: clamp(58px, 8vw, 100px);
+  padding-bottom: clamp(42px, 6vw, 72px);
+}
+
+.learning-section {
+  padding-top: clamp(24px, 4vw, 46px);
+  padding-bottom: clamp(64px, 8vw, 100px);
+}
+
+.section-heading {
+  margin-bottom: 28px;
+}
+
+@media (max-width: 700px) {
+  .hero h1 {
+    max-width: 10ch;
+    font-size: clamp(3.25rem, 12vw, 4.35rem);
+    line-height: .98;
+  }
+
+  .hero-content > p {
+    max-width: 36ch;
+    font-size: 15px;
+    line-height: 1.72;
+  }
+
+  .progress-section h2,
+  .section-heading h2,
+  .reading-heading h2 {
+    font-size: clamp(1.9rem, 8vw, 2.45rem);
+  }
+
+  .stage-card {
+    min-height: 120px;
+    padding: 18px;
+    border-radius: 21px;
+  }
+
+  .primary-button,
+  .auth-submit,
+  .word-game-primary,
+  .daily-quest-option {
+    min-height: 54px;
+    padding-inline: 21px;
+  }
+
+  .answer-option,
+  .reading-option {
+    min-height: 62px;
+    border-radius: 16px;
+  }
+
+  .stage-modal {
+    border-radius: 25px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-button,
+  .auth-submit,
+  .word-game-primary,
+  .daily-quest-option,
+  .review-button,
+  .theme-toggle,
+  .account-button,
+  .letter-nav-button,
+  .letter-speak-button,
+  .answer-option,
+  .reading-option,
+  .stage-card,
+  .progress-card,
+  .reading-card,
+  .daily-quest-card,
+  .study-phrase-card,
+  .word-game-card,
+  .lesson-pick,
+  .exam-pick {
+    transition: none !important;
+    transform: none !important;
+  }
+}

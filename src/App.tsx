@@ -79,54 +79,30 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
   const info = makhrajByLetter[letter] ?? {
     point: [160, 105] as [number, number],
     title: "Место образования звука",
-    description: "Посмотри на схему и повтори звук медленно.",
+    description: "",
   };
   const [pointX, pointY] = info.point;
 
   return (
-    <section className="letter-makhraj" aria-label={`Схема произношения буквы ${letter}`}>
-      <div className="letter-makhraj-heading">
-        <span className="letter-makhraj-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
-        </span>
-        <div><strong>Где рождается звук?</strong><small>Схема положения языка и органов речи</small></div>
-      </div>
-      <svg className="letter-mouth-diagram" viewBox="0 0 340 180" role="img" aria-label={`Упрощённый боковой разрез рта. Выделено место: ${info.title}.`}>
-        <path className="mouth-head-outline" d="M28 31 C75 7 181 9 242 31 C272 42 291 59 299 77 L316 91 L301 101 L309 109 L294 118 C293 142 275 157 248 164 C190 179 104 161 62 137 C43 126 30 106 28 83 Z" />
-        <path className="mouth-cavity" d="M42 86 C83 61 165 55 244 75 C263 80 277 91 283 105 C267 122 241 133 207 137 C147 143 91 126 49 111 Z" />
-        <path className="mouth-palate" d="M52 84 C104 58 184 57 251 78" />
-        <path className="mouth-throat" d="M276 77 C287 88 291 100 282 118 C277 129 271 137 262 143" />
-        <path className="mouth-tongue" d="M53 112 C94 119 139 125 176 115 C208 106 239 106 260 119 C235 140 194 147 145 139 C103 134 72 126 53 112 Z" />
-        <path className="mouth-lips" d="M29 88 C39 83 48 83 55 88 M29 108 C40 113 48 114 56 109" />
-        <path className="mouth-teeth" d="M54 84 L78 77 L86 91 L58 98 Z M56 111 L79 111 L86 123 L59 120 Z" />
-        <path className="mouth-gumline" d="M82 79 C112 69 138 68 160 70" />
-        <circle className="mouth-point-muted" cx="298" cy="132" r="4" />
-        <circle className="mouth-point-muted" cx="286" cy="108" r="4" />
-        <circle className="mouth-point-muted" cx="275" cy="82" r="4" />
-        <circle className="mouth-point-muted" cx="225" cy="94" r="4" />
-        <circle className="mouth-point-muted" cx="204" cy="98" r="4" />
-        <circle className="mouth-point-muted" cx="158" cy="105" r="4" />
-        <circle className="mouth-point-muted" cx="122" cy="125" r="4" />
-        <circle className="mouth-point-muted" cx="110" cy="118" r="4" />
-        <circle className="mouth-point-muted" cx="84" cy="108" r="4" />
-        <circle className="mouth-point-muted" cx="76" cy="101" r="4" />
-        <circle className="mouth-point-muted" cx="66" cy="96" r="4" />
-        <circle className="mouth-point-muted" cx="58" cy="91" r="4" />
-        <circle className="mouth-point-muted" cx="47" cy="109" r="4" />
-        <circle className="mouth-point-muted" cx="39" cy="99" r="4" />
-        <path className="mouth-pointer" d={`M${pointX} ${pointY} L${Math.max(22, pointX - 12)} ${Math.max(24, pointY - 23)}`} />
-        <circle className="mouth-point-active-halo" cx={pointX} cy={pointY} r="11" />
+    <section className="letter-makhraj" aria-label={`Место образования звука буквы ${letter}`}>
+      <svg
+        className="letter-mouth-diagram"
+        viewBox="0 0 340 180"
+        role="img"
+        aria-label={`Боковой разрез ротовой полости. Выделена область артикуляции буквы ${letter}.`}
+      >
+        <path className="mouth-head-outline" d="M18 23 C66 3 173 4 239 26 C273 37 295 56 304 76 L324 91 L307 101 L317 111 L299 122 C296 148 275 164 245 169 C183 181 94 164 49 137 C28 124 17 102 18 78 Z" />
+        <path className="mouth-cavity" d="M31 82 C76 56 163 50 245 72 C267 78 283 91 290 106 C272 127 240 141 201 145 C137 150 78 129 39 109 Z" />
+        <path className="mouth-palate" d="M39 81 C91 54 177 54 251 76" />
+        <path className="mouth-throat" d="M278 76 C291 88 296 103 286 122 C280 136 272 145 261 151" />
+        <path className="mouth-tongue" d="M39 110 C78 121 126 132 170 120 C207 110 246 109 271 124 C246 145 202 153 151 145 C100 138 61 126 39 110 Z" />
+        <path className="mouth-lips" d="M18 83 C28 78 39 78 48 84 M18 108 C29 115 39 116 49 110" />
+        <path className="mouth-teeth" d="M42 78 L69 70 L83 87 L50 96 Z M44 111 L73 111 L85 126 L51 120 Z" />
+        <path className="mouth-gumline" d="M78 74 C117 62 148 62 174 66" />
+        <path className="mouth-highlight" d={`M${pointX - 9} ${pointY} Q${pointX} ${pointY - 8} ${pointX + 9} ${pointY}`} />
+        <circle className="mouth-point-active-halo" cx={pointX} cy={pointY} r="12" />
         <circle className="mouth-point-active" cx={pointX} cy={pointY} r="5.5" />
-        <text className="mouth-side-label" x="25" y="173">ГУБЫ</text>
-        <text className="mouth-side-label" x="151" y="173">ЯЗЫК</text>
-        <text className="mouth-side-label" x="278" y="173">ГОРЛО</text>
       </svg>
-      <div className="letter-makhraj-copy">
-        <strong>{info.title}</strong>
-        <p>{info.description}</p>
-      </div>
-      <p className="letter-makhraj-disclaimer">Схема упрощённая: точное произношение лучше сверять с учителем таджвида.</p>
-      <a className="letter-makhraj-source" href="https://tilawa.ai/en/tajweed-rules/group/makharij/" target="_blank" rel="noreferrer">Открыть интерактивную схему всех точек произношения ↗</a>
     </section>
   );
 }
