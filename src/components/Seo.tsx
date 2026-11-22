@@ -5,13 +5,15 @@ type SeoProps = {
   description: string;
   image?: string;
   url: string;
+  noIndex?: boolean;
 };
 
-export default function Seo({ title, description, image, url }: SeoProps) {
+export default function Seo({ title, description, image, url, noIndex = false }: SeoProps) {
   return (
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
       <link rel="canonical" href={url} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="ALIFLY" />
