@@ -54,7 +54,7 @@ const exercises: Exercise[] = [
   },
   {
     type: "build",
-    prompt: "Собери чтение из частей справа налево",
+    prompt: "Собери чтение из частей",
     target: "بَتَ",
     bank: ["та", "му", "ба", "би"],
     answer: ["ба", "та"],
@@ -106,9 +106,65 @@ const exercises: Exercise[] = [
     answer: ["би", "ту"],
     explanation: "بِ читается «би», затем تُ — «ту». Это учебное сочетание слогов.",
   },
+  {
+    type: "choice",
+    prompt: "Выбери букву, с которой начинается звук «ми»",
+    target: "مِ",
+    options: ["م", "ن", "ب"],
+    answer: "م",
+    explanation: "م — мим. С кясрой получается «ми».",
+  },
+  {
+    type: "match",
+    prompt: "Соедини огласовку и пример",
+    left: [{ id: "fatha2", label: "Фатха" }, { id: "kasra2", label: "Кясра" }, { id: "damma2", label: "Дамма" }],
+    right: [{ id: "kasra2", label: "بِ" }, { id: "damma2", label: "بُ" }, { id: "fatha2", label: "بَ" }],
+    explanation: "Фатха ставится сверху, кясра снизу, дамма сверху в форме маленькой запятой.",
+  },
+  {
+    type: "choice",
+    prompt: "Найди букву «та»",
+    target: "ت",
+    options: ["ث", "ت", "ب"],
+    answer: "ت",
+    explanation: "ت — та. У неё две точки сверху.",
+  },
+  {
+    type: "build",
+    prompt: "Собери слоги в правильном порядке",
+    target: "مَ بَ",
+    bank: ["ба", "ми", "ма", "би"],
+    answer: ["ма", "ба"],
+    explanation: "مَ читается «ма», затем بَ — «ба».",
+  },
+  {
+    type: "choice",
+    prompt: "Как читается эта буква с кясрой?",
+    target: "نِ",
+    options: ["на", "ни", "ну"],
+    answer: "ни",
+    explanation: "Кясра под ن даёт короткий звук «и».",
+  },
+  {
+    type: "match",
+    prompt: "Найди одинаковые буквы",
+    left: [{ id: "jim", label: "ج" }, { id: "ha", label: "ح" }, { id: "kha", label: "خ" }],
+    right: [{ id: "kha", label: "خ" }, { id: "jim", label: "ج" }, { id: "ha", label: "ح" }],
+    explanation: "ج, ح и خ похожи по форме, но отличаются количеством и расположением точек.",
+  },
 ];
 
+function shuffleExercises() {
+  const shuffled = [...exercises];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default function ReadingTrainer() {
+  const [sessionExercises, setSessionExercises] = useState<Exercise[]>(shuffleExercises);
   const [index, setIndex] = useState(0);
   const [choice, setChoice] = useState<string | null>(null);
   const [matched, setMatched] = useState<string[]>([]);
@@ -119,7 +175,7 @@ export default function ReadingTrainer() {
   const [correct, setCorrect] = useState(0);
   const [finished, setFinished] = useState(false);
 
-  const exercise = exercises[index];
+  const exercise = sessionExercises[index];
   const complete = exercise.type === "choice"
     ? choice !== null
     : exercise.type === "match"
@@ -127,7 +183,7 @@ export default function ReadingTrainer() {
       : buildChecked;
 
   const advance = () => {
-    if (index === exercises.length - 1) {
+    if (index === sessionExercises.length - 1) {
       setFinished(true);
       return;
     }
@@ -187,6 +243,7 @@ export default function ReadingTrainer() {
   };
 
   const restart = () => {
+    setSessionExercises(shuffleExercises());
     setIndex(0);
     setChoice(null);
     setMatched([]);
@@ -217,11 +274,11 @@ export default function ReadingTrainer() {
         {!finished ? (
           <>
             <div className="reading-meta">
-              <span>Задание {index + 1} из {exercises.length}</span>
+              <span>Задание {index + 1} из {sessionExercises.length}</span>
               <span>{correct} верно</span>
             </div>
-            <div className="reading-progress" aria-label={`Выполнено ${index} из ${exercises.length} заданий`}>
-              <span style={{ width: `${(index / exercises.length) * 100}%` }} />
+            <div className="reading-progress" aria-label={`Выполнено ${index} из ${sessionExercises.length} заданий`}>
+              <span style={{ width: `${(index / sessionExercises.length) * 100}%` }} />
             </div>
 
             <div className="practice-task-head">
@@ -287,7 +344,7 @@ export default function ReadingTrainer() {
               <>
                 <div className="practice-arabic-target" lang="ar" dir="rtl">{exercise.target}</div>
                 <p className="practice-small-label">ТВОЙ ОТВЕТ</p>
-                <div className="practice-build-answer" aria-label="Собранный ответ">
+                <div className="practice-build-answer" aria-label="Собранный ответ" dir="rtl">
                   {built.length === 0 && <span className="practice-build-placeholder">Нажимай на карточки ниже</span>}
                   {built.map((bankIndex) => (
                     <button key={bankIndex} type="button" className="practice-token is-in-answer" onClick={() => removeToken(bankIndex)} disabled={buildChecked}>
@@ -296,7 +353,7 @@ export default function ReadingTrainer() {
                   ))}
                 </div>
                 <p className="practice-small-label">ВЫБЕРИ ЧАСТИ В ПРАВИЛЬНОМ ПОРЯДКЕ</p>
-                <div className="practice-word-bank">
+                <div className="practice-word-bank" dir="rtl">
                   {exercise.bank.map((token, bankIndex) => (
                     <button key={bankIndex} type="button" className="practice-token" onClick={() => addToken(bankIndex)} disabled={built.includes(bankIndex) || buildChecked}>
                       {token}
@@ -338,14 +395,14 @@ export default function ReadingTrainer() {
 
             {(complete || (exercise.type === "choice" && choice !== null)) && !(exercise.type === "build" && !buildIsCorrect) && (
               <button type="button" className="primary-button reading-next practice-next" onClick={advance}>
-                {index === exercises.length - 1 ? "Завершить тренировку" : "Дальше →"}
+                {index === sessionExercises.length - 1 ? "Завершить тренировку" : "Дальше →"}
               </button>
             )}
           </>
         ) : (
           <div className="reading-result">
             <span className="section-label">ТРЕНИРОВКА ЗАВЕРШЕНА</span>
-            <div className="reading-result-score">{correct} / {exercises.length}</div>
+            <div className="reading-result-score">{correct} / {sessionExercises.length}</div>
             <h3>{correct === exercises.length ? "Ма ша Аллах! Отлично!" : "Хорошая работа!"}</h3>
             <p>Ты потренировал распознавание букв, огласовок и чтение слогов. Повтори раунд, чтобы закрепить результат.</p>
             <button type="button" className="primary-button reading-next" onClick={restart}>Повторить</button>
