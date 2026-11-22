@@ -2017,3 +2017,12 @@ html, body {
   .study-start,
   .modal-button { border-radius: 17px; }
 }
+
+.answer-option,
+.reading-option,
+.exam-pick,
+.lesson-pick,
+.study-start,
+.modal-button { border-radius: 17px; }
+.answer-option,
+.reading-option { min-height: 54px; }
