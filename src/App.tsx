@@ -1204,7 +1204,7 @@ export default function App() {
     setReviewMode(false);
     setReviewMistakeIds([]);
     setExamMode(false);
-    if (lesson.id === 20) navigate("/lessons/alif");
+    if (lesson.id === 20 && location.pathname !== "/lessons/alif") navigate("/lessons/alif");
   };
 
   const answerQuestion = (answer: string) => {
@@ -1345,10 +1345,17 @@ export default function App() {
 
   useEffect(() => {
     if (isLessonsRoute && routeHandled.current !== location.pathname) {
+      if (routeHandled.current === "/lessons/alif") closeStage();
       routeHandled.current = location.pathname;
       window.requestAnimationFrame(() => {
         document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" });
       });
+      return;
+    }
+
+    if (location.pathname === "/" && routeHandled.current === "/lessons/alif") {
+      routeHandled.current = "/";
+      closeStage();
       return;
     }
 
