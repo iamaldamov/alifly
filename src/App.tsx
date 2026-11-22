@@ -1490,12 +1490,20 @@ export default function App() {
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
     : false;
   const firstStageCompletedCount = lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
-  const progressPercent = Math.round((firstStageCompletedCount / lessons.length) * 100);
   const today = localDateKey();
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed || (startingLevel !== null && startingLevel >= 2);
   const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 3);
   const stageFourUnlocked = stageThreeLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 4);
+  const activeRoute = stageFourUnlocked
+    ? { title: "диалогов", stageTitle: "Первые диалоги", lessons: stageFourLessons }
+    : stageThreeUnlocked
+      ? { title: "чтения слов", stageTitle: "Читаем первые слова", lessons: stageThreeLessons }
+      : stageTwoUnlocked
+        ? { title: "огласовок", stageTitle: "Огласовки", lessons: stageTwoLessons }
+        : { title: "алфавита", stageTitle: "Арабский алфавит", lessons };
+  const activeRouteCompletedCount = activeRoute.lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
+  const activeRoutePercent = Math.round((activeRouteCompletedCount / activeRoute.lessons.length) * 100);
   const hasExistingLearningData = completedLessonIds.length > 0 || mistakes.length > 0 || dailyActivity.lessonIds.length > 0;
   const shouldShowLevelPlacement = startingLevel === null && !hasExistingLearningData && (!user || cloudReady);
 
@@ -1577,9 +1585,9 @@ export default function App() {
           <h2>Каждый шаг важен</h2>
         </div>
         <div className="progress-card">
-          <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
-          <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
-          <p>{firstStageCompletedCount === lessons.length ? "Все девять уроков алфавита завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          <div className="progress-info"><span>{activeRouteCompletedCount} из {activeRoute.lessons.length} уроков {activeRoute.title}</span><strong>{activeRoutePercent}%</strong></div>
+          <div className="progress-track"><div className="progress-fill" style={{ width: activeRoutePercent + "%" }} /></div>
+          <p>{activeRouteCompletedCount === activeRoute.lessons.length ? "Этап «" + activeRoute.stageTitle + "» завершён. Следующий маршрут открыт или уже доступен." : "Продолжай с текущего этапа. Твой прогресс сохраняется."}</p>
           <div className="memory-actions">
             {dueMistakes.length > 0 && (
               <button className="review-button" type="button" onClick={startReview}>
