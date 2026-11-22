@@ -200,7 +200,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
   return (
     <div className="auth-control">
-      <button className="profile-avatar-button" type="button" onClick={openPanel} aria-label={user ? "Аккаунт и выбор персонажа" : "Регистрация и выбор персонажа"} aria-haspopup="dialog" title="Мой персонаж">
+      <button className="profile-avatar-button" type="button" onClick={openPanel} aria-label={user ? "Открыть аккаунт" : "Открыть регистрацию"} aria-haspopup="dialog" title="Профиль">
         <PersonIcon className="profile-person-icon" />
       </button>
       {modal && createPortal(modal, document.body)}
