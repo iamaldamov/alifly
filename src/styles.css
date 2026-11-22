@@ -1817,3 +1817,6 @@ html, body {
 }
 :root[data-theme="light"] .practice-task-head h3 { color: #0B0B0C; }
 :root[data-theme="light"] .practice-arabic-target { color: #5E7F00; }
+
+.practice-match-instruction { margin: 0 0 2px; color: #78847c; font-size: 12px; text-align: center; }
+:root[data-theme="dark"] .practice-match-instruction { color: #B6B6BB; }
