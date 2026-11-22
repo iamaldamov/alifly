@@ -21,6 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="/" element={<App />} />
               <Route path="/lessons" element={<App />} />
               <Route path="/lessons/:slug" element={<App />} />
+              <Route path="/login" element={<App />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <MotionEnhancements />
