@@ -1,48 +1,63 @@
-# ALIFLY — SEO foundation update
+# ALIFLY — SEO foundation
 
-Date: 2026-11-22  
-Target: GitHub Pages project site — https://iamaldamov.github.io/alifly/
+Дата: 22 ноября 2026  
+Сайт: https://iamaldamov.github.io/alifly/
 
-## Changes in this pull request
+## Что добавлено в этой ветке
 
-- Rewrote the HTML title and meta description around real beginner learning intent: Arabic from zero, alphabet, pronunciation, vowel marks and practice.
-- Added canonical URL and Russian hreflang declarations.
-- Added Open Graph and Twitter summary metadata for link previews.
-- Added conservative Schema.org JSON-LD for WebSite and SoftwareApplication. No unverified price, rating, review count or claims are included.
-- Added a useful no-JavaScript fallback description.
-- Added sitemap.xml with the one confirmed public canonical URL.
-- Added robots.txt under the project path and refreshed the PWA manifest description.
+- Единый каталог из 46 публичных маршрутов: главная, каталог, 28 букв и 16 уроков — `seo/routes.json`.
+- Генератор отдельных статических HTML-страниц — `seo/static-pages.ts`. Страницы создаются во время Vite build, без изменения React-компонентов и Firebase.
+- Генерация sitemap.xml через `vite-plugin-sitemap`; маршруты для карты берутся из того же JSON.
+- SEO-карта с title, description и H1 — `seo/metadata.csv`.
+- Шаблон Open Graph и Twitter Card — `seo/dynamic-meta-template.html`.
+- `public/robots.txt` уже присутствует в основной ветке и разрешает обход; в нём указан sitemap.
 
-## Important GitHub Pages limitation
+## Структура публичных URL
 
-This is a project site hosted under `/alifly/`, not a custom domain or the account's root site. A `robots.txt` file in this repository is published at `https://iamaldamov.github.io/alifly/robots.txt`, while crawlers conventionally check `https://iamaldamov.github.io/robots.txt` at the origin root. Therefore this repository-level robots file is useful as a project artifact / future custom-domain setup, but it cannot control crawling for the entire GitHub Pages origin. A root-level robots file requires the account's root Pages repository or a custom domain configuration.
+- Главная: `/alifly/`
+- Каталог: `/alifly/lessons/`
+- Страницы букв: `/alifly/lessons/{slug}/`
+- Страницы учебных уроков: `/alifly/study/{slug}/`
 
-## Indexing limitation and next technical step
+Вложенные страницы — самостоятельные HTML-документы с уникальными title, description, canonical, H1, OG и Twitter metadata. Каталог содержит внутренние ссылки на страницы букв и уроков. Главная страница остаётся исходным `index.html`.
 
-ALIFLY is a Vite + React client-rendered application. The initial HTML contains metadata and a meaningful no-JavaScript fallback, but the interactive lesson interface is rendered by JavaScript. Google can render JavaScript, but rendering is a separate processing stage and not all crawlers execute it. If organic search becomes a key acquisition channel, consider pre-rendering a public educational landing page and a small set of genuinely useful, crawlable learning guides. Do not expose authenticated or user-specific lesson/progress screens to indexing.
+## GitHub Pages: ограничение robots.txt
 
-## After merge / deployment
+Это GitHub Pages project site, размещённый в подпути `/alifly/`. Файл из репозитория публикуется как `https://iamaldamov.github.io/alifly/robots.txt`, тогда как поисковые роботы обычно запрашивают `https://iamaldamov.github.io/robots.txt` в корне origin. Репозиторий проекта не может создать или изменить origin-level robots.txt. Для этого нужен корневой Pages-репозиторий аккаунта либо собственный домен.
 
-1. Open Google Search Console and add the URL-prefix property `https://iamaldamov.github.io/alifly/`.
-2. Verify ownership using the method Search Console provides.
-3. Submit `https://iamaldamov.github.io/alifly/sitemap.xml`.
-4. Use URL Inspection for the homepage and run a live test after deployment.
-5. Confirm the rendered page title, canonical URL, robots directives and structured data.
-6. Monitor indexing and search queries over several weeks. Search ranking is not guaranteed by metadata changes.
+## Локальная проверка после получения ветки
 
-## Keyword and content direction
+1. Выполнить `npm install`.
+2. Выполнить `npm run build`.
+3. Убедиться, что появился `dist/sitemap.xml`.
+4. Проверить `dist/robots.txt`.
+5. Проверить наличие `dist/lessons/index.html`, всех 28 файлов `dist/lessons/{slug}/index.html` и всех 16 файлов `dist/study/{slug}/index.html`.
+6. Проверить исходный HTML нескольких страниц: уникальные title, description, canonical, H1, OG и Twitter.
+7. Запустить `npm run preview` и открыть URL напрямую, включая обновление страницы.
 
-Primary intent: `арабский язык с нуля`.
+В этой сессии удалённый GitHub build не запускался: ветка и конфигурация подготовлены, но фактическое выполнение `npm install` и `npm run build` ещё требует CI или локального запуска.
 
-Supporting natural-language topics:
-- арабский алфавит для начинающих;
-- 28 букв арабского алфавита;
-- как произносятся арабские буквы;
-- огласовки в арабском языке;
-- уроки арабского языка онлайн.
+## Google Search Console — действия владельца
 
-Use these phrases naturally in visible, genuinely useful content. Do not add keyword-stuffed hidden text or create thin duplicate pages.
+1. Открыть https://search.google.com/search-console/.
+2. Нажать «Добавить ресурс».
+3. Выбрать «Ресурс с префиксом URL» и указать `https://iamaldamov.github.io/alifly/`.
+4. Подтвердить владение способом, который предложит Search Console. Использовать только актуальный verification token, показанный сервисом.
+5. Открыть «Файлы Sitemap» и отправить `sitemap.xml`.
+6. В «Проверке URL» проверить главную, каталог, страницу буквы и страницу урока; запустить проверку опубликованной страницы.
+7. После обработки следить за статусами страниц и отчётом об индексировании.
 
-## Scope / safety
+## Яндекс.Вебмастер — действия владельца
 
-No React learning logic, Firebase Auth, Firestore schema, user progress, lesson identifiers, Arabic source content or deployment workflow was changed. Sitemap intentionally contains only the verified homepage URL; the current app does not expose independent crawlable URLs for individual lessons.
+1. Открыть https://webmaster.yandex.ru/.
+2. Добавить сайт `https://iamaldamov.github.io/alifly/`.
+3. Подтвердить права методом, который предложит Вебмастер (HTML-файл или meta-тег). Не удалять существующие verification-теги.
+4. В разделе Sitemap добавить `https://iamaldamov.github.io/alifly/sitemap.xml`.
+5. Проверить несколько статических URL и статус обхода/индексации в инструментах Вебмастера.
+
+## Что важно понимать
+
+- Sitemap сообщает поисковику о URL, но не гарантирует их индексацию или позиции.
+- Статические SEO-страницы дают поисковым роботам HTML с содержимым без необходимости запускать React.
+- Основное SPA остаётся на главной странице; пользовательская авторизация и персональный прогресс не включены в SEO-страницы.
+- До merge необходимо получить успешную сборку и проверить опубликованные страницы.
