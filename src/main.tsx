@@ -7,6 +7,7 @@ import "./forest-glass.css";
 import "./experience-polish.css";
 import "./lime-noir.css";
 import "./premium-interaction.css";
+import "./expanded-hero.css";
 import MotionEnhancements from "./MotionEnhancements";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
