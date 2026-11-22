@@ -8,16 +8,20 @@ const REVEAL_TARGETS = [
   ".hero-note",
   ".hero-art",
   ".daily-quest-card",
+  ".reading-heading",
   ".reading-card",
   ".progress-section > div",
+  ".progress-card",
   ".section-heading",
   ".stage-card",
+  ".study-phrase-card",
+  ".word-game-card",
   ".footer > *",
 ].join(",");
 
 /**
  * Small, dependency-free motion layer:
- * - reveals learning sections as they enter the viewport;
+ * - reveals learning sections and key cards as they enter the viewport;
  * - shows brief, contextual help after a touch on controls that need explanation.
  *
  * Content remains visible without JavaScript and when reduced motion is preferred.
