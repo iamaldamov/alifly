@@ -82,6 +82,7 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
     description: "",
   };
   const [pointX, pointY] = info.point;
+  const isOpenCavity = letter === "ا";
 
   return (
     <section className="letter-makhraj" aria-label={`Место образования звука буквы ${letter}`}>
@@ -99,9 +100,15 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
         <path className="mouth-lips" d="M18 83 C28 78 39 78 48 84 M18 108 C29 115 39 116 49 110" />
         <path className="mouth-teeth" d="M42 78 L69 70 L83 87 L50 96 Z M44 111 L73 111 L85 126 L51 120 Z" />
         <path className="mouth-gumline" d="M78 74 C117 62 148 62 174 66" />
-        <path className="mouth-highlight" d={`M${pointX - 9} ${pointY} Q${pointX} ${pointY - 8} ${pointX + 9} ${pointY}`} />
-        <circle className="mouth-point-active-halo" cx={pointX} cy={pointY} r="12" />
-        <circle className="mouth-point-active" cx={pointX} cy={pointY} r="5.5" />
+        {isOpenCavity ? (
+          <path className="mouth-airflow" d="M55 101 C112 91 187 92 263 105" />
+        ) : (
+          <>
+            <path className="mouth-highlight" d={`M${pointX - 9} ${pointY} Q${pointX} ${pointY - 8} ${pointX + 9} ${pointY}`} />
+            <circle className="mouth-point-active-halo" cx={pointX} cy={pointY} r="12" />
+            <circle className="mouth-point-active" cx={pointX} cy={pointY} r="5.5" />
+          </>
+        )}
       </svg>
     </section>
   );
