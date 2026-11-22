@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import ReadingTrainer from "./ReadingTrainer";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
@@ -1417,8 +1416,6 @@ export default function App() {
         completedCount={dailyCompletedCount}
         onGoalChange={updateDailyGoal}
       />
-
-      <ReadingTrainer />
 
       <section className="progress-section">
         <div>
