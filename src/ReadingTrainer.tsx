@@ -248,7 +248,9 @@ export default function ReadingTrainer() {
             )}
 
             {exercise.type === "match" && (
-              <div className="practice-match">
+              <>
+                <p className="practice-match-instruction">Сначала нажми карточку слева, затем найди её пару справа.</p>
+                <div className="practice-match">
                 <div className="practice-match-column">
                   <span className="practice-column-label">БУКВЫ</span>
                   {exercise.left.map((item) => (
@@ -277,7 +279,8 @@ export default function ReadingTrainer() {
                 </div>
                 {matchError && <p className="practice-inline-hint" role="status">Не эта пара. Попробуй ещё раз.</p>}
                 {matched.length > 0 && matched.length < exercise.left.length && <p className="practice-inline-hint">{matched.length} из {exercise.left.length} пар найдено</p>}
-              </div>
+                </div>
+              </>
             )}
 
             {exercise.type === "build" && (
