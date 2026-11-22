@@ -60,8 +60,7 @@ const levelOptions: LevelOption[] = [
 
 const diagnosticQuestions: DiagnosticQuestion[] = [
   {
-    prompt: "Узнай букву «ба».",
-    stimulus: "ب",
+    prompt: "Выбери букву, которая называется «ба».",
     options: ["ت", "ب", "ث"],
     correct: "ب",
     levelOnMiss: 1,
