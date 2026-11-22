@@ -87,7 +87,7 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
   const isMiddleTongue = ["ج", "ش", "ي"].includes(letter);
   const isSideTongue = letter === "ض";
   const isLip = ["ب", "م", "و", "ف"].includes(letter);
-  const zoneRadius = isThroat ? 19 : isBackTongue || isMiddleTongue || isSideTongue ? 17 : isLip ? 15 : 13;
+  const zoneRadius = isThroat ? 16 : isBackTongue || isMiddleTongue || isSideTongue ? 14 : isLip ? 12 : 11;
 
   return (
     <section className="letter-makhraj" aria-label={`Схема места образования звука буквы ${letter}`}>
@@ -95,7 +95,7 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
         className="letter-mouth-diagram"
         viewBox="0 0 420 238"
         role="img"
-        aria-label={`Профиль ротовой полости. Цветом выделена зона произношения буквы ${letter}.`}
+        aria-label={`Вид сбоку на ротовую полость. Выделена область образования звука буквы ${letter}.`}
       >
         <defs>
           <linearGradient id="alifly-head" x1="0" y1="0" x2="1" y2="1">
@@ -103,48 +103,43 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
             <stop offset="1" stopColor="#DCC8B6" />
           </linearGradient>
           <linearGradient id="alifly-tongue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#EFAEAA" />
-            <stop offset="1" stopColor="#C9777B" />
+            <stop offset="0" stopColor="#F0B4AE" />
+            <stop offset="1" stopColor="#C8757A" />
           </linearGradient>
           <filter id="alifly-zone-glow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="5" />
+            <feGaussianBlur stdDeviation="4" />
           </filter>
         </defs>
 
-        {/* Side profile and oral cavity */}
-        <path d="M18 35 C82 5 224 8 304 39 C347 56 373 83 380 111 L410 133 L387 146 L403 161 L376 176 C365 211 324 229 263 230 L112 225 C53 216 22 184 17 139 C13 99 13 62 18 35Z"
-          fill="url(#alifly-head)" stroke="#B7A28F" strokeWidth="3" />
-        <path d="M34 118 C93 78 214 66 305 99 C340 112 356 137 351 161 C322 185 279 198 224 199 C146 201 78 174 34 143Z"
+        {/* Clean side-view cross section: lips on the left, throat on the right */}
+        <path d="M72 17 C157 -1 282 9 335 47 C353 60 365 78 371 94 L402 108 L374 121 L390 135 L356 151 C345 190 303 218 240 225 L116 224 C69 218 42 189 39 153 L21 139 L39 126 L24 112 L43 100 C45 63 52 34 72 17Z"
+          fill="url(#alifly-head)" stroke="#B7A28F" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M43 105 C93 77 188 71 274 86 C311 92 336 111 341 137 C319 157 282 169 228 173 C151 178 84 158 43 132Z"
           fill="#FFFDF8" stroke="#C7B7A6" strokeWidth="2.5" />
-        <path d="M42 113 C112 77 219 77 305 105" fill="none" stroke="#B9947D" strokeWidth="12" strokeLinecap="round" />
-        <path d="M344 104 C366 128 367 153 350 180 C340 197 328 207 313 213" fill="none" stroke="#B9947D" strokeWidth="15" strokeLinecap="round" />
-        <path d="M46 145 C99 164 153 186 211 178 C263 170 309 166 344 183 C318 210 263 220 202 213 C133 205 75 178 46 145Z"
+        <path d="M52 94 C122 68 215 72 291 91" fill="none" stroke="#B9947D" strokeWidth="11" strokeLinecap="round" />
+        <path d="M292 92 C319 103 331 123 325 145 C319 163 306 177 291 188" fill="none" stroke="#B9947D" strokeWidth="13" strokeLinecap="round" />
+        <path d="M49 129 C91 151 133 164 182 157 C231 150 282 145 324 157 C301 185 252 202 194 201 C129 199 77 170 49 129Z"
           fill="url(#alifly-tongue)" stroke="#B96F73" strokeWidth="2.5" />
-        <path d="M20 119 C34 111 47 112 60 122 M20 146 C35 155 48 156 62 148"
-          fill="none" stroke="#BD7778" strokeWidth="9" strokeLinecap="round" />
-        <path d="M57 111 L91 103 L108 128 L65 139Z M58 151 L96 151 L111 176 L66 166Z"
-          fill="#FFFFFF" stroke="#B9ADA1" strokeWidth="2" />
-        <path d="M109 109 C157 92 206 91 246 98" fill="none" stroke="#D8A5A0" strokeWidth="3.5" strokeLinecap="round" />
-        <path d="M298 105 C311 113 318 125 315 138" fill="none" stroke="#C99E8B" strokeWidth="5" strokeLinecap="round" />
+        <path d="M24 107 C35 101 44 102 54 109 M24 132 C36 140 46 140 55 133"
+          fill="none" stroke="#BD7778" strokeWidth="8" strokeLinecap="round" />
+        <path d="M49 99 L78 94 L94 119 L54 126Z M50 133 L87 136 L101 157 L56 148Z"
+          fill="#FFFFFF" stroke="#B9ADA1" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M105 92 C151 79 207 80 250 91" fill="none" stroke="#D8A5A0" strokeWidth="3" strokeLinecap="round" />
+        <path d="M42 183 C66 205 91 213 124 216" fill="none" stroke="#B9A28F" strokeWidth="2" strokeLinecap="round" opacity=".7" />
 
-        {/* One clear highlighted articulation area */}
         {isOpenCavity ? (
           <>
-            <path d="M83 142 C151 120 242 124 322 150" fill="none" stroke="#8AC5A0" strokeWidth="18" strokeLinecap="round" opacity=".2" />
-            <path d="M83 142 C151 120 242 124 322 150" fill="none" stroke="#36885D" strokeWidth="5" strokeLinecap="round" strokeDasharray="3 12" />
-            <path d="M190 108 L190 76 M180 86 L190 76 L200 86" fill="none" stroke="#36885D" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M91 119 C150 102 237 107 305 130" fill="none" stroke="#8AC5A0" strokeWidth="19" strokeLinecap="round" opacity=".24" />
+            <path d="M91 119 C150 102 237 107 305 130" fill="none" stroke="#36885D" strokeWidth="4" strokeLinecap="round" strokeDasharray="3 11" />
+            <path d="M195 102 L195 77 M186 86 L195 77 L204 86" fill="none" stroke="#36885D" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
           </>
         ) : (
           <>
-            <ellipse cx={pointX} cy={pointY} rx={zoneRadius + 9} ry={zoneRadius + 9} fill="#A5D95B" opacity=".22" filter="url(#alifly-zone-glow)" />
-            <ellipse cx={pointX} cy={pointY} rx={zoneRadius} ry={zoneRadius * .78} fill="#B8E76C" opacity=".62" stroke="#548B36" strokeWidth="3.5" />
-            <circle cx={pointX} cy={pointY} r="5.5" fill="#285B45" stroke="#FFFFFF" strokeWidth="2.5" />
+            <circle cx={pointX} cy={pointY} r={zoneRadius + 8} fill="#A5D95B" opacity=".25" filter="url(#alifly-zone-glow)" />
+            <circle cx={pointX} cy={pointY} r={zoneRadius} fill="#B8E76C" opacity=".88" stroke="#548B36" strokeWidth="3" />
+            <circle cx={pointX} cy={pointY} r="4.5" fill="#285B45" stroke="#FFFFFF" strokeWidth="2" />
           </>
         )}
-
-        {/* Quiet visual orientation markers */}
-        <path d="M26 191 Q44 207 66 213" fill="none" stroke="#B9A28F" strokeWidth="2" strokeLinecap="round" opacity=".65" />
-        <circle cx="372" cy="194" r="4" fill="#B9A28F" opacity=".6" />
       </svg>
     </section>
   );
