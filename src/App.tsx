@@ -952,9 +952,10 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const routeHandled = useRef<string | null>(null);
-  const isLessonsRoute = location.pathname === "/lessons";
-  const isAlifRoute = location.pathname === "/lessons/alif";
-  const isLoginRoute = location.pathname === "/login";
+  const routePath = location.pathname.replace(/\\/+$/, "") || "/";
+  const isLessonsRoute = routePath === "/lessons";
+  const isAlifRoute = routePath === "/lessons/alif";
+  const isLoginRoute = routePath === "/login";
   const seoTitle = isAlifRoute
     ? "Алиф — первая буква арабского алфавита | ALIFLY"
     : isLessonsRoute
@@ -969,7 +970,7 @@ export default function App() {
       : isLoginRoute
         ? "Войди в аккаунт ALIFLY, чтобы синхронизировать прогресс и продолжать обучение на разных устройствах."
         : "Изучайте арабский язык с нуля вместе с ALIFLY: интерактивные уроки алфавита, произношение букв, огласовки, упражнения и отслеживание прогресса.";
-  const canonicalUrl = `https://iamaldamov.github.io/alifly${location.pathname === "/" ? "/" : location.pathname}`;
+  const canonicalUrl = `https://iamaldamov.github.io/alifly${routePath === "/" ? "/" : routePath}`;
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
@@ -1179,7 +1180,7 @@ export default function App() {
   };
 
   const closeStage = () => {
-    if (location.pathname === "/lessons/alif") navigate("/lessons");
+    if (routePath === "/lessons/alif") navigate("/lessons");
     setSelectedStage(null);
     setSelectedLesson(null);
     setQuestionIndex(0);
@@ -1204,7 +1205,7 @@ export default function App() {
     setReviewMode(false);
     setReviewMistakeIds([]);
     setExamMode(false);
-    if (lesson.id === 20 && location.pathname !== "/lessons/alif") navigate("/lessons/alif");
+    if (lesson.id === 20 && routePath !== "/lessons/alif") navigate("/lessons/alif");
   };
 
   const answerQuestion = (answer: string) => {
@@ -1344,23 +1345,23 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (isLessonsRoute && routeHandled.current !== location.pathname) {
+    if (isLessonsRoute && routeHandled.current !== routePath) {
       if (routeHandled.current === "/lessons/alif") closeStage();
-      routeHandled.current = location.pathname;
+      routeHandled.current = routePath;
       window.requestAnimationFrame(() => {
         document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" });
       });
       return;
     }
 
-    if (location.pathname === "/" && routeHandled.current === "/lessons/alif") {
+    if (routePath === "/" && routeHandled.current === "/lessons/alif") {
       routeHandled.current = "/";
       closeStage();
       return;
     }
 
-    if (isAlifRoute && routeHandled.current !== location.pathname) {
-      routeHandled.current = location.pathname;
+    if (isAlifRoute && routeHandled.current !== routePath) {
+      routeHandled.current = routePath;
       setSelectedStage(stages[0]);
       startLesson(lessons[0]);
     }
