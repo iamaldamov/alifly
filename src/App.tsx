@@ -1291,16 +1291,22 @@ export default function App() {
           .filter((item) => item.mode === "recall" && item.prompt === currentQuestion.prompt)
           .map((item) => item.correct) ?? [];
         const letterNames = selectedLesson?.letters.map((item) => item.name.split(" (")[0]) ?? [];
-        const vowelChoices = ["Фатха", "Кясра", "Дамма", "ба", "би", "бу", "та", "ти", "ту", "ма", "ми", "му"];
+        const vowelChoices = ["ба", "би", "бу", "та", "ти", "ту", "ма", "ми", "му"];
+        const signChoices = ["Фатха", "Кясра", "Дамма"];
+        const positionChoices = ["Над буквой", "Под буквой", "Перед буквой"];
         const chainChoices = ["бата", "мана", "биту", "бити", "мута", "мата"];
-        const isSyllableChain = Boolean(currentQuestion.stimulus && currentQuestion.stimulus.length > 3);
-        const candidates = [...new Set([
-          currentQuestion.correct,
-          ...samePrompt,
-          ...(isSyllableChain ? chainChoices : []),
-          ...letterNames,
-          ...vowelChoices,
-        ])];
+        const isVowelLesson = selectedLesson !== null && selectedLesson.id >= 6 && selectedLesson.id <= 8;
+        const isSyllableChain = isVowelLesson && Boolean(currentQuestion.stimulus && currentQuestion.stimulus.length > 3);
+        const fallbackChoices = isSyllableChain
+          ? chainChoices
+          : isVowelLesson && currentQuestion.prompt.startsWith("Где")
+            ? positionChoices
+            : isVowelLesson && (currentQuestion.prompt.includes("знак") || currentQuestion.prompt.includes("соответствие"))
+              ? signChoices
+              : isVowelLesson
+                ? vowelChoices
+                : letterNames;
+        const candidates = [...new Set([currentQuestion.correct, ...samePrompt, ...fallbackChoices])];
         return [currentQuestion.correct, ...candidates.filter((item) => item !== currentQuestion.correct)].slice(0, 3);
       })()
     : currentQuestion?.options ?? [];
