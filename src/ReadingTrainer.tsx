@@ -327,7 +327,13 @@ export default function ReadingTrainer() {
               </div>
             )}
 
-            {(complete || (exercise.type === "choice" && choice !== null)) && (
+            {exercise.type === "build" && buildChecked && !buildIsCorrect && (
+              <button type="button" className="primary-button practice-check-button" onClick={() => { setBuilt([]); setBuildChecked(false); }}>
+                Попробовать ещё раз
+              </button>
+            )}
+
+            {(complete || (exercise.type === "choice" && choice !== null)) && !(exercise.type === "build" && !buildIsCorrect) && (
               <button type="button" className="primary-button reading-next practice-next" onClick={advance}>
                 {index === exercises.length - 1 ? "Завершить тренировку" : "Дальше →"}
               </button>
