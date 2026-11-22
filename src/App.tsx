@@ -1293,6 +1293,7 @@ export default function App() {
         const letterNames = selectedLesson?.letters.map((item) => item.name.split(" (")[0]) ?? [];
         const vowelChoices = ["ба", "би", "бу", "та", "ти", "ту", "ма", "ми", "му"];
         const signChoices = ["Фатха", "Кясра", "Дамма"];
+        const correspondenceChoices = ["Фатха — «а»", "Кясра — «и»", "Дамма — «у»"];
         const positionChoices = ["Над буквой", "Под буквой", "Перед буквой"];
         const chainChoices = ["бата", "мана", "биту", "бити", "мута", "мата"];
         const isVowelLesson = selectedLesson !== null && selectedLesson.id >= 6 && selectedLesson.id <= 8;
@@ -1301,8 +1302,10 @@ export default function App() {
           ? chainChoices
           : isVowelLesson && currentQuestion.prompt.startsWith("Где")
             ? positionChoices
-            : isVowelLesson && (currentQuestion.prompt.includes("знак") || currentQuestion.prompt.includes("соответствие"))
-              ? signChoices
+            : isVowelLesson && currentQuestion.prompt.includes("соответствие")
+              ? correspondenceChoices
+              : isVowelLesson && currentQuestion.prompt.includes("знак")
+                ? signChoices
               : isVowelLesson
                 ? vowelChoices
                 : letterNames;
