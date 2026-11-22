@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Seo from "./components/Seo";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
@@ -947,6 +949,22 @@ function readDailyGoal(userId: string): DailyGoal {
 
 export default function App() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const routeHandled = useRef<string | null>(null);
+  const isLessonsRoute = location.pathname === "/lessons";
+  const isAlifRoute = location.pathname === "/lessons/alif";
+  const seoTitle = isAlifRoute
+    ? "Алиф — первая буква арабского алфавита | ALIFLY"
+    : isLessonsRoute
+      ? "Уроки арабского языка с нуля | ALIFLY"
+      : "ALIFLY — арабский язык с нуля | Уроки и практика";
+  const seoDescription = isAlifRoute
+    ? "Изучи арабскую букву алиф: форма, название, произношение и первое упражнение в интерактивном уроке ALIFLY."
+    : isLessonsRoute
+      ? "Последовательные бесплатные уроки арабского языка для начинающих: алфавит, огласовки, чтение и практика."
+      : "Изучайте арабский язык с нуля вместе с ALIFLY: интерактивные уроки алфавита, произношение букв, огласовки, упражнения и отслеживание прогресса.";
+  const canonicalUrl = `https://iamaldamov.github.io/alifly${location.pathname === "/" ? "/" : location.pathname}`;
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
@@ -1156,6 +1174,7 @@ export default function App() {
   };
 
   const closeStage = () => {
+    if (location.pathname === "/lessons/alif") navigate("/lessons");
     setSelectedStage(null);
     setSelectedLesson(null);
     setQuestionIndex(0);
@@ -1318,6 +1337,22 @@ export default function App() {
     setReviewMode(true);
   };
 
+  useEffect(() => {
+    if (isLessonsRoute && routeHandled.current !== location.pathname) {
+      routeHandled.current = location.pathname;
+      window.requestAnimationFrame(() => {
+        document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" });
+      });
+      return;
+    }
+
+    if (isAlifRoute && routeHandled.current !== location.pathname) {
+      routeHandled.current = location.pathname;
+      setSelectedStage(stages[0]);
+      startLesson(lessons[0]);
+    }
+  }, [location.pathname]);
+
   const currentQuestion = selectedLesson?.questions[questionIndex];
   const currentQuestionCorrect = currentQuestion && selectedAnswer !== null
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
@@ -1331,6 +1366,7 @@ export default function App() {
 
   return (
     <main className="app">
+      <Seo title={seoTitle} description={seoDescription} url={canonicalUrl} />
       <header className="topbar">
         <a className="logo" href={import.meta.env.BASE_URL} aria-label="ALIFLY — главная">
           <span className="logo-mark">ا</span>
@@ -1367,7 +1403,10 @@ export default function App() {
           <h1>Открой для себя <span>арабский язык.</span></h1>
           <p>Понятный путь от первой буквы до уверенного чтения. Короткие уроки и заметный прогресс — в твоём темпе.</p>
           <div className="hero-actions">
-            <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
+            <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => {
+                if (location.pathname !== "/lessons") navigate("/lessons");
+                else document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" });
+              }}>
               Начать обучение <span>↗</span>
             </button>
             <span className="hero-action-note">Первые уроки доступны бесплатно</span>
