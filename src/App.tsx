@@ -1332,7 +1332,7 @@ export default function App() {
   return (
     <main className="app">
       <header className="topbar">
-        <a className="logo" href="#" aria-label="ALIFLY — главная">
+        <a className="logo" href={import.meta.env.BASE_URL} aria-label="ALIFLY — главная">
           <span className="logo-mark">ا</span>
           <span>ALIFLY</span>
         </a>
