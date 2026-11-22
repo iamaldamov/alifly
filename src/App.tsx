@@ -1547,8 +1547,8 @@ export default function App() {
         <div className="hero-content">
           <div className="hero-overline">
             <span className="hero-overline-line" />
-            <span>АРАБСКИЙ · С НУЛЯ</span>
-            <span className="hero-overline-index">01 / 03</span>
+            <span>{startingLevel === 4 ? "АРАБСКИЙ · ПРАКТИКА" : startingLevel === 3 ? "АРАБСКИЙ · ЧТЕНИЕ" : startingLevel === 2 ? "АРАБСКИЙ · ОГЛАСОВКИ" : "АРАБСКИЙ · С НУЛЯ"}</span>
+            <span className="hero-overline-index">01 / 04</span>
           </div>
           <h1>Открой для себя <span>арабский язык.</span></h1>
           <p>Понятный путь от первой буквы до уверенного чтения. Короткие уроки и заметный прогресс — в твоём темпе.</p>
