@@ -1,0 +1,37 @@
+name: Build ALIFLY Russian-hosting preview
+
+on:
+  push:
+    branches:
+      - "deploy/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-root-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Build for a domain root
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alifly-russian-hosting-root-preview
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
