@@ -38,29 +38,47 @@ const arabicLetterNames: Record<string, string> = {
   "ي": "يَاء",
 };
 
-type MakhrajArea = "air" | "throat" | "back" | "middle" | "side" | "tip" | "lips";
+type MakhrajArea =
+  | "air" | "deepThroat" | "middleThroat" | "nearThroat"
+  | "qaf" | "kaf" | "middleTongue" | "sideTongue"
+  | "lam" | "nun" | "ra" | "tad" | "sibilants" | "interdental"
+  | "lowerLip" | "lips";
 
 const makhrajAreaByLetter: Record<string, MakhrajArea> = {
   "ا": "air",
-  "ء": "throat", "ه": "throat", "ح": "throat", "ع": "throat", "خ": "throat", "غ": "throat",
-  "ق": "back", "ك": "back",
-  "ج": "middle", "ش": "middle", "ي": "middle",
-  "ض": "side",
-  "ل": "tip", "ن": "tip", "ر": "tip", "ت": "tip", "د": "tip", "ط": "tip",
-  "ث": "tip", "ذ": "tip", "ظ": "tip", "س": "tip", "ز": "tip", "ص": "tip",
-  "ف": "lips", "ب": "lips", "م": "lips", "و": "lips",
+  "ء": "deepThroat", "ه": "deepThroat",
+  "ع": "middleThroat", "ح": "middleThroat",
+  "غ": "nearThroat", "خ": "nearThroat",
+  "ق": "qaf", "ك": "kaf",
+  "ج": "middleTongue", "ش": "middleTongue", "ي": "middleTongue",
+  "ض": "sideTongue",
+  "ل": "lam", "ن": "nun", "ر": "ra",
+  "ت": "tad", "د": "tad", "ط": "tad",
+  "س": "sibilants", "ز": "sibilants", "ص": "sibilants",
+  "ث": "interdental", "ذ": "interdental", "ظ": "interdental",
+  "ف": "lowerLip",
+  "ب": "lips", "م": "lips", "و": "lips",
 };
 
 function LetterMakhrajDiagram({ letter }: { letter: string }) {
-  const area = makhrajAreaByLetter[letter] ?? "middle";
+  const area = makhrajAreaByLetter[letter] ?? "middleTongue";
   const highlight: Record<MakhrajArea, { cx: number; cy: number; rx: number; ry: number }> = {
-    air: { cx: 218, cy: 105, rx: 70, ry: 24 },
-    throat: { cx: 350, cy: 145, rx: 31, ry: 43 },
-    back: { cx: 266, cy: 151, rx: 37, ry: 24 },
-    middle: { cx: 205, cy: 163, rx: 39, ry: 23 },
-    side: { cx: 174, cy: 174, rx: 35, ry: 18 },
-    tip: { cx: 126, cy: 163, rx: 31, ry: 20 },
-    lips: { cx: 72, cy: 142, rx: 26, ry: 25 },
+    air: { cx: 220, cy: 112, rx: 73, ry: 30 },
+    deepThroat: { cx: 357, cy: 174, rx: 24, ry: 34 },
+    middleThroat: { cx: 350, cy: 147, rx: 24, ry: 27 },
+    nearThroat: { cx: 341, cy: 119, rx: 24, ry: 25 },
+    qaf: { cx: 286, cy: 151, rx: 28, ry: 19 },
+    kaf: { cx: 253, cy: 150, rx: 25, ry: 18 },
+    middleTongue: { cx: 205, cy: 174, rx: 34, ry: 17 },
+    sideTongue: { cx: 171, cy: 185, rx: 29, ry: 14 },
+    lam: { cx: 151, cy: 159, rx: 22, ry: 16 },
+    nun: { cx: 131, cy: 149, rx: 20, ry: 14 },
+    ra: { cx: 119, cy: 137, rx: 20, ry: 13 },
+    tad: { cx: 105, cy: 127, rx: 19, ry: 13 },
+    sibilants: { cx: 112, cy: 174, rx: 22, ry: 14 },
+    interdental: { cx: 76, cy: 139, rx: 18, ry: 17 },
+    lowerLip: { cx: 50, cy: 148, rx: 17, ry: 16 },
+    lips: { cx: 35, cy: 140, rx: 15, ry: 19 },
   };
   const mark = highlight[area];
 
@@ -85,7 +103,7 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
         <path d="M25 126 C39 118 51 119 62 128 M25 151 C40 160 52 161 64 153" fill="none" stroke="#b96f70" strokeWidth="8" strokeLinecap="round" />
         <path d="M56 118 L89 108 L105 130 L65 141Z M58 157 L93 158 L108 179 L65 170Z" fill="#fff" stroke="#b9afa4" strokeWidth="2" />
         <path d="M105 109 C149 95 191 93 225 98" fill="none" stroke="#d7a4a0" strokeWidth="3" strokeLinecap="round" />
-        <ellipse cx={mark.cx} cy={mark.cy} rx={mark.rx} ry={mark.ry} fill="#b9e94a" fillOpacity=".38" stroke="#a6d52f" strokeWidth="4" />
+        <ellipse cx={mark.cx} cy={mark.cy} rx={mark.rx} ry={mark.ry} fill="#b9e94a" fillOpacity=".4" stroke="#a6d52f" strokeWidth="4" />
         {area === "air" && <path d="M88 143 C153 119 247 123 323 147" fill="none" stroke="#82b8a0" strokeWidth="5" strokeDasharray="5 10" strokeLinecap="round" />}
       </svg>
     </section>
