@@ -20,7 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route path="/" element={<App />} />
               <Route path="/lessons" element={<App />} />
-              <Route path="/lessons/:slug" element={<App />} />
+              <Route path="/lessons/alif" element={<App />} />
               <Route path="/login" element={<App />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
