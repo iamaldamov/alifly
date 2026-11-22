@@ -952,7 +952,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const routeHandled = useRef<string | null>(null);
-  const routePath = location.pathname.replace(/\\/+$/, "") || "/";
+  const routePath = location.pathname.replace(/\/+$/, "") || "/";
   const isLessonsRoute = routePath === "/lessons";
   const isAlifRoute = routePath === "/lessons/alif";
   const isLoginRoute = routePath === "/login";
