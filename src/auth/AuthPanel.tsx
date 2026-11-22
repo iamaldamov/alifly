@@ -19,7 +19,7 @@ function PersonIcon({ className }: { className: string }) {
   );
 }
 
-export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus }) {
+export default function AuthPanel({ cloudStatus, openOnMount = false, onClose }: { cloudStatus: CloudStatus; openOnMount?: boolean; onClose?: () => void }) {
   const { user, isLoading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AuthMode>("signup");
@@ -34,6 +34,13 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
 
     if (user) {
       setIsOpen(false);
+      if (openOnMount) onClose?.();
+      return;
+    }
+
+    if (openOnMount) {
+      setMode("signin");
+      setIsOpen(true);
       return;
     }
 
@@ -42,7 +49,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     } catch {
       setIsOpen(true);
     }
-  }, [authLoading, user?.uid]);
+  }, [authLoading, user?.uid, openOnMount]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -73,6 +80,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   function closePanel() {
     setIsOpen(false);
     if (!user) markPromptDismissed();
+    onClose?.();
   }
 
   const openPanel = () => {
