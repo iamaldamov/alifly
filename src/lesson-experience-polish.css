@@ -30,6 +30,9 @@
 .question-block h3{max-width:58ch;margin:12px 0 20px;font-size:clamp(20px,3vw,26px);line-height:1.4}
 .answer-options{gap:12px;grid-template-columns:repeat(auto-fit,minmax(92px,1fr))}
 .answer-option{min-height:clamp(84px,12vh,112px);border-radius:18px;font-size:clamp(42px,7vw,56px)}
+.answer-muted{opacity:.42;filter:saturate(.55)}
+.recall-stimulus-text{max-width:100%;min-height:90px;font-family:inherit;font-size:clamp(22px,4vw,30px);line-height:1.5;text-align:center;overflow-wrap:anywhere}
+.recall-stimulus-long{font-size:clamp(42px,9vw,68px);line-height:1.45;overflow-wrap:anywhere}
 .answer-feedback{margin-top:18px;padding:16px 18px;border-radius:16px;font-size:14px;line-height:1.65}
 .answer-feedback strong{font-size:15px}
 .recall-stimulus{min-height:120px;font-size:clamp(72px,13vw,104px)}
@@ -47,12 +50,13 @@
 :root[data-theme="dark"] .answer-option{border-color:var(--border,#3e5145);background:#1d2b23;color:#e5efe7}
 :root[data-theme="dark"] .answer-option.answer-correct{border-color:#6eaa76;background:#1d3a29;color:#b9efbd}
 :root[data-theme="dark"] .answer-option.answer-wrong{border-color:#c87970;background:#422825;color:#ffd2cb}
+:root[data-theme="dark"] .answer-option.answer-muted{opacity:.38;filter:saturate(.45)}
 :root[data-theme="dark"] .feedback-correct{background:#1d3a29;color:#b9efbd}
 :root[data-theme="dark"] .feedback-wrong{background:#422825;color:#ffd2cb}
 @media(max-width:700px){
 .modal-backdrop{display:flex;align-items:stretch;justify-content:center;padding:0;background:rgba(8,17,12,.72);backdrop-filter:blur(12px)}
 .stage-modal.lesson-modal,.stage-modal:has(.lesson-study){position:relative;width:100%;max-width:none;height:100%;max-height:100dvh;min-height:100dvh;margin:0;padding:calc(28px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));border:0;border-radius:0;box-shadow:none;overflow-y:auto}
-.lesson-modal .modal-close{position:sticky;z-index:3;top:0;float:right;margin:-7px -5px 0 10px}
+.lesson-modal .modal-close{position:absolute;z-index:3;top:calc(14px + env(safe-area-inset-top));right:16px;float:none;margin:0}
 .lesson-topline{padding-right:42px}
 .lesson-modal h2{clear:both;padding-top:8px;font-size:clamp(27px,7vw,34px)}
 .lesson-intro{font-size:14px}
