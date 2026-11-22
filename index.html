@@ -23,7 +23,14 @@
         }
 
         var pathname = window.location.pathname;
-        if (pathname.indexOf(base) === 0 && pathname !== base && pathname.indexOf(base + "assets/") !== 0) {
+        var knownRoutes = [
+          base + "lessons", base + "lessons/",
+          base + "lessons/alif", base + "lessons/alif/",
+          base + "login", base + "login/"
+        ];
+        if (pathname.indexOf(base) === 0 && pathname !== base &&
+            pathname.indexOf(base + "assets/") !== 0 &&
+            knownRoutes.indexOf(pathname) === -1) {
           var route = pathname.slice(base.length - 1);
           var query = window.location.search.slice(1);
           var fallbackUrl = base + "?p=" + encodeURIComponent(route);
