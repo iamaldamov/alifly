@@ -27,3 +27,27 @@ jobs:
         run: npm install
       - name: Build project
         run: npm run build
+      - name: Verify generated Pages files
+        run: |
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          test -f dist/lessons/index.html
+          test -f dist/lessons/alif/index.html
+      - name: Smoke test preview routes
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/alifly-preview.log 2>&1 &
+          PREVIEW_PID=$!
+          trap 'kill "$PREVIEW_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4173/alifly/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          for route in /alifly/ /alifly/lessons/ /alifly/lessons/alif/; do
+            status=$(curl --silent --show-error --location --output /dev/null --write-out "%{http_code}" "http://127.0.0.1:4173$route")
+            test "$status" = "200"
+          done
+          curl --silent --show-error --location http://127.0.0.1:4173/alifly/lessons/alif/ | grep -q "Алиф — первая буква арабского алфавита"
