@@ -147,20 +147,28 @@ const exercises: Exercise[] = [
   },
   {
     type: "match",
-    prompt: "Найди одинаковые буквы",
+    prompt: "Соедини букву с её отличительным названием",
     left: [{ id: "jim", label: "ج" }, { id: "ha", label: "ح" }, { id: "kha", label: "خ" }],
-    right: [{ id: "kha", label: "خ" }, { id: "jim", label: "ج" }, { id: "ha", label: "ح" }],
-    explanation: "ج, ح и خ похожи по форме, но отличаются количеством и расположением точек.",
+    right: [{ id: "kha", label: "ха с точкой" }, { id: "jim", label: "джим" }, { id: "ha", label: "ха без точки" }],
+    explanation: "ج — джим, ح — ха без точки, خ — ха с точкой.",
   },
 ];
 
-function shuffleExercises() {
-  const shuffled = [...exercises];
+function shuffleList<T>(items: T[]): T[] {
+  const shuffled = [...items];
   for (let i = shuffled.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+function shuffleExercises(): Exercise[] {
+  return shuffleList(exercises).map((exercise) => {
+    if (exercise.type === "choice") return { ...exercise, options: shuffleList(exercise.options) };
+    if (exercise.type === "match") return { ...exercise, right: shuffleList(exercise.right) };
+    return { ...exercise, bank: shuffleList(exercise.bank) };
+  });
 }
 
 export default function ReadingTrainer() {
