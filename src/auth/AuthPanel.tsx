@@ -156,7 +156,6 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
             <h2 id="auth-title">Аккаунт ALIFLY</h2>
             <p className="auth-description">Твой прогресс и уроки привязаны к аккаунту.</p>
             
-            {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
             <p className={cloudStatus === "error" ? "auth-error" : "auth-message"} role="status">
               {cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Проверь интернет." : cloudStatus === "saved" ? "Прогресс успешно сохранён в аккаунте." : "Аккаунт подключён."}
             </p>
