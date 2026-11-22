@@ -1,5 +1,5 @@
 /* ALIFLY offline shell. Bump the cache version when changing this file. */
-const CACHE_NAME = "alifly-shell-v5";
+const CACHE_NAME = "alifly-shell-v6";
 const APP_BASE = new URL("./", self.location.href).pathname;
 const APP_SHELL = [
   APP_BASE,
