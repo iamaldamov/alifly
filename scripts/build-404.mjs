@@ -37,7 +37,7 @@ function escapeAttribute(value) {
 
 function replaceTag(html, pattern, replacement) {
   if (!pattern.test(html)) {
-    throw new Error(\`Could not find expected HTML metadata pattern: \${pattern}\`);
+    throw new Error("Could not find expected HTML metadata pattern: " + pattern);
   }
   return html.replace(pattern, replacement);
 }
@@ -49,15 +49,15 @@ for (const route of routePages) {
   const robots = route.robots ?? "index, follow, max-image-preview:large";
 
   let html = indexHtml;
-  html = replaceTag(html, /<title>[\\s\\S]*?<\\/title>/, \`<title>\${title}</title>\`);
-  html = replaceTag(html, /<meta\\s+name="description"[\\s\\S]*?\\/>/, \`<meta name="description" content="\${description}" />\`);
-  html = replaceTag(html, /<meta\\s+name="robots"[^>]*\\/>/, \`<meta name="robots" content="\${robots}" />\`);
-  html = replaceTag(html, /<link\\s+rel="canonical"[^>]*\\/>/, \`<link rel="canonical" href="\${canonical}" />\`);
-  html = replaceTag(html, /<meta\\s+property="og:title"[^>]*\\/>/, \`<meta property="og:title" content="\${title}" />\`);
-  html = replaceTag(html, /<meta\\s+property="og:description"[\\s\\S]*?\\/>/, \`<meta property="og:description" content="\${description}" />\`);
-  html = replaceTag(html, /<meta\\s+property="og:url"[^>]*\\/>/, \`<meta property="og:url" content="\${canonical}" />\`);
-  html = replaceTag(html, /<meta\\s+name="twitter:title"[^>]*\\/>/, \`<meta name="twitter:title" content="\${title}" />\`);
-  html = replaceTag(html, /<meta\\s+name="twitter:description"[\\s\\S]*?\\/>/, \`<meta name="twitter:description" content="\${description}" />\`);
+  html = replaceTag(html, /<title>[\s\S]*?<\/title>/, "<title>" + title + "</title>");
+  html = replaceTag(html, /<meta\s+name="description"[\s\S]*?\/>/, '<meta name="description" content="' + description + '" />');
+  html = replaceTag(html, /<meta\s+name="robots"[^>]*\/>/, '<meta name="robots" content="' + robots + '" />');
+  html = replaceTag(html, /<link\s+rel="canonical"[^>]*\/>/, '<link rel="canonical" href="' + canonical + '" />');
+  html = replaceTag(html, /<meta\s+property="og:title"[^>]*\/>/, '<meta property="og:title" content="' + title + '" />');
+  html = replaceTag(html, /<meta\s+property="og:description"[\s\S]*?\/>/, '<meta property="og:description" content="' + description + '" />');
+  html = replaceTag(html, /<meta\s+property="og:url"[^>]*\/>/, '<meta property="og:url" content="' + canonical + '" />');
+  html = replaceTag(html, /<meta\s+name="twitter:title"[^>]*\/>/, '<meta name="twitter:title" content="' + title + '" />');
+  html = replaceTag(html, /<meta\s+name="twitter:description"[\s\S]*?\/>/, '<meta name="twitter:description" content="' + description + '" />');
 
   const destination = resolve(outputDir, route.path, "index.html");
   await mkdir(dirname(destination), { recursive: true });
