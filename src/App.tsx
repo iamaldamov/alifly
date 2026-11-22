@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
+import { AliflyHeroArtwork, AliflyStageArtwork } from "./illustrations/AliflyArtwork";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { db } from "./lib/firebase";
@@ -1378,12 +1379,8 @@ export default function App() {
             <span>ПРОГРЕСС</span>
           </div>
         </div>
-        <div className="hero-index-art" aria-hidden="true">
-          <span className="hero-index-caption">THE ARABIC<br/>LEARNING JOURNEY</span>
-          <span className="hero-index-number">01</span>
-          <span className="hero-index-orbit hero-index-orbit-one" />
-          <span className="hero-index-orbit hero-index-orbit-two" />
-          <span className="hero-index-foot">ALIFLY® · EST. FOR LEARNERS</span>
+        <div className="hero-index-art">
+          <AliflyHeroArtwork />
         </div>
       </section>
 
@@ -1430,7 +1427,7 @@ export default function App() {
             const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked) || (stage.id === 3 && stageThreeUnlocked);
             return (
               <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} data-touch-hint={unlocked ? `Открой этап «${stage.title}» и выбери доступный урок` : undefined} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
-                <span className="stage-icon">{stage.icon}</span>
+                <span className="stage-icon"><AliflyStageArtwork stageId={stage.id} /></span>
                 <span className="stage-info">
                   <span className="stage-number">ЭТАП {stage.id}</span>
                   <strong>{stage.title}</strong>
