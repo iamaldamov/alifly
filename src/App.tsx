@@ -954,16 +954,21 @@ export default function App() {
   const routeHandled = useRef<string | null>(null);
   const isLessonsRoute = location.pathname === "/lessons";
   const isAlifRoute = location.pathname === "/lessons/alif";
+  const isLoginRoute = location.pathname === "/login";
   const seoTitle = isAlifRoute
     ? "Алиф — первая буква арабского алфавита | ALIFLY"
     : isLessonsRoute
       ? "Уроки арабского языка с нуля | ALIFLY"
-      : "ALIFLY — арабский язык с нуля | Уроки и практика";
+      : isLoginRoute
+        ? "Вход в аккаунт ALIFLY | Сохранение прогресса"
+        : "ALIFLY — арабский язык с нуля | Уроки и практика";
   const seoDescription = isAlifRoute
     ? "Изучи арабскую букву алиф: форма, название, произношение и первое упражнение в интерактивном уроке ALIFLY."
     : isLessonsRoute
       ? "Последовательные бесплатные уроки арабского языка для начинающих: алфавит, огласовки, чтение и практика."
-      : "Изучайте арабский язык с нуля вместе с ALIFLY: интерактивные уроки алфавита, произношение букв, огласовки, упражнения и отслеживание прогресса.";
+      : isLoginRoute
+        ? "Войди в аккаунт ALIFLY, чтобы синхронизировать прогресс и продолжать обучение на разных устройствах."
+        : "Изучайте арабский язык с нуля вместе с ALIFLY: интерактивные уроки алфавита, произношение букв, огласовки, упражнения и отслеживание прогресса.";
   const canonicalUrl = `https://iamaldamov.github.io/alifly${location.pathname === "/" ? "/" : location.pathname}`;
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
@@ -1367,7 +1372,7 @@ export default function App() {
 
   return (
     <main className="app">
-      <Seo title={seoTitle} description={seoDescription} url={canonicalUrl} />
+      <Seo title={seoTitle} description={seoDescription} url={canonicalUrl} noIndex={isLoginRoute} />
       <header className="topbar">
         <a className="logo" href={import.meta.env.BASE_URL} aria-label="ALIFLY — главная">
           <span className="logo-mark">ا</span>
@@ -1378,7 +1383,7 @@ export default function App() {
             <span className="streak-icon" aria-hidden="true">🔥</span>
             <span className="streak-count">{streak}</span>
           </span>
-          <AuthPanel cloudStatus={cloudSaveStatus} />
+          <AuthPanel cloudStatus={cloudSaveStatus} openOnMount={isLoginRoute} onClose={() => { if (isLoginRoute) navigate("/"); }} />
           <button
             className="theme-toggle"
             data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
