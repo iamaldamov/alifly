@@ -1,6 +1,9 @@
 name: Lighthouse audit
 
 on:
+  push:
+    branches:
+      - chore/lighthouse-ci
   pull_request:
     branches:
       - main
