@@ -1737,3 +1737,39 @@ html, body {
   .letter-makhraj { padding:12px 10px; }
   .letter-mouth-diagram { max-height:180px; }
 }
+
+
+/* ALIFLY 2.0 — weekly learning rhythm */
+.weekly-rhythm { margin: 8px 4% 30px; padding: 30px; border: 1px solid #e4e8dc; border-radius: 24px; background: linear-gradient(135deg, #fffefa 0%, #f0f4eb 100%); }
+.weekly-rhythm-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.weekly-rhythm-heading h2 { margin: 9px 0 7px; color: #263e32; font-size: 26px; letter-spacing: -.04em; }
+.weekly-rhythm-heading p, .weekly-rhythm-footer p { margin: 0; color: #78847b; font-size: 13px; line-height: 1.6; }
+.weekly-rhythm-count { display: flex; flex-direction: column; align-items: flex-end; flex: 0 0 auto; }
+.weekly-rhythm-count strong { color: #285b45; font-size: 34px; line-height: 1; letter-spacing: -.06em; }
+.weekly-rhythm-count strong span { color: #9aa69a; font-size: 19px; }
+.weekly-rhythm-count small { margin-top: 6px; color: #8a958a; font-size: 10px; }
+.weekly-rhythm-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin-top: 25px; }
+.weekly-day { display: flex; min-height: 90px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid #e8ebe2; border-radius: 15px; background: #fff; color: #879287; }
+.weekly-day > span:first-child { font-size: 9px; font-weight: 850; letter-spacing: .1em; }
+.weekly-day-number { color: #405448; font-size: 18px; font-weight: 750; }
+.weekly-day-check { color: #b6beb4; font-size: 13px; font-weight: 900; }
+.weekly-day.is-done { border-color: #cbdcc9; background: #e9f1e6; }
+.weekly-day.is-done .weekly-day-check { color: #285b45; }
+.weekly-day.is-today { outline: 2px solid #c59a4a; outline-offset: 2px; }
+.weekly-rhythm-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 20px; }
+.weekly-checkin-button { min-height: 43px; padding: 0 17px; border: 0; border-radius: 13px; background: #285b45; color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+.weekly-checkin-button:hover { transform: translateY(-1px); background: #1d4635; }
+.weekly-checkin-button.is-done { background: #e5eee2; color: #285b45; }
+.weekly-rhythm-note { display: block; margin-top: 13px; color: #9aa298; font-size: 10px; }
+@media (max-width: 600px) {
+  .weekly-rhythm { margin: 4px 0 24px; padding: 22px 17px; }
+  .weekly-rhythm-heading { align-items: flex-start; }
+  .weekly-rhythm-heading h2 { font-size: 22px; }
+  .weekly-rhythm-heading p { max-width: 230px; font-size: 11px; }
+  .weekly-rhythm-count strong { font-size: 28px; }
+  .weekly-rhythm-days { gap: 5px; margin-top: 21px; }
+  .weekly-day { min-height: 76px; border-radius: 11px; }
+  .weekly-day-number { font-size: 15px; }
+  .weekly-rhythm-footer { align-items: stretch; flex-direction: column; gap: 12px; }
+  .weekly-checkin-button { width: 100%; }
+}

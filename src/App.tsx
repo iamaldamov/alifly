@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import ReadingTrainer from "./ReadingTrainer";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
+import WeeklyRhythm from "./WeeklyRhythm";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { db } from "./lib/firebase";
@@ -1325,6 +1326,8 @@ export default function App() {
         completedCount={dailyCompletedCount}
         onGoalChange={updateDailyGoal}
       />
+
+      <WeeklyRhythm />
 
       <ReadingTrainer />
 
