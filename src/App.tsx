@@ -696,15 +696,6 @@ function shuffleQuestions(questions: Question[]): Question[] {
   return shuffleItems(questions);
 }
 
-const letterDotCounts: Record<string, number> = {
-  "ا": 0, "ب": 1, "ت": 2, "ث": 3, "ج": 1, "ح": 0, "خ": 1,
-  "د": 0, "ذ": 1, "ر": 0, "ز": 1, "س": 0, "ش": 3, "ص": 0,
-  "ض": 1, "ط": 0, "ظ": 1, "ع": 0, "غ": 1, "ف": 1, "ق": 2,
-  "ك": 0, "ل": 0, "م": 0, "ن": 1, "ه": 0, "و": 0, "ي": 2,
-};
-
-const dotCountLabels = ["Нет точек", "Одна точка", "Две точки", "Три точки"];
-
 function buildVowelPracticeQuestions(lesson: Lesson): Question[] {
   const letterQuestions = lesson.letters.map((letter) => ({
     prompt: "Посмотри на сочетание и введи его звучание.",
@@ -763,17 +754,7 @@ function buildLessonQuestions(lesson: Lesson): Question[] {
       mode: "choice",
       explanation: `Это буква «${letter.name}» — ${letter.character}.${letter.note ? ` ${letter.note}` : ""}`,
     };
-    const dotCount = letterDotCounts[letter.character] ?? 0;
-    const dotQuestion: Question = {
-      prompt: `Сколько точек у буквы ${letter.character}?`,
-      options: shuffleItems(dotCountLabels),
-      correct: dotCountLabels[dotCount],
-      mode: "choice",
-      explanation: dotCount === 0
-        ? `У буквы ${letter.character} нет точек.`
-        : `У буквы ${letter.character} — ${dotCountLabels[dotCount].toLocaleLowerCase("ru-RU")}.`,
-    };
-    return [recognition, dotQuestion, ...buildLetterRecallQuestions(letter)];
+    return [recognition, ...buildLetterRecallQuestions(letter)];
   });
 
   return shuffleQuestions(questions);
@@ -1389,7 +1370,7 @@ export default function App() {
             <span className="hero-overline-index">01 / 03</span>
           </div>
           <h1>Открой для себя <span>арабский язык.</span></h1>
-          <p>Понятный путь от первой буквы до уверенного чтения. Короткие занятия, практика и заметный прогресс — в твоём темпе.</p>
+          <p>Понятный путь от первой буквы до уверенного чтения. Короткие уроки и заметный прогресс — в твоём темпе.</p>
           <div className="hero-actions">
             <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
               Начать обучение <span>↗</span>
@@ -1399,7 +1380,7 @@ export default function App() {
           <div className="hero-bottomline">
             <span>БУКВЫ</span><i />
             <span>ЧТЕНИЕ</span><i />
-            <span>ПРАКТИКА</span>
+            <span>ПРОГРЕСС</span>
           </div>
         </div>
         <div className="hero-index-art" aria-hidden="true">
