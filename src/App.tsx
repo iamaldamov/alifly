@@ -1199,6 +1199,7 @@ export default function App() {
     setReviewMode(false);
     setReviewMistakeIds([]);
     setExamMode(false);
+    if (lesson.id === 20) navigate("/lessons/alif");
   };
 
   const answerQuestion = (answer: string) => {
