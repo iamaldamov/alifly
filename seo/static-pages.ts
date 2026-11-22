@@ -1,5 +1,5 @@
 import type { Plugin } from "vite";
-import type { SeoRoute } from "./routes";
+export type SeoRoute = { path: string; title: string; description: string; h1: string; summary: string; kind: "home" | "hub" | "letter" | "lesson"; arabic?: string; subject?: string };
 
 const SITE_URL = "https://iamaldamov.github.io/alifly";
 const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
