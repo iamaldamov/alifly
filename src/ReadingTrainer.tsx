@@ -124,7 +124,7 @@ export default function ReadingTrainer() {
     ? choice !== null
     : exercise.type === "match"
       ? matched.length === exercise.left.length
-      : buildChecked && exercise.answer.every((token, position) => exercise.bank[built[position]] === token) && built.length === exercise.answer.length;
+      : buildChecked;
 
   const advance = () => {
     if (index === exercises.length - 1) {
