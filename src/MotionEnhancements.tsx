@@ -90,15 +90,15 @@ export default function MotionEnhancements() {
         </svg>
       </div>
       <style>{[
-        ".alifly-crescent-scene{position:fixed;z-index:0;top:8svh;right:-1vw;width:min(34vw,390px);aspect-ratio:260/300;pointer-events:none;overflow:visible;color:#B99A62;opacity:calc(.12 + var(--alifly-scroll-progress,0)*.12);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2.5vh),0);transition:opacity .7s ease;contain:layout paint}",
-        ".alifly-crescent-halo{position:absolute;inset:13%;border-radius:50%;background:radial-gradient(ellipse at 56% 48%,rgba(185,154,98,.15),rgba(185,154,98,.045) 42%,transparent 72%);filter:blur(15px);animation:alifly-crescent-breathe 7s ease-in-out infinite}",
+        ".app{position:relative;z-index:1}.alifly-crescent-scene{position:fixed;z-index:0;top:8svh;right:-1vw;width:min(34vw,390px);aspect-ratio:260/300;pointer-events:none;overflow:visible;color:#B99A62;opacity:calc(.085 + var(--alifly-scroll-progress,0)*.085);filter:blur(.45px) saturate(.82);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2.5vh),0);transition:opacity .7s ease;contain:layout paint}",
+        ".alifly-crescent-halo{position:absolute;inset:13%;border-radius:50%;background:radial-gradient(ellipse at 56% 48%,rgba(185,154,98,.095),rgba(185,154,98,.025) 42%,transparent 72%);filter:blur(18px);animation:alifly-crescent-breathe 7s ease-in-out infinite}",
         ".alifly-crescent-art{position:relative;width:100%;height:100%;overflow:visible;transform:rotate(calc(var(--alifly-scroll-progress,0)*-5deg)) scale(calc(.97 + var(--alifly-scroll-progress,0)*.035));transform-origin:58% 48%;animation:alifly-crescent-float 9s ease-in-out infinite}",
         ".alifly-crescent-glow{opacity:.42;filter:url(#alifly-crescent-glow)}",
         ".alifly-crescent-outline{stroke-dasharray:650;stroke-dashoffset:calc(650 - var(--alifly-scroll-progress,0)*34);}",
         "@keyframes alifly-crescent-float{0%,100%{translate:0 0}50%{translate:0 -7px}}",
-        "@keyframes alifly-crescent-breathe{0%,100%{opacity:.55;scale:.96}50%{opacity:1;scale:1.04}}",
-        ":root[data-theme=light] .alifly-crescent-scene{opacity:calc(.075 + var(--alifly-scroll-progress,0)*.07)}",
-        "@media(max-width:700px){.alifly-crescent-scene{top:11svh;right:-13vw;width:53vw;opacity:calc(.085 + var(--alifly-scroll-progress,0)*.08)}:root[data-theme=light] .alifly-crescent-scene{opacity:calc(.055 + var(--alifly-scroll-progress,0)*.05)}.alifly-crescent-halo{filter:blur(10px)}}",
+        "@keyframes alifly-crescent-breathe{0%,100%{opacity:.42;scale:.96}50%{opacity:.78;scale:1.04}}",
+        ":root[data-theme=light] .alifly-crescent-scene{opacity:calc(.052 + var(--alifly-scroll-progress,0)*.05)}",
+        "@media(max-width:700px){.alifly-crescent-scene{top:11svh;right:-13vw;width:53vw;opacity:calc(.065 + var(--alifly-scroll-progress,0)*.06)}:root[data-theme=light] .alifly-crescent-scene{opacity:calc(.04 + var(--alifly-scroll-progress,0)*.035)}.alifly-crescent-halo{filter:blur(13px)}}",
         "@media(prefers-reduced-motion:reduce){.alifly-crescent-scene,.alifly-crescent-art,.alifly-crescent-halo{transition:none!important;animation:none!important;transform:none!important;translate:none!important}}"
       ].join("\n")}</style>
       <div className={"alifly-touch-hint " + (touchHint ? "is-visible" : "")} role="status" aria-live="polite">{touchHint}</div>
