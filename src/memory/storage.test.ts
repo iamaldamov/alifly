@@ -15,9 +15,10 @@ describe("memory storage", () => {
   beforeEach(() => vi.stubGlobal("localStorage", new MemoryStorage()));
   afterEach(() => vi.unstubAllGlobals());
 
-  it("isolates guest and signed-in account keys", () => {
-    expect(memoryStorageKey(null)).toBe(memoryStorageKey("guest"));
+  it("isolates guest and signed-in account keys, including a UID named guest", () => {
+    expect(memoryStorageKey(null)).not.toBe(memoryStorageKey("guest"));
     expect(memoryStorageKey("user-a")).not.toBe(memoryStorageKey("user-b"));
+    expect(memoryStorageKey(" user-a ")).toBe(memoryStorageKey("user-a"));
   });
 
   it("round-trips separate user states", () => {
