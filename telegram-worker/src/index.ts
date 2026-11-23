@@ -238,7 +238,14 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
 async function handleMiniAppSession(request: Request, env: Env) {
   const origin = request.headers.get("Origin");
   const allowedOrigin = new URL(env.APP_URL).origin;
+  const corsHeaders = {
+    "access-control-allow-origin": allowedOrigin,
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-allow-headers": "Content-Type",
+    "vary": "Origin",
+  };
   if (origin && origin !== allowedOrigin) return json({ error: "Origin not allowed" }, 403);
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
 
   let body: { initData?: string };
   try {
@@ -283,7 +290,7 @@ async function handleMiniAppSession(request: Request, env: Env) {
   return json(
     { user: { id: user.id, firstName: user.first_name, username: user.username ?? null }, progress },
     200,
-    { "access-control-allow-origin": allowedOrigin, "vary": "Origin" },
+    corsHeaders,
   );
 }
 
@@ -330,6 +337,22 @@ export default {
         return new Response("Temporary failure", { status: 500 });
       }
       return new Response("OK");
+    }
+
+    if (url.pathname === "/api/telegram/session" && request.method === "OPTIONS") {
+      try {
+        const allowedOrigin = new URL(env.APP_URL).origin;
+        const origin = request.headers.get("Origin");
+        if (origin && origin !== allowedOrigin) return new Response(null, { status: 403 });
+        return new Response(null, { status: 204, headers: {
+          "access-control-allow-origin": allowedOrigin,
+          "access-control-allow-methods": "POST, OPTIONS",
+          "access-control-allow-headers": "Content-Type",
+          "vary": "Origin",
+        }});
+      } catch {
+        return new Response(null, { status: 500 });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/telegram/session") {
