@@ -1247,7 +1247,14 @@ export default function App() {
         const previous = current.find((item) => item.id === mistakeId);
         const card = updateReviewCard(
           previous,
-          { id: mistakeId, lessonId: selectedLesson.id, lessonTitle: selectedLesson.title, question },
+          {
+            id: mistakeId,
+            // Preserve original lesson metadata when the question is replayed
+            // inside the combined review lesson (whose temporary ID is 0).
+            lessonId: previous?.lessonId ?? selectedStage?.id ?? selectedLesson.id,
+            lessonTitle: previous?.lessonTitle ?? selectedLesson.title,
+            question: previous?.question ?? question,
+          },
           isCorrect,
         );
         return [...current.filter((item) => item.id !== mistakeId), card];
