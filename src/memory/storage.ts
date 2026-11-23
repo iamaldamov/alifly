@@ -1,43 +1,59 @@
 import {
   EMPTY_MEMORY_STATE,
   MEMORY_SCHEMA_VERSION,
+  type MemoryContentType,
+  type MemoryErrorType,
+  type MemoryGrade,
   type MemoryItem,
   type MemoryReviewEvent,
+  type MemorySkill,
   type MemoryState,
 } from "./types";
 
 const STORAGE_PREFIX = "alifly-memory";
 const MAX_STORAGE_CHARS = 1_500_000;
 
+const CONTENT_TYPES: MemoryContentType[] = ["letter", "vowel_mark", "syllable", "word", "phrase", "grammar_rule", "lesson_question"];
+const SKILLS: MemorySkill[] = ["recognition", "recall", "pronunciation", "listening", "reading", "meaning", "grammar"];
+const GRADES: MemoryGrade[] = ["again", "hard", "good", "easy"];
+const ERROR_TYPES: MemoryErrorType[] = ["shape", "dots", "letter_name", "pronunciation", "listening", "meaning", "reading", "grammar", "attention", "unknown"];
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNullableEnum<T extends string>(value: unknown, values: T[]): value is T | null {
+  return value === null || (typeof value === "string" && values.includes(value as T));
 }
 
 function isMemoryItem(value: unknown): value is MemoryItem {
   if (!isRecord(value)) return false;
   return value.schemaVersion === MEMORY_SCHEMA_VERSION
-    && typeof value.id === "string"
-    && typeof value.contentId === "string"
-    && typeof value.contentType === "string"
-    && typeof value.skill === "string"
+    && typeof value.id === "string" && value.id.length > 0
+    && typeof value.contentId === "string" && value.contentId.length > 0
+    && typeof value.contentType === "string" && CONTENT_TYPES.includes(value.contentType as MemoryContentType)
+    && typeof value.skill === "string" && SKILLS.includes(value.skill as MemorySkill)
     && typeof value.dueAt === "number" && Number.isFinite(value.dueAt)
-    && typeof value.intervalDays === "number" && Number.isFinite(value.intervalDays)
-    && typeof value.repetitions === "number" && Number.isInteger(value.repetitions)
-    && typeof value.easeFactor === "number" && Number.isFinite(value.easeFactor)
-    && typeof value.lapseCount === "number" && Number.isInteger(value.lapseCount)
+    && typeof value.intervalDays === "number" && Number.isFinite(value.intervalDays) && value.intervalDays >= 0
+    && typeof value.repetitions === "number" && Number.isInteger(value.repetitions) && value.repetitions >= 0
+    && typeof value.easeFactor === "number" && Number.isFinite(value.easeFactor) && value.easeFactor >= 1.3 && value.easeFactor <= 3
+    && typeof value.lapseCount === "number" && Number.isInteger(value.lapseCount) && value.lapseCount >= 0
     && (value.lastReviewedAt === null || (typeof value.lastReviewedAt === "number" && Number.isFinite(value.lastReviewedAt)))
+    && isNullableEnum(value.lastGrade, GRADES)
+    && isNullableEnum(value.lastErrorType, ERROR_TYPES)
     && typeof value.createdAt === "number" && Number.isFinite(value.createdAt)
     && typeof value.updatedAt === "number" && Number.isFinite(value.updatedAt);
 }
 
 function isMemoryEvent(value: unknown): value is MemoryReviewEvent {
   if (!isRecord(value)) return false;
-  return typeof value.id === "string"
-    && typeof value.itemId === "string"
+  return typeof value.id === "string" && value.id.length > 0
+    && typeof value.itemId === "string" && value.itemId.length > 0
     && typeof value.reviewedAt === "number" && Number.isFinite(value.reviewedAt)
-    && (value.grade === "again" || value.grade === "hard" || value.grade === "good" || value.grade === "easy")
-    && (value.responseTimeMs === null || (typeof value.responseTimeMs === "number" && Number.isFinite(value.responseTimeMs)))
-    && typeof value.usedHint === "boolean";
+    && typeof value.grade === "string" && GRADES.includes(value.grade as MemoryGrade)
+    && (value.responseTimeMs === null || (typeof value.responseTimeMs === "number" && Number.isFinite(value.responseTimeMs) && value.responseTimeMs >= 0))
+    && typeof value.usedHint === "boolean"
+    && isNullableEnum(value.errorType, ERROR_TYPES);
 }
 
 export function memoryStorageKey(userId: string | null): string {
