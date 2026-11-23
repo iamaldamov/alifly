@@ -4,7 +4,7 @@ import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { db } from "./lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { stages, lessons, stageTwoLessons, stageThreeLessons, isCorrectAnswer, buildLessonQuestions, buildExamRecallQuestions } from "./data/curriculum";
+import { stages, lessons, stageTwoLessons, stageThreeLessons, legacyAlphabetProgress, isCorrectAnswer, buildLessonQuestions, buildExamRecallQuestions } from "./data/curriculum";
 import type { Stage, Question, Lesson } from "./data/curriculum";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
