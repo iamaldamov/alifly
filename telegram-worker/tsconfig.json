@@ -5,7 +5,8 @@
     "moduleResolution": "Bundler",
     "lib": [
       "ES2022",
-      "WebWorker"
+      "WebWorker",
+      "DOM.Iterable"
     ],
     "types": [
       "@cloudflare/workers-types"
