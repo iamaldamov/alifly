@@ -8,7 +8,7 @@ Stage 2 connects the versioned memory foundation to the existing lesson-answer f
 
 ### Stable lesson identity
 
-`src/memory/lessonAdapter.ts` converts the existing lesson/question identity into an opaque deterministic ID. The source question prompt is hashed; prompt text, answer options, correct answers, explanations, and translations are not copied into the new memory record.
+`src/memory/lessonAdapter.ts` converts the existing lesson/question identity into an opaque deterministic ID. The source question ID (which currently contains the existing question prompt) is hashed; prompt text, answer options, correct answers, explanations, and translations are not copied into the new memory record. This lightweight deterministic hash is an identifier, not a cryptographic anonymization or security boundary. A future curriculum migration should replace it with explicit immutable question IDs.
 
 ### Answer capture
 
@@ -29,13 +29,15 @@ Memory state is stored with the versioned key `alifly-memory:v1:{scope}`. Guest 
 
 The existing "Тренировка памяти" screen now chooses due dates from MEMORY ENGINE for cards that have a new memory record. Legacy cards without a memory record continue to use their original `dueAt` value. This preserves old users' progress while gradually moving new answers to the new scheduler.
 
+A review session temporarily uses lesson ID `0` for its combined question list. When a reviewed card is answered, the integration now resolves its original `Mistake` by ID and reuses the original lesson/question identity. This updates the existing memory item and schedules its next review instead of creating a duplicate under lesson `0`.
+
 ## Intentionally deferred
 
 ### Firestore sync
 
-The new memory state is not yet written to Firestore. The repository search did not find a checked-in Firestore rules file, and deployed rules cannot be verified from source code alone. Before adding a cloud field or subcollection, inspect the actual deployed rules and confirm per-user read/write access and field-size constraints. Firebase documents that security rules—not client-side UID scoping—are the authorization boundary (https://firebase.google.com/docs/firestore/security/rules-conditions).
+The new memory state is not yet written to Firestore. The repository contains `firestore.rules`, whose current tracked version permits an authenticated user to read/write any descendant under their own `users/{uid}` document. However, source control does not prove that these rules are the rules currently deployed in Firebase. Draft PR #31 proposes stricter allowlists and denies unlisted nested collections; if those rules are deployed, a new memory subcollection may be rejected. Before enabling cloud sync, inspect the Firebase Console's deployed rules and test owner isolation plus the exact memory schema in the Firestore Emulator. Firebase documents that security rules—not client-side UID scoping—are the authorization boundary (https://firebase.google.com/docs/firestore/security/rules-conditions).
 
-The existing progress document is already used for other progress fields, but adding a new field may still be rejected by strict field allowlists. No assumption is made about the deployed rule set.
+For now, memory remains local-only; no new Firestore fields or subcollections are written.
 
 ### Learner rating UI and error diagnosis
 
@@ -49,6 +51,7 @@ At this stage existing correct/incorrect outcomes map to Good/Again. Hard/Easy r
 - [ ] Sign in; confirm the signed-in UID uses a separate local storage key.
 - [ ] Sign out; confirm guest memory is restored rather than the previous account's memory.
 - [ ] Start the existing review session; confirm new cards follow MEMORY ENGINE due dates.
+- [ ] Review a due card, answer it, and confirm the original memory item is rescheduled (no new `lesson-0` orphan item is created).
 - [ ] Confirm legacy cards without a v1 memory item still follow their original due dates.
 - [ ] Confirm exam answers are excluded, matching the existing mistake-tracking behavior.
 - [ ] Confirm the original lessons, Arabic content, transliteration, and UI are unchanged.
