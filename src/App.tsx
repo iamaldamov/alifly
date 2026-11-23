@@ -1074,6 +1074,14 @@ function readDailyGoal(userId: string): DailyGoal {
   }
 }
 
+function hasDailyGoalChoice(userId: string): boolean {
+  try {
+    return localStorage.getItem(dailyGoalStorageKey(userId)) !== null;
+  } catch {
+    return true;
+  }
+}
+
 export default function App() {
   const { user } = useAuth();
   const dailyUserId = user?.uid ?? "guest";
@@ -1083,6 +1091,8 @@ export default function App() {
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [startingLevel, setStartingLevel] = useState<LearningLevel | null>(() => readStartingLevel("guest"));
   const [showLevelSettings, setShowLevelSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showDailyMissionSetup, setShowDailyMissionSetup] = useState(() => !hasDailyGoalChoice("guest"));
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
@@ -1120,6 +1130,7 @@ export default function App() {
     setDailyGoal(readDailyGoal(dailyUserId));
     setDailyActivity(readDailyActivity(dailyUserId));
     setStartingLevel(readStartingLevel(dailyUserId));
+    setShowDailyMissionSetup(!hasDailyGoalChoice(dailyUserId));
   }, [dailyUserId]);
 
   useEffect(() => {
@@ -1304,6 +1315,7 @@ export default function App() {
     } catch {
       // The daily goal remains available for this session if storage is blocked.
     }
+    setShowDailyMissionSetup(false);
   };
 
   const closeStage = () => {
@@ -1520,6 +1532,9 @@ export default function App() {
             <span className="streak-count">{streak}</span>
           </span>
           <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} />
+          <button className="settings-toggle" type="button" onClick={() => setShowSettings(true)} aria-label="Открыть настройки" title="Настройки">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" /><path d="m19.4 13.5 1.1.8-1.1 1.9-1.3-.5a7.7 7.7 0 0 1-1.4.8l-.2 1.4h-2.2l-.2-1.4a7.7 7.7 0 0 1-1.5-.8l-1.2.5-1.1-1.9 1.1-.8a7 7 0 0 1 0-1.7l-1.1-.8 1.1-1.9 1.2.5a7.7 7.7 0 0 1 1.5-.8l.2-1.4h2.2l.2 1.4a7.7 7.7 0 0 1 1.4.8l1.3-.5 1.1 1.9-1.1.8a7 7 0 0 1 0 1.7Z" /></svg>
+          </button>
           <button
             className="theme-toggle"
             data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
@@ -1541,6 +1556,59 @@ export default function App() {
           onSelectLevel={startLearningLevel}
           onClose={showLevelSettings && !shouldShowLevelPlacement ? () => setShowLevelSettings(false) : undefined}
         />
+      )}
+
+      {showSettings && (
+        <div className="alifly-settings-backdrop" onClick={() => setShowSettings(false)}>
+          <section className="alifly-settings-panel" role="dialog" aria-modal="true" aria-labelledby="alifly-settings-title" onClick={(event) => event.stopPropagation()}>
+            <button className="alifly-settings-close" type="button" onClick={() => setShowSettings(false)} aria-label="Закрыть настройки">×</button>
+            <span className="section-label">ПЕРСОНАЛЬНЫЕ ПАРАМЕТРЫ</span>
+            <h2 id="alifly-settings-title">Настройки</h2>
+            <div className="settings-group">
+              <h3>Внешний вид</h3>
+              <p>Выбери тему, в которой тебе удобно заниматься.</p>
+              <div className="settings-choice-row" role="group" aria-label="Тема оформления">
+                <button type="button" className={theme === "light" ? "settings-choice is-active" : "settings-choice"} aria-pressed={theme === "light"} onClick={() => setTheme("light")}>☀ Светлая</button>
+                <button type="button" className={theme === "dark" ? "settings-choice is-active" : "settings-choice"} aria-pressed={theme === "dark"} onClick={() => setTheme("dark")}>☾ Тёмная</button>
+              </div>
+            </div>
+            <div className="settings-group">
+              <h3>Миссия дня</h3>
+              <p>Сколько уроков ты хочешь проходить ежедневно?</p>
+              <div className="settings-choice-row" role="group" aria-label="Цель на день">
+                {([1, 2, 3] as DailyGoal[]).map((goal) => (
+                  <button key={goal} type="button" className={dailyGoal === goal ? "settings-choice is-active" : "settings-choice"} aria-pressed={dailyGoal === goal} onClick={() => updateDailyGoal(goal)}>{goal} {goal === 1 ? "урок" : "урока"}</button>
+                ))}
+              </div>
+              <small>Цель и отметки сохраняются на этом устройстве.</small>
+            </div>
+            <div className="settings-group">
+              <h3>Уровень арабского</h3>
+              <p>{startingLevel === null ? "Уровень ещё не выбран." : ["", "Начинаю с нуля", "Знаю буквы", "Читаю простые слова", "Уже умею читать"][startingLevel]}</p>
+              <button className="settings-primary-action" type="button" onClick={() => { setShowSettings(false); setShowLevelSettings(true); }}>Изменить уровень</button>
+            </div>
+            <button className="settings-done-button" type="button" onClick={() => setShowSettings(false)}>Готово</button>
+          </section>
+        </div>
+      )}
+
+      {showDailyMissionSetup && startingLevel !== null && !selectedStage && !shouldShowLevelPlacement && (
+        <div className="daily-mission-backdrop">
+          <section className="daily-mission-dialog" role="dialog" aria-modal="true" aria-labelledby="daily-mission-heading">
+            <span className="daily-quest-kicker">НЕБОЛЬШОЙ ШАГ К БОЛЬШОЙ ЦЕЛИ</span>
+            <div className="daily-mission-symbol" aria-hidden="true">ا</div>
+            <h2 id="daily-mission-heading">Миссия дня</h2>
+            <p>Выбери комфортный темп и пройди ещё несколько уроков сегодня.</p>
+            <div className="daily-mission-options" role="group" aria-label="Выбери дневную цель">
+              {([1, 2, 3] as DailyGoal[]).map((goal) => (
+                <button key={goal} type="button" onClick={() => updateDailyGoal(goal)}>
+                  <strong>{goal}</strong><span>{goal === 1 ? "урок" : "урока"}</span>
+                </button>
+              ))}
+            </div>
+            <small>Цель и отметки дня сохраняются на этом устройстве. Изменить цель можно позже в настройках.</small>
+          </section>
+        </div>
       )}
 
       <section className="hero">
@@ -1576,7 +1644,7 @@ export default function App() {
       <DailyQuest
         goal={dailyGoal}
         completedCount={dailyCompletedCount}
-        onGoalChange={updateDailyGoal}
+        onEdit={() => setShowSettings(true)}
       />
 
       <section className="progress-section">
