@@ -8,7 +8,7 @@ import { appendReviewResult, createMemoryItem, getDueMemoryItems, reviewMemoryIt
 import { loadMemoryState, saveMemoryState } from "./memory/storage";
 import { createLessonMemoryIdentity } from "./memory/lessonAdapter";
 import { getMemoryInsights, memorySkillLabel } from "./memory/analytics";
-import type { MemoryState } from "./memory/types";
+import type { MemoryErrorType, MemoryGrade, MemoryState } from "./memory/types";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
 const arabicLetterNames: Record<string, string> = {
@@ -972,6 +972,8 @@ export default function App() {
   const [mistakes, setMistakes] = useState<Mistake[]>(readMistakes);
   const [memoryState, setMemoryState] = useState<MemoryState>(() => loadMemoryState(null));
   const [memoryOwnerId, setMemoryOwnerId] = useState("guest");
+  const [selectedMemoryGrade, setSelectedMemoryGrade] = useState<MemoryGrade | null>(null);
+  const [selectedMemoryError, setSelectedMemoryError] = useState<MemoryErrorType>("unknown");
   const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
@@ -1205,6 +1207,9 @@ export default function App() {
     if (selectedAnswer !== null || !selectedLesson) return;
     setSelectedAnswer(answer);
     const question = selectedLesson.questions[questionIndex];
+    const answerIsCorrect = isCorrectAnswer(question, answer);
+    setSelectedMemoryGrade(answerIsCorrect ? "good" : "again");
+    setSelectedMemoryError("unknown");
     const mistakeId = reviewMode
       ? reviewMistakeIds[questionIndex]
       : `${selectedLesson.id}:${question.prompt}${question.stimulus ? `:${question.stimulus}` : ""}`;
@@ -1227,23 +1232,6 @@ export default function App() {
         sourceMistake?.id ?? mistakeId,
         sourceQuestion.mode === "recall",
       );
-      setMemoryState((current) => {
-        const previous = current.items.find((item) => item.id === memoryIdentity.id);
-        const memoryItem = previous ?? createMemoryItem({
-          ...memoryIdentity,
-          contentType: "lesson_question",
-        });
-        const reviewed = reviewMemoryItem(
-          memoryItem,
-          {
-            grade: isCorrect ? "good" : "again",
-            errorType: isCorrect ? null : "unknown",
-          },
-          `${memoryIdentity.id}-${Date.now().toString(36)}-${current.recentEvents.length.toString(36)}`,
-        );
-        return appendReviewResult(current, reviewed);
-      });
-
       setMistakes((current) => {
         const previous = current.find((item) => item.id === mistakeId);
         const card = updateReviewCard(
@@ -1263,8 +1251,42 @@ export default function App() {
     }
   };
 
+  const saveCurrentMemoryAssessment = () => {
+    if (!selectedLesson || selectedAnswer === null || examMode || !selectedMemoryGrade) return;
+    const question = selectedLesson.questions[questionIndex];
+    const mistakeId = reviewMode
+      ? reviewMistakeIds[questionIndex]
+      : `${selectedLesson.id}:${question.prompt}${question.stimulus ? `:${question.stimulus}` : ""}`;
+    if (!mistakeId) return;
+    const sourceMistake = reviewMode ? mistakes.find((item) => item.id === mistakeId) : undefined;
+    const sourceQuestion = sourceMistake?.question ?? question;
+    const identity = createLessonMemoryIdentity(
+      sourceMistake?.lessonId ?? selectedLesson.id,
+      sourceMistake?.id ?? mistakeId,
+      sourceQuestion.mode === "recall",
+    );
+    const isCorrect = isCorrectAnswer(question, selectedAnswer);
+    setMemoryState((current) => {
+      const previous = current.items.find((item) => item.id === identity.id);
+      const memoryItem = previous ?? createMemoryItem({
+        ...identity,
+        contentType: "lesson_question",
+      });
+      const reviewed = reviewMemoryItem(
+        memoryItem,
+        {
+          grade: selectedMemoryGrade,
+          errorType: selectedMemoryGrade === "again" ? selectedMemoryError : null,
+        },
+        `${identity.id}-${Date.now().toString(36)}-${current.recentEvents.length.toString(36)}`,
+      );
+      return appendReviewResult(current, reviewed);
+    });
+  };
+
   const nextQuestion = () => {
     if (!selectedLesson) return;
+    saveCurrentMemoryAssessment();
     if (questionIndex === selectedLesson.questions.length - 1) {
       if (examMode) {
         if (correctAnswers >= 8 && !examPassed) {
@@ -1301,6 +1323,8 @@ export default function App() {
     }
     setQuestionIndex((index) => index + 1);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
   };
 
@@ -1825,6 +1849,42 @@ export default function App() {
                     <div className={`answer-feedback ${currentQuestionCorrect ? "feedback-correct" : "feedback-wrong"}`} aria-live="polite">
                       <strong>{currentQuestionCorrect ? "Правильно!" : "Правильный ответ"}</strong>
                       <span>{currentQuestionCorrect ? currentQuestion.explanation : `${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
+                    </div>
+                  )}
+                  {selectedAnswer !== null && !examMode && (
+                    <div className="memory-rating" aria-label="Оцени, насколько легко вспомнил">
+                      <span className="memory-rating-title">Насколько легко вспомнил?</span>
+                      <div className="memory-rating-options">
+                        {([
+                          ["again", "Не вспомнил"],
+                          ["hard", "Трудно"],
+                          ["good", "Нормально"],
+                          ["easy", "Легко"],
+                        ] as Array<[MemoryGrade, string]>).map(([grade, label]) => (
+                          <button
+                            key={grade}
+                            type="button"
+                            className={`memory-rating-button ${selectedMemoryGrade === grade ? "is-selected" : ""}`}
+                            aria-pressed={selectedMemoryGrade === grade}
+                            onClick={() => setSelectedMemoryGrade(grade)}
+                          >{label}</button>
+                        ))}
+                      </div>
+                      {selectedMemoryGrade === "again" && (
+                        <div className="memory-error-options">
+                          <label htmlFor="memory-error-type">Что именно было сложно?</label>
+                          <select id="memory-error-type" value={selectedMemoryError} onChange={(event) => setSelectedMemoryError(event.target.value as MemoryErrorType)}>
+                            <option value="unknown">Пока не знаю</option>
+                            <option value="shape">Перепутал форму</option>
+                            <option value="dots">Перепутал точки</option>
+                            <option value="letter_name">Забыл название</option>
+                            <option value="pronunciation">Сложно произнести</option>
+                            <option value="meaning">Забыл значение</option>
+                            <option value="reading">Сложно прочитать</option>
+                            <option value="attention">Невнимательность</option>
+                          </select>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
