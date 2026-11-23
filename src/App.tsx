@@ -1466,7 +1466,7 @@ export default function App() {
   const stageTwoUnlocked = examPassed;
   const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id));
 
-  if (authLoading || (user && progressOwnerId !== user.uid)) {
+  if (authLoading || progressOwnerId !== dailyUserId) {
     return (
       <main className="app app-loading" aria-live="polite">
         <div className="app-loading-message">
