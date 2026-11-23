@@ -4,7 +4,7 @@ import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { db } from "./lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { appendReviewResult, createMemoryItem, reviewMemoryItem } from "./memory/engine";
+import { appendReviewResult, createMemoryItem, getDueMemoryItems, reviewMemoryItem } from "./memory/engine";
 import { loadMemoryState, saveMemoryState } from "./memory/storage";
 import { createLessonMemoryIdentity } from "./memory/lessonAdapter";
 import type { MemoryState } from "./memory/types";
@@ -1310,7 +1310,19 @@ export default function App() {
     setExamMode(true);
   };
 
-  const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
+  const dueMemoryItemIds = new Set(
+    getDueMemoryItems(memoryState, Date.now(), 500).map((item) => item.id),
+  );
+  const dueMistakes = mistakes.filter((item) => {
+    const identity = createLessonMemoryIdentity(
+      item.lessonId,
+      item.id,
+      item.question.mode === "recall",
+    );
+    const memoryItem = memoryState.items.find((candidate) => candidate.id === identity.id);
+    // New cards follow MEMORY ENGINE scheduling; legacy cards keep their old due date.
+    return memoryItem ? dueMemoryItemIds.has(memoryItem.id) : item.dueAt <= Date.now();
+  });
   const weakMistakes = mistakes.filter((item) => item.errorCount > 0);
 
   const startWeakReview = () => {
@@ -1338,7 +1350,7 @@ export default function App() {
   };
 
   const startReview = () => {
-    const due = mistakes.filter((item) => item.dueAt <= Date.now());
+    const due = dueMistakes;
     if (due.length === 0) return;
     setSelectedStage(stages[0]);
     setSelectedLesson({
