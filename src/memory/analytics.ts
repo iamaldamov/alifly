@@ -37,10 +37,13 @@ export function getMemoryInsights(state: MemoryState, now = Date.now()): MemoryI
       return {
         skill,
         count: items.length,
+        attempts,
         accuracyPercent: attempts ? Math.round((passed / attempts) * 100) : 0,
       };
     })
-    .filter((item) => item.count > 0)
+    // Do not label never-reviewed skills as weak with a misleading 0% score.
+    .filter((item) => item.count > 0 && item.attempts > 0)
+    .map(({ attempts: _attempts, ...item }) => item)
     .sort((a, b) => a.accuracyPercent - b.accuracyPercent || b.count - a.count);
 
   return {
