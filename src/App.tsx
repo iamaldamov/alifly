@@ -78,69 +78,87 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
   const info = makhrajByLetter[letter] ?? {
     point: [160, 105] as [number, number],
     title: "Место образования звука",
-    description: "",
+    description: "Посмотри на выделенную область и сопоставь её с подсказкой.",
   };
-  const [pointX, pointY] = info.point;
-  const isOpenCavity = letter === "ا";
-  const isThroat = ["ء", "ه", "ع", "ح", "غ", "خ"].includes(letter);
-  const isBackTongue = ["ق", "ك"].includes(letter);
-  const isMiddleTongue = ["ج", "ش", "ي"].includes(letter);
-  const isSideTongue = letter === "ض";
-  const isLip = ["ب", "م", "و", "ف"].includes(letter);
-  const zoneRadius = isThroat ? 16 : isBackTongue || isMiddleTongue || isSideTongue ? 14 : isLip ? 12 : 11;
+  const lipLetters = ["ب", "م", "و", "ف"];
+  const frontLetters = ["ت", "ث", "د", "ذ", "ر", "ز", "س", "ص", "ط", "ظ", "ل", "ن"];
+  const middleLetters = ["ج", "ش", "ي"];
+  const backLetters = ["ق", "ك"];
+  const throatLetters = ["ء", "ه", "ع", "ح", "غ", "خ"];
+  const isAlif = letter === "ا";
+  const zone = lipLetters.includes(letter) ? "lips"
+    : frontLetters.includes(letter) ? "front"
+    : middleLetters.includes(letter) ? "middle"
+    : letter === "ض" ? "side"
+    : backLetters.includes(letter) ? "back"
+    : throatLetters.includes(letter) ? "throat" : "middle";
+  const target: Record<string, { x: number; y: number; label: string; lx: number; ly: number }> = {
+    lips: { x: 83, y: 133, label: "ГУБЫ", lx: 48, ly: 52 },
+    front: { x: 157, y: 144, label: "КОНЧИК ЯЗЫКА", lx: 112, ly: 225 },
+    middle: { x: 231, y: 148, label: "СЕРЕДИНА ЯЗЫКА", lx: 183, ly: 225 },
+    side: { x: 277, y: 169, label: "БОК ЯЗЫКА", lx: 270, ly: 225 },
+    back: { x: 321, y: 137, label: "КОРЕНЬ ЯЗЫКА", lx: 310, ly: 52 },
+    throat: { x: letter === "ه" || letter === "ء" ? 393 : letter === "ع" || letter === "ح" ? 374 : 350, y: 154, label: "ГОРЛО", lx: 380, ly: 225 },
+  };
+  const point = target[zone];
 
   return (
-    <section className="letter-makhraj" aria-label={`Схема места образования звука буквы ${letter}`}>
-      <svg
-        className="letter-mouth-diagram"
-        viewBox="0 0 420 238"
-        role="img"
-        aria-label={`Вид сбоку на ротовую полость. Выделена область образования звука буквы ${letter}.`}
-      >
+    <section className="letter-makhraj" aria-label={`Где образуется звук буквы ${letter}`}>
+      <div className="letter-makhraj-heading">
+        <strong>Где работает язык и артикуляционный аппарат</strong>
+        <small>Вид сбоку · выделено место образования звука</small>
+      </div>
+      <svg className="letter-mouth-diagram" viewBox="0 0 440 250" role="img"
+        aria-label={isAlif ? "Полость рта открыта, язык не касается нёба: звук проходит свободно." : `Выделена область: ${info.title}.`}>
         <defs>
-          <linearGradient id="alifly-head" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#F8EBDD" />
-            <stop offset="1" stopColor="#DCC8B6" />
+          <linearGradient id="mouth-skin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#E9D8C4"/><stop offset="1" stopColor="#C8AE96"/>
           </linearGradient>
-          <linearGradient id="alifly-tongue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#F0B4AE" />
-            <stop offset="1" stopColor="#C8757A" />
+          <linearGradient id="mouth-tongue" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#E8A7A0"/><stop offset="1" stopColor="#B96770"/>
           </linearGradient>
-          <filter id="alifly-zone-glow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="4" />
+          <filter id="mouth-glow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="5"/>
           </filter>
         </defs>
-
-        {/* Clean side-view cross section: lips on the left, throat on the right */}
-        <path d="M72 17 C157 -1 282 9 335 47 C353 60 365 78 371 94 L402 108 L374 121 L390 135 L356 151 C345 190 303 218 240 225 L116 224 C69 218 42 189 39 153 L21 139 L39 126 L24 112 L43 100 C45 63 52 34 72 17Z"
-          fill="url(#alifly-head)" stroke="#B7A28F" strokeWidth="3" strokeLinejoin="round" />
-        <path d="M43 105 C93 77 188 71 274 86 C311 92 336 111 341 137 C319 157 282 169 228 173 C151 178 84 158 43 132Z"
-          fill="#FFFDF8" stroke="#C7B7A6" strokeWidth="2.5" />
-        <path d="M52 94 C122 68 215 72 291 91" fill="none" stroke="#B9947D" strokeWidth="11" strokeLinecap="round" />
-        <path d="M292 92 C319 103 331 123 325 145 C319 163 306 177 291 188" fill="none" stroke="#B9947D" strokeWidth="13" strokeLinecap="round" />
-        <path d="M49 129 C91 151 133 164 182 157 C231 150 282 145 324 157 C301 185 252 202 194 201 C129 199 77 170 49 129Z"
-          fill="url(#alifly-tongue)" stroke="#B96F73" strokeWidth="2.5" />
-        <path d="M24 107 C35 101 44 102 54 109 M24 132 C36 140 46 140 55 133"
-          fill="none" stroke="#BD7778" strokeWidth="8" strokeLinecap="round" />
-        <path d="M49 99 L78 94 L94 119 L54 126Z M50 133 L87 136 L101 157 L56 148Z"
-          fill="#FFFFFF" stroke="#B9ADA1" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M105 92 C151 79 207 80 250 91" fill="none" stroke="#D8A5A0" strokeWidth="3" strokeLinecap="round" />
-        <path d="M42 183 C66 205 91 213 124 216" fill="none" stroke="#B9A28F" strokeWidth="2" strokeLinecap="round" opacity=".7" />
-
-        {isOpenCavity ? (
-          <>
-            <path d="M91 119 C150 102 237 107 305 130" fill="none" stroke="#8AC5A0" strokeWidth="19" strokeLinecap="round" opacity=".24" />
-            <path d="M91 119 C150 102 237 107 305 130" fill="none" stroke="#36885D" strokeWidth="4" strokeLinecap="round" strokeDasharray="3 11" />
-            <path d="M195 102 L195 77 M186 86 L195 77 L204 86" fill="none" stroke="#36885D" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-          </>
+        <path d="M32 118 C40 76 72 40 122 29 C192 13 290 27 342 62 C365 77 384 101 405 120 L430 135 L403 150 L421 164 L390 179 C376 210 340 228 290 232 L116 232 C70 224 43 197 38 164 L19 151 L39 139Z"
+          fill="url(#mouth-skin)" stroke="#927E6B" strokeWidth="2.5" strokeLinejoin="round"/>
+        <path d="M43 125 C105 91 201 83 285 99 C329 107 360 127 370 153 C347 174 307 182 259 178 C183 173 106 166 43 145Z"
+          fill="#FFFDF8" stroke="#B6A38F" strokeWidth="2"/>
+        <path d="M57 111 C130 79 230 80 309 105 C331 112 345 126 352 140"
+          fill="none" stroke="#A88D77" strokeWidth="13" strokeLinecap="round"/>
+        <path d="M352 139 C367 153 366 176 351 193" fill="none" stroke="#A88D77" strokeWidth="14" strokeLinecap="round"/>
+        <path d="M54 145 C99 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z"
+          fill="url(#mouth-tongue)" stroke="#A95C65" strokeWidth="2.5"/>
+        <path d="M47 119 L82 113 L98 137 L53 143Z M49 148 L87 151 L103 171 L57 164Z"
+          fill="#FFFFFF" stroke="#A99A8B" strokeWidth="2" strokeLinejoin="round"/>
+        <path d="M51 113 Q38 124 51 139 M50 148 Q37 159 51 169" fill="none" stroke="#A95C65" strokeWidth="7" strokeLinecap="round"/>
+        <path d="M111 101 Q171 88 236 99" fill="none" stroke="#D2BBA8" strokeWidth="2" strokeLinecap="round"/>
+        {isAlif ? (
+          <g>
+            <path d="M105 136 Q210 111 330 146" fill="none" stroke="#7DAF72" strokeWidth="20" strokeLinecap="round" opacity=".2"/>
+            <path d="M105 136 Q210 111 330 146" fill="none" stroke="#4F8D59" strokeWidth="4" strokeDasharray="5 10" strokeLinecap="round"/>
+            <path d="M215 116 L215 84 M205 95 L215 84 L225 95" fill="none" stroke="#4F8D59" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+            <text x="220" y="58" textAnchor="middle" fontSize="12" fontWeight="800" fill="#39764B">СВОБОДНЫЙ ПРОХОД ВОЗДУХА</text>
+          </g>
         ) : (
-          <>
-            <circle cx={pointX} cy={pointY} r={zoneRadius + 8} fill="#A5D95B" opacity=".25" filter="url(#alifly-zone-glow)" />
-            <circle cx={pointX} cy={pointY} r={zoneRadius} fill="#B8E76C" opacity=".88" stroke="#548B36" strokeWidth="3" />
-            <circle cx={pointX} cy={pointY} r="4.5" fill="#285B45" stroke="#FFFFFF" strokeWidth="2" />
-          </>
+          <g>
+            <circle cx={point.x} cy={point.y} r="24" fill="#BEE76A" opacity=".32" filter="url(#mouth-glow)"/>
+            <circle cx={point.x} cy={point.y} r="13" fill="#BEE76A" stroke="#356B43" strokeWidth="3"/>
+            <circle cx={point.x} cy={point.y} r="4" fill="#173B2B"/>
+            <path d={`M${point.x} ${point.y} L${point.lx} ${point.ly < 100 ? point.ly + 10 : point.ly - 16}`} stroke="#4F8D59" strokeWidth="2" strokeDasharray="4 4" fill="none"/>
+            <rect x={point.lx - 62} y={point.ly - 13} width="124" height="25" rx="12" fill="#193B2A"/>
+            <text x={point.lx} y={point.ly + 4} textAnchor="middle" fontSize="9.5" fontWeight="800" letterSpacing=".4" fill="#D9F4A2">{point.label}</text>
+          </g>
         )}
+        <text x="24" y="244" fontSize="9" fill="#758477">ГУБЫ</text>
+        <text x="416" y="244" textAnchor="end" fontSize="9" fill="#758477">ГОРЛО</text>
       </svg>
+      <div className="letter-makhraj-copy">
+        <strong>{isAlif ? "Без смыкания языка" : info.title}</strong>
+        <p>{isAlif ? "Долгий звук алифа проходит через открытую полость рта. Язык не должен прижиматься к нёбу или зубам." : info.description}</p>
+        <small className="letter-makhraj-disclaimer">Схема условная и показывает область, а не точную анатомическую траекторию. Для постановки звука слушай образец и сверяйся с преподавателем.</small>
+      </div>
     </section>
   );
 }
