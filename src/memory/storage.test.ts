@@ -15,7 +15,9 @@ describe("memory storage", () => {
   beforeEach(() => vi.stubGlobal("localStorage", new MemoryStorage()));
   afterEach(() => vi.unstubAllGlobals());
 
-  it("isolates guest and signed-in account keys, including a UID named guest", () => {
+  it("isolates guest and signed-in account keys without changing existing key formats", () => {
+    expect(memoryStorageKey(null)).toBe("alifly-memory:v1:guest");
+    expect(memoryStorageKey("user-a")).toBe("alifly-memory:v1:user-a");
     expect(memoryStorageKey(null)).not.toBe(memoryStorageKey("guest"));
     expect(memoryStorageKey("user-a")).not.toBe(memoryStorageKey("user-b"));
     expect(memoryStorageKey(" user-a ")).toBe(memoryStorageKey("user-a"));
