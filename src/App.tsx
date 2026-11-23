@@ -1447,7 +1447,9 @@ export default function App() {
       <footer className="footer">
         <span className="footer-logo">ALIFLY</span>
         <p>Учись с интересом. Продвигайся с уверенностью.</p>
-        <a className="support-project-button" href="https://t.me/tribute/app?startapp=g6Qg" target="_blank" rel="noopener noreferrer" aria-label="Открыть страницу поддержки ALIFLY в Telegram">\n          Поддержать ALIFLY в Telegram <span aria-hidden="true">↗</span>\n        </a>
+        <a className="support-project-button" href="https://t.me/tribute/app?startapp=g6Qg" target="_blank" rel="noopener noreferrer" aria-label="Открыть страницу поддержки ALIFLY в Telegram">
+          Поддержать ALIFLY в Telegram <span aria-hidden="true">↗</span>
+        </a>
         <span>Создано с заботой о знаниях.</span>
       </footer>
 
