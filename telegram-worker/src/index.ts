@@ -244,22 +244,20 @@ async function handleMiniAppSession(request: Request, env: Env) {
     "access-control-allow-headers": "Content-Type",
     "vary": "Origin",
   };
-  if (origin && origin !== allowedOrigin) return json({ error: "Origin not allowed" }, 403);
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
-
+  if (origin && origin !== allowedOrigin) return json({ error: "Origin not allowed" }, 403, corsHeaders);
   let body: { initData?: string };
   try {
     body = (await request.json()) as { initData?: string };
   } catch {
-    return json({ error: "Invalid JSON" }, 400);
+    return json({ error: "Invalid JSON" }, 400, corsHeaders);
   }
   if (!body.initData || body.initData.length > 10_000) {
-    return json({ error: "Missing Telegram initData" }, 400);
+    return json({ error: "Missing Telegram initData" }, 400, corsHeaders);
   }
 
   const user = await verifyTelegramInitData(body.initData, env.TELEGRAM_BOT_TOKEN);
   if (!user || !Number.isSafeInteger(user.id)) {
-    return json({ error: "Invalid or expired Telegram session" }, 401);
+    return json({ error: "Invalid or expired Telegram session" }, 401, corsHeaders);
   }
 
   await env.DB.prepare(
