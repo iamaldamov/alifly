@@ -1592,13 +1592,13 @@ export default function App() {
         </div>
       )}
 
-      {showDailyMissionSetup && startingLevel !== null && !selectedStage && !shouldShowLevelPlacement && (
+      {showDailyMissionSetup && startingLevel !== null && !shouldShowLevelPlacement && (
         <div className="daily-mission-backdrop">
           <section className="daily-mission-dialog" role="dialog" aria-modal="true" aria-labelledby="daily-mission-heading">
             <span className="daily-quest-kicker">НЕБОЛЬШОЙ ШАГ К БОЛЬШОЙ ЦЕЛИ</span>
             <div className="daily-mission-symbol" aria-hidden="true">ا</div>
             <h2 id="daily-mission-heading">Миссия дня</h2>
-            <p>Выбери комфортный темп и пройди ещё несколько уроков сегодня.</p>
+            <p>Выбери комфортный темп и пройди ещё 1, 2 или 3 урока сегодня.</p>
             <div className="daily-mission-options" role="group" aria-label="Выбери дневную цель">
               {([1, 2, 3] as DailyGoal[]).map((goal) => (
                 <button key={goal} type="button" onClick={() => updateDailyGoal(goal)}>
