@@ -22,7 +22,7 @@ Clients cannot add or edit trial, subscription, entitlement, payment, role, or o
 
 ## Progress protection
 
-Only `users/{uid}/progress/current` is client-accessible. The rule validates the exact fields currently written by `src/App.tsx`, their basic types, the daily-goal range, the daily-activity shape, and the server timestamp.
+Only `users/{uid}/progress/current` is client-accessible. The rule validates the exact fields currently written by `src/App.tsx`, their basic types, the daily-goal range, the daily-activity shape, and the server timestamp. The optional `starting_level` field accepts `null` before placement or an integer from 1 to 4; it is optional so older progress documents and clients remain compatible.
 
 Clients cannot delete the progress document. Other nested collections are denied by default.
 
