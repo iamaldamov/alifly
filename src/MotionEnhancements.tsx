@@ -71,34 +71,24 @@ export default function MotionEnhancements() {
 
   return (
     <>
-      <div className="alifly-celestial-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as CSSProperties}>
-        <div className="alifly-celestial-glow" />
-        <svg className="alifly-celestial-art" viewBox="0 0 240 280" fill="none">
-          <defs>
-            <radialGradient id="alifly-moon-halo">
-              <stop offset="0" stopColor="#E8D5A5" stopOpacity=".22" />
-              <stop offset="1" stopColor="#E8D5A5" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="alifly-moon-fill" x1="56" y1="42" x2="194" y2="226" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="#FFF1C9" />
-              <stop offset="1" stopColor="#C9AD72" />
-            </linearGradient>
-          </defs>
-          <circle cx="120" cy="132" r="116" fill="url(#alifly-moon-halo)" />
-          <path
-            d="M158 34C99 44 58 98 65 157C72 215 124 254 181 244C161 262 134 273 104 270C34 263 -9 197 5 130C19 63 82 20 149 31C152 32 155 33 158 34Z"
-            transform="translate(28 -12)"
-            fill="url(#alifly-moon-fill)"
-          />
+      <div className="alifly-pattern-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as CSSProperties}>
+        <svg className="alifly-pattern-art" viewBox="0 0 300 300" fill="none">
+          <g className="alifly-pattern-lines" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M150 18 183 117 282 150 183 183 150 282 117 183 18 150 117 117 150 18Z" />
+            <path d="M150 54 174 126 246 150 174 174 150 246 126 174 54 150 126 126 150 54Z" />
+            <path d="M150 18 150 282M18 150 282 150M56.5 56.5 243.5 243.5M243.5 56.5 56.5 243.5" />
+            <path d="M150 84 166 134 216 150 166 166 150 216 134 166 84 150 134 134 150 84Z" />
+          </g>
+          <circle cx="150" cy="150" r="4" fill="currentColor" />
         </svg>
       </div>
       <style>{[
-        ".alifly-celestial-scene{position:fixed;z-index:0;top:0;right:0;width:min(34vw,390px);height:72svh;overflow:hidden;pointer-events:none;opacity:calc(.10 + var(--alifly-scroll-progress,0)*.13);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2vh),0);transition:opacity .45s ease;contain:layout paint}",
-        ".alifly-celestial-glow{position:absolute;width:82%;aspect-ratio:1;top:3%;right:-12%;border-radius:50%;background:radial-gradient(circle,rgba(218,190,126,.13),rgba(218,190,126,0) 68%);filter:blur(12px)}",
-        ".alifly-celestial-art{position:absolute;width:88%;height:auto;max-height:430px;top:2%;right:-13%;overflow:visible;filter:drop-shadow(0 0 20px rgba(239,214,159,.10));transform:scale(calc(.92 + var(--alifly-scroll-progress,0)*.12));transform-origin:68% 42%}",
-        ":root[data-theme=light] .alifly-celestial-scene{opacity:calc(.055 + var(--alifly-scroll-progress,0)*.07)}",
-        "@media(max-width:700px){.alifly-celestial-scene{width:48vw;height:42svh;opacity:calc(.075 + var(--alifly-scroll-progress,0)*.09)}.alifly-celestial-art{width:100%;max-height:290px;right:-23%;top:1%}:root[data-theme=light] .alifly-celestial-scene{opacity:calc(.035 + var(--alifly-scroll-progress,0)*.05)}}",
-        "@media(prefers-reduced-motion:reduce){.alifly-celestial-scene,.alifly-celestial-art{transition:none!important;transform:none!important}}"
+        ".alifly-pattern-scene{position:fixed;z-index:0;top:10svh;right:-5vw;width:min(38vw,440px);aspect-ratio:1;pointer-events:none;overflow:hidden;color:#B79B63;opacity:calc(.045 + var(--alifly-scroll-progress,0)*.075);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2vh),0);transition:opacity .5s ease;contain:layout paint}",
+        ".alifly-pattern-art{width:100%;height:100%;overflow:visible;transform:rotate(calc(var(--alifly-scroll-progress,0)*10deg)) scale(calc(.94 + var(--alifly-scroll-progress,0)*.06));transform-origin:center}",
+        ".alifly-pattern-lines{stroke-dasharray:780;stroke-dashoffset:calc(780 - var(--alifly-scroll-progress,0)*150);transition:stroke-dashoffset .35s ease}",
+        ":root[data-theme=light] .alifly-pattern-scene{opacity:calc(.035 + var(--alifly-scroll-progress,0)*.045)}",
+        "@media(max-width:700px){.alifly-pattern-scene{top:12svh;right:-19vw;width:58vw;opacity:calc(.035 + var(--alifly-scroll-progress,0)*.055)}:root[data-theme=light] .alifly-pattern-scene{opacity:calc(.025 + var(--alifly-scroll-progress,0)*.035)}}",
+        "@media(prefers-reduced-motion:reduce){.alifly-pattern-scene,.alifly-pattern-art,.alifly-pattern-lines{transition:none!important;transform:none!important}}"
       ].join("\n")}</style>
       <div className={"alifly-touch-hint " + (touchHint ? "is-visible" : "")} role="status" aria-live="polite">{touchHint}</div>
     </>
