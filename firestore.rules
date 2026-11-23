@@ -14,8 +14,11 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'email', 'avatarId', 'createdAt', 'updatedAt'
         ])
-        && request.resource.data.keys().hasAll(['avatarId', 'updatedAt'])
-        && isValidAvatar(request.resource.data.avatarId)
+        && request.resource.data.keys().hasAll(['updatedAt'])
+        && (
+          !('avatarId' in request.resource.data)
+          || isValidAvatar(request.resource.data.avatarId)
+        )
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.updatedAt == request.time
         && (
@@ -41,7 +44,10 @@ service cloud.firestore {
         ])
         && changed.hasOnly(['avatarId', 'updatedAt'])
         && changed.hasAll(['updatedAt'])
-        && isValidAvatar(request.resource.data.avatarId)
+        && (
+          !('avatarId' in request.resource.data)
+          || isValidAvatar(request.resource.data.avatarId)
+        )
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.updatedAt == request.time;
     }
