@@ -1214,10 +1214,17 @@ export default function App() {
     }
 
     if (mistakeId && !examMode) {
+      // Review sessions use a temporary lesson ID (0). Resolve the original
+      // lesson/question identity so an existing memory card is rescheduled,
+      // rather than creating a second orphaned card under lesson 0.
+      const sourceMistake = reviewMode
+        ? mistakes.find((item) => item.id === mistakeId)
+        : undefined;
+      const sourceQuestion = sourceMistake?.question ?? question;
       const memoryIdentity = createLessonMemoryIdentity(
-        selectedLesson.id,
-        mistakeId,
-        question.mode === "recall",
+        sourceMistake?.lessonId ?? selectedLesson.id,
+        sourceMistake?.id ?? mistakeId,
+        sourceQuestion.mode === "recall",
       );
       setMemoryState((current) => {
         const previous = current.items.find((item) => item.id === memoryIdentity.id);
