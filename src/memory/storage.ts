@@ -57,8 +57,9 @@ function isMemoryEvent(value: unknown): value is MemoryReviewEvent {
 }
 
 export function memoryStorageKey(userId: string | null): string {
-  const scope = userId && userId.trim() ? userId.trim() : "guest";
-  return `${STORAGE_PREFIX}:v${MEMORY_SCHEMA_VERSION}:${encodeURIComponent(scope)}`;
+  const normalizedUserId = userId?.trim();
+  const scope = normalizedUserId ? `user:${encodeURIComponent(normalizedUserId)}` : "guest";
+  return `${STORAGE_PREFIX}:v${MEMORY_SCHEMA_VERSION}:${scope}`;
 }
 
 export function parseMemoryState(raw: string | null): MemoryState {
