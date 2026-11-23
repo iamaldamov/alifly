@@ -95,7 +95,12 @@ export function loadMemoryState(userId: string | null): MemoryState {
 export function saveMemoryState(userId: string | null, state: MemoryState): boolean {
   try {
     if (typeof localStorage === "undefined") return false;
-    localStorage.setItem(memoryStorageKey(userId), JSON.stringify(state));
+    const serialized = JSON.stringify(state);
+    // Keep writes within the same limit enforced by parseMemoryState.
+    // Otherwise an oversized state could be written successfully and then
+    // discarded as invalid on the next page load.
+    if (serialized.length > MAX_STORAGE_CHARS) return false;
+    localStorage.setItem(memoryStorageKey(userId), serialized);
     return true;
   } catch {
     return false;
