@@ -84,10 +84,9 @@ export default function MotionEnhancements() {
               <feGaussianBlur stdDeviation="5" />
             </filter>
           </defs>
-          <path className="alifly-crescent-glow" d="M174 28C112 42 72 100 79 164c7 64 62 112 126 105-23 13-50 20-78 17C49 278 0 218 7 140 14 62 82 4 160 11c5 0 10 1 14 2Z" stroke="url(#alifly-crescent-gradient)" strokeWidth="3" />
-          <path className="alifly-crescent-outline" d="M174 28C112 42 72 100 79 164c7 64 62 112 126 105-23 13-50 20-78 17C49 278 0 218 7 140 14 62 82 4 160 11c5 0 10 1 14 2Z" stroke="url(#alifly-crescent-gradient)" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M177 30C122 47 88 101 94 158c6 55 48 98 101 106" stroke="url(#alifly-crescent-gradient)" strokeWidth=".7" strokeLinecap="round" opacity=".5" />
-          <circle cx="190" cy="55" r="2.2" fill="#D7BE8D" opacity=".8" />
+          <path className="alifly-crescent-glow" d="M198 20C116 30 55 91 55 160s61 130 143 140C150 272 116 222 116 160S150 48 198 20Z" stroke="url(#alifly-crescent-gradient)" strokeWidth="3" strokeLinejoin="miter" />
+          <path className="alifly-crescent-outline" d="M198 20C116 30 55 91 55 160s61 130 143 140C150 272 116 222 116 160S150 48 198 20Z" stroke="url(#alifly-crescent-gradient)" strokeWidth="1.65" strokeLinejoin="miter" />
+          <path d="M190 28C123 46 76 101 76 160s47 114 114 132" stroke="url(#alifly-crescent-gradient)" strokeWidth=".7" strokeLinecap="round" opacity=".5" />
         </svg>
       </div>
       <style>{[
