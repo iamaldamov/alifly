@@ -34,7 +34,7 @@ Authentication is provided by Firebase Authentication. The app reads and writes 
 
 The Firebase initialization currently calls `initializeFirestore(app, { ignoreUndefinedProperties: true })` without explicitly enabling persistent Firestore local cache. Therefore the app's own localStorage persistence and Firestore's SDK cache must not be treated as the same storage layer.
 
-Repository code search did not locate a checked-in Firestore rules file. Before adding a new cloud collection or changing document fields, locate and review the deployed Firestore Security Rules and test per-user isolation. Never assume client-side UID scoping is an authorization boundary.
+The repository contains `firestore.rules`. Its currently tracked version allows an authenticated user to read/write descendants under their own `users/{uid}` path. This source file does not prove which rules are deployed in Firebase. Draft PR #31 proposes a stricter allowlist and denies unlisted nested collections; a new memory collection could be rejected if that ruleset is deployed. Before adding cloud writes, inspect the Firebase Console's deployed rules and verify the exact schema and per-user isolation in the Firestore Emulator. Never assume client-side UID scoping is an authorization boundary.
 
 ## New foundation
 
@@ -56,18 +56,18 @@ Review grades are `again`, `hard`, `good`, and `easy`. Error categories are sepa
 - No Firestore writes are added in this foundation.
 - The existing `alifly-mistakes` key is not deleted, rewritten, or migrated.
 
-A later integration must define stable IDs for lesson questions and non-question content, build a reviewed legacy migration, and test account switching so one user's local memory cannot be copied into another user's account.
+Stage 2 adds deterministic IDs by hashing the current legacy question ID. This prevents raw question text from being copied into the new memory record, but the hash is a lightweight identifier, not cryptographic anonymization. When curriculum content receives explicit immutable IDs, the adapter should migrate to those IDs. A reviewed legacy migration and account-switching tests are still required before syncing or migrating existing records.
 
 Before cloud sync is enabled, confirm deployed Firestore rules allow only the authenticated owner to read/write their own memory records. Prefer a dedicated `users/{uid}/memory/{itemId}` path or another explicitly bounded schema, with validated fields and limits. Avoid expanding the current monolithic progress document indefinitely.
 
 ## Next implementation steps
 
-1. Add integration adapters that translate answered learning items into stable memory item IDs without changing lesson content.
-2. Introduce an opt-in review-grade step and error classification UI.
-3. Migrate old question cards only when a stable ID mapping is available; preserve all unmapped legacy records.
-4. Add per-user cloud sync after deployed Firestore rules are verified and emulator/rules tests pass.
-5. Add learner-facing due queue, memory map, and daily review session.
-6. Validate data migration, account switching, offline/online behavior, and mobile browser storage failures.
+1. Add learner-facing Hard / Good / Easy self-assessment and optional error-cause selection without changing lesson prompts.
+2. Expand memory items beyond question-level records to letter, vowel-mark, word, reading, and grammar skills using immutable curriculum IDs.
+3. Migrate old question cards only when a reviewed ID mapping is available; preserve all unmapped legacy records.
+4. Add per-user cloud sync only after deployed Firestore rules are verified and emulator/rules tests pass.
+5. Add the learner-facing memory map and daily review session.
+6. Validate account switching, offline/online behavior, and mobile browser storage failures.
 
 ## Acceptance criteria for this foundation
 
