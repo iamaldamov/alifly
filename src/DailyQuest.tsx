@@ -49,7 +49,12 @@ export default function DailyQuest({
 
         <div className="daily-quest-summary">
           <div className="daily-quest-emblem" aria-hidden="true">
-            {completed ? "✓" : "ا"}
+            <svg viewBox="0 0 72 72" role="presentation">
+              <circle cx="36" cy="36" r="31" fill="#dce8d4" />
+              <path d="M18 43c5-10 12-15 19-15s13 5 17 15" fill="none" stroke="#719275" strokeWidth="3" strokeLinecap="round" />
+              <path d="M23 46h26l-3 10H26z" fill="#f7f1df" stroke="#8aa18a" strokeWidth="2" />
+              {completed ? <path d="m27 34 6 6 13-15" fill="none" stroke="#315b43" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /> : <text x="36" y="43" textAnchor="middle" fill="#315b43" fontSize="27" fontFamily="Noto Naskh Arabic, Amiri, serif">ا</text>}
+            </svg>
           </div>
           <strong>{visibleCount} / {goal}</strong>
           <span>уроков сегодня</span>

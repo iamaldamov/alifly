@@ -1,0 +1,76 @@
+/* Original ALIFLY illustration system: warm paper, botanical greens, Arabic letterforms. */
+.hero-index-art {
+  position: relative;
+  display: grid;
+  min-height: 390px;
+  place-items: center;
+  overflow: visible;
+}
+.alifly-hero-artwork {
+  display: block;
+  width: min(100%, 510px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 18px 28px rgba(5, 24, 14, .12));
+}
+.alifly-art-tile-one { transform-origin: 95px 126px; animation: alifly-tile-float 7s ease-in-out infinite; }
+.alifly-art-tile-two { transform-origin: 409px 101px; animation: alifly-tile-float 8s ease-in-out -2s infinite; }
+.alifly-art-tile-three { transform-origin: 412px 309px; animation: alifly-tile-float 7.5s ease-in-out -3.5s infinite; }
+.alifly-art-label { animation: alifly-label-rise 700ms cubic-bezier(.22,1,.36,1) both; }
+.alifly-stage-artwork { display: block; width: 100%; height: 100%; overflow: visible; }
+.stage-icon {
+  flex: 0 0 66px;
+  width: 66px;
+  height: 66px;
+  padding: 0;
+  background: transparent;
+  border-radius: 22px;
+}
+.stage-icon .alifly-stage-artwork { border-radius: 22px; }
+.stage-locked .stage-icon { filter: grayscale(.65); opacity: .68; }
+@keyframes alifly-tile-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+@keyframes alifly-label-rise {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 760px) {
+  .hero-index-art { min-height: 260px; margin-top: 4px; }
+  .alifly-hero-artwork { width: min(100%, 410px); }
+  .stage-icon { flex-basis: 60px; width: 60px; height: 60px; }
+}
+@media (max-width: 390px) {
+  .hero-index-art { min-height: 220px; }
+  .stage-icon { flex-basis: 54px; width: 54px; height: 54px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .alifly-art-tile-one, .alifly-art-tile-two, .alifly-art-tile-three, .alifly-art-label { animation: none; }
+}
+
+/* Second illustration pass: lesson selection, study, practice, review and daily goal. */
+.modal-art { display: grid; place-items: center; width: 100%; min-height: 118px; margin: -4px auto 8px; }
+.alifly-lesson-artwork { display: block; width: min(180px, 100%); height: auto; overflow: visible; }
+.lesson-study-art { display: grid; place-items: center; min-height: 105px; margin: -8px auto 8px; }
+.lesson-study-art .alifly-lesson-artwork { width: min(190px, 75%); }
+.study-phrase-card { position: relative; overflow: hidden; }
+.study-phrase-art { display: flex; justify-content: center; min-height: 72px; margin: -3px 0 4px; }
+.study-phrase-art .alifly-lesson-artwork { width: 118px; height: 78px; }
+.question-art { display: flex; justify-content: center; min-height: 68px; margin: -4px auto 6px; }
+.question-art .alifly-lesson-artwork { width: 120px; height: 78px; }
+.letter-hint-icon { display: grid; flex: 0 0 68px; place-items: center; width: 68px; height: 68px; overflow: hidden; border-radius: 19px; background: #e7efdf; }
+.letter-hint-icon .alifly-lesson-artwork { width: 76px; max-width: none; }
+.result-symbol { display: grid; place-items: center; min-height: 112px; }
+.result-symbol .alifly-lesson-artwork { width: 148px; }
+.daily-quest-emblem { display: grid; place-items: center; width: 72px; height: 72px; }
+.daily-quest-emblem svg { display: block; width: 100%; height: 100%; }
+@media (max-width: 560px) {
+  .modal-art { min-height: 96px; }
+  .lesson-study-art { min-height: 82px; }
+  .lesson-study-art .alifly-lesson-artwork { width: min(155px, 70%); }
+  .study-phrase-art { min-height: 58px; }
+  .study-phrase-art .alifly-lesson-artwork { width: 96px; height: 62px; }
+  .question-art { min-height: 55px; }
+  .question-art .alifly-lesson-artwork { width: 100px; height: 64px; }
+}
