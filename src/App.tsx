@@ -1103,6 +1103,15 @@ export default function App() {
       } catch (error) {
         if (cancelled) return;
         console.error("ALIFLY: could not load cloud progress", error);
+        // Keep the signed-in learner isolated even when the network is unavailable.
+        setCompletedLessonIds([]);
+        setMistakes([]);
+        setStreak(0);
+        setLastStudyDate("");
+        setExamPassed(false);
+        setDailyGoal(1);
+        setDailyActivity({ date: "", lessonIds: [] });
+        setProgressOwnerId(user.uid);
         setCloudSaveStatus("error");
         return;
       }
@@ -1456,6 +1465,18 @@ export default function App() {
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed;
   const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id));
+
+  if (authLoading || (user && progressOwnerId !== user.uid)) {
+    return (
+      <main className="app app-loading" aria-live="polite">
+        <div className="app-loading-message">
+          <span className="logo-mark" aria-hidden="true">ا</span>
+          <strong>ALIFLY</strong>
+          <p>Загружаем твой прогресс…</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="app">
