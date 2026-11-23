@@ -179,6 +179,33 @@ test("a learner can create their own current progress document", async () => {
   ));
 });
 
+test("starting_level accepts null and the four supported learner routes", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+  const progressRef = doc(alice.firestore(), "users/alice/progress/current");
+
+  // The field is optional for older clients; null means the learner has not selected a route yet.
+  await assertSucceeds(setDoc(progressRef, progressDocument()));
+
+  for (const startingLevel of [null, 1, 2, 3, 4]) {
+    await assertSucceeds(setDoc(progressRef, {
+      ...progressDocument(),
+      starting_level: startingLevel,
+    }));
+  }
+});
+
+test("starting_level rejects unsupported or incorrectly typed values", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+  const progressRef = doc(alice.firestore(), "users/alice/progress/current");
+
+  for (const startingLevel of [0, 5, "2", false]) {
+    await assertFails(setDoc(progressRef, {
+      ...progressDocument(),
+      starting_level: startingLevel,
+    }));
+  }
+});
+
 test("a learner cannot read another learner's progress", async () => {
   const alice = testEnv.authenticatedContext("alice");
   const bob = testEnv.authenticatedContext("bob");
