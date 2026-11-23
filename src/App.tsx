@@ -1339,7 +1339,7 @@ export default function App() {
 
   const memoryInsights = getMemoryInsights(memoryState);
   const dueMemoryItemIds = new Set(
-    getDueMemoryItems(memoryState, Date.now(), 500).map((item) => item.id),
+    getDueMemoryItems(memoryState, Date.now(), Number.MAX_SAFE_INTEGER).map((item) => item.id),
   );
   const dueMistakes = mistakes.filter((item) => {
     const identity = createLessonMemoryIdentity(
@@ -1484,7 +1484,7 @@ export default function App() {
           <p>{firstStageCompletedCount === lessons.length ? "Все девять уроков алфавита завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
           <div className="memory-insights" aria-label="Состояние памяти">
             <div className="memory-insight"><strong>{memoryInsights.totalItems}</strong><span>карточек в памяти</span></div>
-            <div className="memory-insight"><strong>{memoryInsights.dueItems}</strong><span>пора повторить</span></div>
+            <div className="memory-insight"><strong>{dueMistakes.length}</strong><span>пора повторить</span></div>
             <div className="memory-insight"><strong>{memoryInsights.accuracyPercent}%</strong><span>успешных ответов</span></div>
             {memoryInsights.skillCounts.length > 0 && (
               <div className="memory-skill-list">
