@@ -2026,3 +2026,31 @@ html, body {
 .modal-button { border-radius: 17px; }
 .answer-option,
 .reading-option { min-height: 54px; }
+
+
+/* Clear, readable articulation guide — tuned for phone screens */
+.letter-makhraj { max-width: 520px; padding: 16px 14px; border-radius: 22px; }
+.letter-makhraj-heading { display: grid; gap: 5px; margin: 2px 0 8px; text-align: left; }
+.letter-makhraj-heading strong { color: #193B2A; font-size: 14px; line-height: 1.35; }
+.letter-makhraj-heading small { color: #68786D; font-size: 11px; line-height: 1.4; }
+.letter-mouth-diagram { max-height: none; width: 100%; }
+.letter-makhraj-target { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; margin: 2px 0 10px; padding: 9px 12px; border: 1px solid #CFE0C3; border-radius: 13px; background: #EAF3DF; color: #234C32; font-size: 13px; font-weight: 800; line-height: 1.35; }
+.letter-makhraj-target span { color: #79A93F; font-size: 16px; }
+.letter-makhraj-copy { padding: 13px 14px; border-radius: 14px; background: #FFFFFF; text-align: left; }
+.letter-makhraj-copy strong { display: block; color: #193B2A; font-size: 14px; line-height: 1.4; }
+.letter-makhraj-copy p { margin: 6px 0 0; color: #4E5F53; font-size: 13px; line-height: 1.6; }
+.letter-makhraj-disclaimer { display: block; margin-top: 9px; color: #788579; font-size: 10px; line-height: 1.5; }
+:root[data-theme="dark"] .letter-makhraj-heading strong { color: #E3F0E4; }
+:root[data-theme="dark"] .letter-makhraj-heading small { color: #B7C7BA; }
+:root[data-theme="dark"] .letter-makhraj-target { border-color: #496548; background: #2B4030; color: #DDF2C3; }
+:root[data-theme="dark"] .letter-makhraj-copy { background: #26382D; }
+:root[data-theme="dark"] .letter-makhraj-copy strong { color: #E3F0E4; }
+:root[data-theme="dark"] .letter-makhraj-copy p { color: #D0DDD1; }
+:root[data-theme="dark"] .letter-makhraj-disclaimer { color: #AABBAE; }
+@media (max-width: 480px) {
+  .letter-makhraj { padding: 12px 9px; }
+  .letter-makhraj-heading strong { font-size: 13px; }
+  .letter-makhraj-target { font-size: 12px; }
+  .letter-makhraj-copy { padding: 11px; }
+  .letter-makhraj-copy p { font-size: 12px; }
+}
