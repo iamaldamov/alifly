@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 const REVEAL_TARGETS = [
   ".hero-content > .eyebrow", ".hero-content > h1", ".hero-content > p",
@@ -71,7 +71,7 @@ export default function MotionEnhancements() {
 
   return (
     <>
-      <div className="alifly-celestial-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as React.CSSProperties}>
+      <div className="alifly-celestial-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as CSSProperties}>
         <div className="alifly-celestial-glow" />
         <svg className="alifly-celestial-art" viewBox="0 0 360 520" fill="none">
           <defs>
