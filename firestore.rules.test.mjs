@@ -67,6 +67,22 @@ test("a learner can create and read their own allowlisted profile", async () => 
   await assertSucceeds(getDoc(profileRef));
 });
 
+test("the current ALIFLY email sign-up profile works without avatarId", async () => {
+  const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
+
+  // Mirrors AuthPanel.tsx: createUserWithEmailAndPassword followed by setDoc.
+  await assertSucceeds(setDoc(doc(alice.firestore(), "users/alice"), {
+    email: "alice@example.com",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }));
+
+  // The current app may later update a timestamp without having an avatar field.
+  await assertSucceeds(updateDoc(doc(alice.firestore(), "users/alice"), {
+    updatedAt: serverTimestamp(),
+  }));
+});
+
 test("a learner cannot add trial or subscription fields to their profile", async () => {
   const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
 
