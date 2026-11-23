@@ -16,3 +16,11 @@ CREATE TABLE IF NOT EXISTS telegram_users (
 
 CREATE INDEX IF NOT EXISTS idx_telegram_users_updated_at
   ON telegram_users(updated_at);
+
+CREATE TABLE IF NOT EXISTS processed_updates (
+  update_id TEXT PRIMARY KEY,
+  processed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_processed_updates_at
+  ON processed_updates(processed_at);
