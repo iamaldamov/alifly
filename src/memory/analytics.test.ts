@@ -4,6 +4,16 @@ import { getMemoryInsights } from "./analytics";
 import { EMPTY_MEMORY_STATE } from "./types";
 
 describe("memory insights", () => {
+  it("does not flag unreviewed skills as weak", () => {
+    const item = createMemoryItem({
+      id: "unreviewed", contentId: "unreviewed", contentType: "lesson_question", skill: "pronunciation", now: 1_000,
+    });
+    const insights = getMemoryInsights({ ...EMPTY_MEMORY_STATE, items: [item] }, 2_000);
+
+    expect(insights.skillCounts).toEqual([]);
+    expect(insights.weakItems).toBe(0);
+  });
+
   it("calculates due, weak, reviewed, and recent accuracy metrics", () => {
     const initial = createMemoryItem({
       id: "card", contentId: "card", contentType: "lesson_question", skill: "recall", now: 1_000,
