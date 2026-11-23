@@ -4,6 +4,10 @@ import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { db } from "./lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { appendReviewResult, createMemoryItem, reviewMemoryItem } from "./memory/engine";
+import { loadMemoryState, saveMemoryState } from "./memory/storage";
+import { createLessonMemoryIdentity } from "./memory/lessonAdapter";
+import type { MemoryState } from "./memory/types";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
 const arabicLetterNames: Record<string, string> = {
@@ -965,6 +969,8 @@ export default function App() {
   const [lessonFinished, setLessonFinished] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(readCompletedLessons);
   const [mistakes, setMistakes] = useState<Mistake[]>(readMistakes);
+  const [memoryState, setMemoryState] = useState<MemoryState>(() => loadMemoryState(null));
+  const [memoryOwnerId, setMemoryOwnerId] = useState("guest");
   const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
@@ -989,6 +995,18 @@ export default function App() {
     setDailyGoal(readDailyGoal(dailyUserId));
     setDailyActivity(readDailyActivity(dailyUserId));
   }, [dailyUserId]);
+
+  // Keep the new memory store isolated per guest/account on this device.
+  useEffect(() => {
+    const storageUserId = dailyUserId === "guest" ? null : dailyUserId;
+    setMemoryState(loadMemoryState(storageUserId));
+    setMemoryOwnerId(dailyUserId);
+  }, [dailyUserId]);
+
+  useEffect(() => {
+    if (memoryOwnerId !== dailyUserId) return;
+    saveMemoryState(dailyUserId === "guest" ? null : dailyUserId, memoryState);
+  }, [dailyUserId, memoryOwnerId, memoryState]);
 
   useEffect(() => {
     if (!selectedStage) return;
@@ -1196,6 +1214,28 @@ export default function App() {
     }
 
     if (mistakeId && !examMode) {
+      const memoryIdentity = createLessonMemoryIdentity(
+        selectedLesson.id,
+        mistakeId,
+        question.mode === "recall",
+      );
+      setMemoryState((current) => {
+        const previous = current.items.find((item) => item.id === memoryIdentity.id);
+        const memoryItem = previous ?? createMemoryItem({
+          ...memoryIdentity,
+          contentType: "lesson_question",
+        });
+        const reviewed = reviewMemoryItem(
+          memoryItem,
+          {
+            grade: isCorrect ? "good" : "again",
+            errorType: isCorrect ? null : "unknown",
+          },
+          `${memoryIdentity.id}-${Date.now().toString(36)}-${current.recentEvents.length.toString(36)}`,
+        );
+        return appendReviewResult(current, reviewed);
+      });
+
       setMistakes((current) => {
         const previous = current.find((item) => item.id === mistakeId);
         const card = updateReviewCard(
