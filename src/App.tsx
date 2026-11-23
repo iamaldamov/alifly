@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
-import { AliflyHeroArtwork, AliflyStageArtwork } from "./illustrations/AliflyArtwork";
+import { AliflyHeroArtwork, AliflyStageArtwork, AliflyLessonArtwork } from "./illustrations/AliflyArtwork";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
 import { db } from "./lib/firebase";
@@ -1457,7 +1457,7 @@ export default function App() {
 
             {!selectedLesson ? (
               <>
-                <div className="modal-icon">{selectedStage.icon}</div>
+                <div className="modal-art"><AliflyLessonArtwork variant={selectedStage.id === 2 ? "vowels" : selectedStage.id === 3 ? "conversation" : "alphabet"} /></div>
                 <span className="section-label">ЭТАП {selectedStage.id}</span>
                 <h2 id="stage-modal-title">{selectedStage.title}</h2>
                 <p>{selectedStage.description}</p>
@@ -1526,6 +1526,7 @@ export default function App() {
               </>
             ) : lessonPhase === "study" && !examMode && !reviewMode ? (
               <div className="lesson-study">
+                <div className="lesson-study-art"><AliflyLessonArtwork variant={selectedLesson.studyCards ? "conversation" : selectedStage.id === 2 ? "vowels" : "alphabet"} /></div>
                 <div className="lesson-topline">
                   <span className="section-label">СНАЧАЛА ИЗУЧИ</span>
                   <span className="lesson-step">{selectedLesson.studyCards?.length ?? selectedLesson.letters.length} элементов</span>
@@ -1541,6 +1542,7 @@ export default function App() {
                   <div className="study-phrase-cards">
                     {selectedLesson.studyCards.map((card, index) => (
                       <article className="study-phrase-card" key={`${index}-${card.arabic}`}>
+                        <span className="study-phrase-art" aria-hidden="true"><AliflyLessonArtwork variant="conversation" /></span>
                         <strong className="study-phrase-arabic" lang="ar" dir="rtl">{card.arabic}</strong>
                         <span className="study-phrase-transliteration">{card.transliteration}</span>
                         <span className="study-phrase-translation">{card.translation}</span>
@@ -1580,7 +1582,7 @@ export default function App() {
                       return (
                         <div className="alphabet-flashcards">
                           <div className="letter-learning-hint">
-                            <span className="letter-hint-icon">ا</span>
+                            <span className="letter-hint-icon"><AliflyLessonArtwork variant="alphabet" /></span>
                             <p><strong>Изучай по одной букве</strong><small>Посмотри на форму, послушай название и повтори его вслух. Листай карточки в своём темпе.</small></p>
                           </div>
                           <div
@@ -1668,7 +1670,7 @@ export default function App() {
                   </>
                 ) : (
                   <>
-                <div className="result-symbol">✦</div>
+                <div className="result-symbol"><AliflyLessonArtwork variant={examMode ? "success" : reviewMode ? "memory" : "success"} /></div>
                 <span className="section-label">{reviewMode ? "ТРЕНИРОВКА ПАМЯТИ ЗАВЕРШЕНА" : "УРОК ЗАВЕРШЁН"}</span>
                 <h2 id="stage-modal-title">{reviewMode ? "Повторение завершено!" : "Отличная работа!"}</h2>
                 <p>Правильных ответов: {correctAnswers} из {selectedLesson.questions.length}.</p>
@@ -1688,6 +1690,7 @@ export default function App() {
                 <h2 id="stage-modal-title">{selectedLesson.title}</h2>
                 <p className="lesson-intro">{selectedLesson.goal}</p>
                 <div className="question-block">
+                  <div className="question-art"><AliflyLessonArtwork variant={selectedStage.id === 2 ? "vowels" : reviewMode ? "memory" : "alphabet"} /></div>
                   <span className="question-label">ПРОВЕРЬ СЕБЯ</span>
                   <h3>{currentQuestion.prompt}</h3>
                   {currentQuestion.mode === "recall" ? (
