@@ -975,6 +975,7 @@ export default function App() {
   const [selectedMemoryGrade, setSelectedMemoryGrade] = useState<MemoryGrade | null>(null);
   const [selectedMemoryError, setSelectedMemoryError] = useState<MemoryErrorType>("unknown");
   const savedMemoryAssessmentRef = useRef<string | null>(null);
+  const saveMemoryAssessmentRef = useRef<() => void>(() => {});
   const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
@@ -1020,7 +1021,7 @@ export default function App() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        saveCurrentMemoryAssessment();
+        saveMemoryAssessmentRef.current();
         setSelectedStage(null);
         setSelectedLesson(null);
         setQuestionIndex(0);
@@ -1283,6 +1284,9 @@ export default function App() {
       return appendReviewResult(current, reviewed);
     });
   };
+
+  // Keep the latest assessment callback available to the Escape-key listener.
+  saveMemoryAssessmentRef.current = saveCurrentMemoryAssessment;
 
   const nextQuestion = () => {
     if (!selectedLesson) return;
