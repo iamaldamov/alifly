@@ -137,7 +137,7 @@ async function handleMessage(env: Env, message: TelegramMessage) {
       env,
       chatId,
       row
-        ? `Твой прогресс ALIFLY\n\n⭐ Опыт: ${row.xp} XP\n📘 Этап: ${row.current_stage}\nУрок: ${row.current_lesson}\n🔥 Серия дней: ${row.streak}`,
+        ? `Твой прогресс ALIFLY\n\n⭐ Опыт: ${row.xp} XP\n📘 Этап: ${row.current_stage}\nУрок: ${row.current_lesson}\n🔥 Серия дней: ${row.streak}`
         : "Пока нет учебного прогресса. Открой ALIFLY и пройди первый урок!",
       mainKeyboard(env),
     );
