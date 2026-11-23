@@ -1251,7 +1251,7 @@ export default function App() {
             id: mistakeId,
             // Preserve original lesson metadata when the question is replayed
             // inside the combined review lesson (whose temporary ID is 0).
-            lessonId: previous?.lessonId ?? selectedStage?.id ?? selectedLesson.id,
+            lessonId: previous?.lessonId ?? selectedLesson.id,
             lessonTitle: previous?.lessonTitle ?? selectedLesson.title,
             question: previous?.question ?? question,
           },
