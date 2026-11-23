@@ -52,6 +52,7 @@ At this stage existing correct/incorrect outcomes map to Good/Again. Hard/Easy r
 - [ ] Sign out; confirm guest memory is restored rather than the previous account's memory.
 - [ ] Start the existing review session; confirm new cards follow MEMORY ENGINE due dates.
 - [ ] Review a due card, answer it, and confirm the original memory item is rescheduled (no new `lesson-0` orphan item is created).
+- [ ] Confirm the legacy Mistake keeps its original lessonId and lessonTitle after a review answer.
 - [ ] Confirm legacy cards without a v1 memory item still follow their original due dates.
 - [ ] Confirm exam answers are excluded, matching the existing mistake-tracking behavior.
 - [ ] Confirm the original lessons, Arabic content, transliteration, and UI are unchanged.
