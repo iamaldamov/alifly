@@ -1351,12 +1351,29 @@ export default function App() {
     // New cards follow MEMORY ENGINE scheduling; legacy cards keep their old due date.
     return memoryItem ? dueMemoryItemIds.has(memoryItem.id) : item.dueAt <= Date.now();
   });
-  const weakMistakes = mistakes.filter((item) => item.errorCount > 0);
+  // Include cards marked difficult in MEMORY ENGINE, even when the legacy
+  // mistake counter did not increase (for example, a learner chose "Again"
+  // after a correct guess). Keep legacy-only cards in the same queue.
+  const weakMistakes = mistakes.filter((item) => {
+    const identity = createLessonMemoryIdentity(
+      item.lessonId,
+      item.id,
+      item.question.mode === "recall",
+    );
+    const memoryItem = memoryState.items.find((candidate) => candidate.id === identity.id);
+    return item.errorCount > 0 || (memoryItem?.lapseCount ?? 0) > 0;
+  });
 
   const startWeakReview = () => {
-    const weak = [...mistakes]
-      .filter((item) => item.errorCount > 0)
-      .sort((a, b) => b.errorCount - a.errorCount);
+    const weak = [...weakMistakes]
+      .sort((a, b) => {
+        const getWeaknessScore = (item: Mistake) => {
+          const identity = createLessonMemoryIdentity(item.lessonId, item.id, item.question.mode === "recall");
+          const memoryItem = memoryState.items.find((candidate) => candidate.id === identity.id);
+          return item.errorCount + (memoryItem?.lapseCount ?? 0) * 2;
+        };
+        return getWeaknessScore(b) - getWeaknessScore(a);
+      });
     if (weak.length === 0) return;
     setSelectedStage(stages[0]);
     setSelectedLesson({
