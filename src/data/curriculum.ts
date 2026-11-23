@@ -621,7 +621,7 @@ export function buildExamRecallQuestions(): Question[] {
 }
 
 
-const legacyAlphabetProgress: Record<number, number[]> = {
+export const legacyAlphabetProgress: Record<number, number[]> = {
   1: [20],
   2: [21, 22],
   3: [23],
