@@ -1181,6 +1181,8 @@ export default function App() {
     setSelectedLesson(null);
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(false);
@@ -1195,6 +1197,8 @@ export default function App() {
     setActiveLetterIndex(0);
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
@@ -1253,7 +1257,6 @@ export default function App() {
       sourceMistake?.id ?? mistakeId,
       sourceQuestion.mode === "recall",
     );
-    const isCorrect = isCorrectAnswer(question, selectedAnswer);
     setMemoryState((current) => {
       const previous = current.items.find((item) => item.id === identity.id);
       const memoryItem = previous ?? createMemoryItem({
@@ -1329,6 +1332,8 @@ export default function App() {
     setLessonPhase("practice");
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
@@ -1387,6 +1392,8 @@ export default function App() {
     setReviewMistakeIds(weak.map((item) => item.id));
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
@@ -1409,10 +1416,13 @@ export default function App() {
     setReviewMistakeIds(due.map((item) => item.id));
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(true);
+    setExamMode(false);
   };
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
