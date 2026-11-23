@@ -101,6 +101,7 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
     throat: { x: letter === "ه" || letter === "ء" ? 393 : letter === "ع" || letter === "ح" ? 374 : 350, y: 154, label: "ГОРЛО", lx: 380, ly: 225 },
   };
   const point = target[zone];
+  const targetLabel = isAlif ? "Свободный проход воздуха — язык не касается нёба" : point.label;
 
   return (
     <section className="letter-makhraj" aria-label={`Где образуется звук буквы ${letter}`}>
@@ -147,13 +148,12 @@ function LetterMakhrajDiagram({ letter }: { letter: string }) {
             <circle cx={point.x} cy={point.y} r="13" fill="#BEE76A" stroke="#356B43" strokeWidth="3"/>
             <circle cx={point.x} cy={point.y} r="4" fill="#173B2B"/>
             <path d={`M${point.x} ${point.y} L${point.lx} ${point.ly < 100 ? point.ly + 10 : point.ly - 16}`} stroke="#4F8D59" strokeWidth="2" strokeDasharray="4 4" fill="none"/>
-            <rect x={point.lx - 62} y={point.ly - 13} width="124" height="25" rx="12" fill="#193B2A"/>
-            <text x={point.lx} y={point.ly + 4} textAnchor="middle" fontSize="9.5" fontWeight="800" letterSpacing=".4" fill="#D9F4A2">{point.label}</text>
           </g>
         )}
         <text x="24" y="244" fontSize="9" fill="#758477">ГУБЫ</text>
         <text x="416" y="244" textAnchor="end" fontSize="9" fill="#758477">ГОРЛО</text>
       </svg>
+      <div className="letter-makhraj-target"><span aria-hidden="true">●</span> {targetLabel}</div>
       <div className="letter-makhraj-copy">
         <strong>{isAlif ? "Без смыкания языка" : info.title}</strong>
         <p>{isAlif ? "Долгий звук алифа проходит через открытую полость рта. Язык не должен прижиматься к нёбу или зубам." : info.description}</p>
