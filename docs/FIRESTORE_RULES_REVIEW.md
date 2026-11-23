@@ -11,10 +11,10 @@ The rules allow a signed-in learner to read only their own profile and current p
 
 ## Profile protection
 
-The root profile document has an explicit field allowlist:
+The root profile document has an explicit field allowlist. `avatarId` is optional because the current `AuthPanel.tsx` sign-up flow creates the profile with `email`, `createdAt`, and `updatedAt` only:
 
 - `email` (optional; when present it must match the authenticated token)
-- `avatarId` (one of the six avatar IDs used by the current app)
+- `avatarId` (optional; when present, one of the six supported IDs)
 - `createdAt` (optional for legacy/minimal profile creation; immutable after creation)
 - `updatedAt` (must be the server request time)
 
