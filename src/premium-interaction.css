@@ -286,3 +286,175 @@ button:disabled {
     transform: none !important;
   }
 }
+
+
+/* ALIFLY light-theme contrast corrections and personal settings */
+:root[data-theme="light"] .hero h1,
+:root[data-theme="light"] .hero h1 span,
+:root[data-theme="light"] .hero-content > p,
+:root[data-theme="light"] .hero-overline,
+:root[data-theme="light"] .hero-action-note,
+:root[data-theme="light"] .hero-bottomline,
+:root[data-theme="light"] .hero-index-caption,
+:root[data-theme="light"] .hero-index-foot {
+  color: #11130D !important;
+}
+:root[data-theme="light"] .hero-overline-line,
+:root[data-theme="light"] .hero-bottomline i { background: #6B8D0B; }
+:root[data-theme="light"] .section-label,
+:root[data-theme="light"] .eyebrow,
+:root[data-theme="light"] .daily-quest-kicker { color: #496600 !important; }
+:root[data-theme="light"] .letter-flashcard,
+:root[data-theme="light"] .study-phrase-card,
+:root[data-theme="light"] .reading-card,
+:root[data-theme="light"] .level-placement,
+:root[data-theme="light"] .level-diagnostic {
+  color: #11130D !important;
+  background: #FFFFFF !important;
+}
+:root[data-theme="light"] .letter-flashcard-character,
+:root[data-theme="light"] .letter-flashcard-name,
+:root[data-theme="light"] .study-phrase-translation,
+:root[data-theme="light"] .question-block h3,
+:root[data-theme="light"] .lesson-modal h2,
+:root[data-theme="light"] .stage-modal h2,
+:root[data-theme="light"] .level-placement h2,
+:root[data-theme="light"] .level-placement h3,
+:root[data-theme="light"] .level-option strong,
+:root[data-theme="light"] .daily-quest-card h2 {
+  color: #11130D !important;
+}
+:root[data-theme="light"] .letter-flashcard-note,
+:root[data-theme="light"] .letter-flashcard-top,
+:root[data-theme="light"] .study-phrase-transliteration,
+:root[data-theme="light"] .study-phrase-card small,
+:root[data-theme="light"] .lesson-intro,
+:root[data-theme="light"] .study-guidance,
+:root[data-theme="light"] .stage-modal p,
+:root[data-theme="light"] .level-placement p,
+:root[data-theme="light"] .level-option-summary,
+:root[data-theme="light"] .level-option-route,
+:root[data-theme="light"] .daily-quest-card p,
+:root[data-theme="light"] .daily-quest-note {
+  color: #454A40 !important;
+}
+:root[data-theme="light"] .letter-flashcard-character,
+:root[data-theme="light"] .study-phrase-arabic,
+:root[data-theme="light"] .reading-glyph,
+:root[data-theme="light"] .recall-stimulus,
+:root[data-theme="light"] .level-diagnostic-stimulus {
+  color: #174A32 !important;
+}
+:root[data-theme="light"] .answer-option,
+:root[data-theme="light"] .reading-option,
+:root[data-theme="light"] .level-diagnostic-option,
+:root[data-theme="light"] .lesson-pick {
+  color: #11130D !important;
+  background: #FFFFFF !important;
+  border-color: rgba(11,11,12,.2) !important;
+}
+:root[data-theme="light"] .answer-option.answer-correct,
+:root[data-theme="light"] .reading-option-correct,
+:root[data-theme="light"] .level-diagnostic-option.is-correct {
+  color: #174A32 !important;
+  background: #E8F4DC !important;
+}
+:root[data-theme="light"] .answer-option.answer-wrong,
+:root[data-theme="light"] .reading-option-wrong {
+  color: #8A2924 !important;
+  background: #FCEAE7 !important;
+}
+:root[data-theme="light"] .daily-quest-card,
+:root[data-theme="light"] .progress-card,
+:root[data-theme="light"] .stage-card,
+:root[data-theme="light"] .study-phrase-card {
+  background: #FFFFFF !important;
+  color: #11130D !important;
+}
+:root[data-theme="light"] .daily-quest-summary,
+:root[data-theme="light"] .daily-quest-summary strong,
+:root[data-theme="light"] .daily-quest-summary > span {
+  color: #11130D !important;
+}
+:root[data-theme="light"] .topbar-right,
+:root[data-theme="light"] .streak,
+:root[data-theme="light"] .profile-avatar-button,
+:root[data-theme="light"] .theme-toggle,
+:root[data-theme="light"] .settings-toggle {
+  color: #11130D !important;
+}
+
+/* Mission and settings dialogs */
+.settings-toggle {
+  display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px;
+  border: 1px solid var(--border, rgba(11,11,12,.16)); border-radius: 50%;
+  background: var(--surface, #fff); color: var(--text, #111); cursor: pointer;
+}
+.settings-toggle svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.alifly-settings-backdrop, .daily-mission-backdrop {
+  position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 18px;
+  background: rgba(5, 8, 5, .68); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+.alifly-settings-panel, .daily-mission-dialog {
+  position: relative; width: min(520px, 100%); max-height: min(90dvh, 780px); overflow-y: auto;
+  padding: clamp(24px, 5vw, 38px); border: 1px solid rgba(11,13,10,.12); border-radius: 26px;
+  background: #FFFFFF; color: #11130D; box-shadow: 0 28px 90px rgba(0,0,0,.3);
+}
+.alifly-settings-panel h2, .daily-mission-dialog h2 { margin: 8px 0 20px; color: #11130D; font-size: clamp(28px, 6vw, 36px); letter-spacing: -.04em; }
+.alifly-settings-close {
+  position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; border: 0;
+  border-radius: 50%; background: #F0F2E9; color: #11130D; font-size: 25px; cursor: pointer;
+}
+.settings-group { padding: 17px 0; border-top: 1px solid rgba(11,13,10,.1); }
+.settings-group h3 { margin: 0 0 5px; color: #11130D; font-size: 17px; }
+.settings-group p, .settings-group small { display: block; margin: 0 0 12px; color: #555B50; font-size: 13px; line-height: 1.55; }
+.settings-choice-row { display: flex; flex-wrap: wrap; gap: 9px; }
+.settings-choice {
+  min-height: 44px; padding: 0 15px; border: 1px solid rgba(11,13,10,.18); border-radius: 14px;
+  background: #F7F8F3; color: #20251A; font-weight: 750; cursor: pointer;
+}
+.settings-choice.is-active { border-color: #789A12; background: #EAF5C8; color: #263600; box-shadow: inset 0 0 0 1px #789A12; }
+.settings-primary-action, .settings-done-button {
+  min-height: 48px; padding: 0 18px; border: 0; border-radius: 15px;
+  background: #C6F432; color: #0B0B0C; font-weight: 850; cursor: pointer;
+}
+.settings-done-button { width: 100%; margin-top: 10px; }
+.daily-mission-dialog { width: min(460px, 100%); text-align: center; }
+.daily-mission-symbol {
+  display: grid; place-items: center; width: 64px; height: 64px; margin: 20px auto 12px;
+  border-radius: 20px; background: #EFF7D8; color: #174A32; font-family: Georgia, serif; font-size: 42px;
+}
+.daily-mission-dialog > p { margin: 0 auto 22px; max-width: 34ch; color: #555B50; font-size: 14px; line-height: 1.6; }
+.daily-mission-options { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin: 20px 0; }
+.daily-mission-options button {
+  display: flex; min-height: 92px; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border: 1px solid rgba(11,13,10,.14); border-radius: 18px; background: #F7F8F3; color: #11130D;
+  cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.daily-mission-options button:active { transform: scale(.97); }
+.daily-mission-options button:hover { border-color: #8BB719; background: #F1F8DB; }
+.daily-mission-options strong { font-size: 27px; }
+.daily-mission-options span { font-size: 13px; font-weight: 700; }
+.daily-mission-dialog > small { display: block; color: #62675E; font-size: 11px; line-height: 1.55; }
+.daily-quest-current-goal { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: #454A40; font-size: 13px; }
+.daily-quest-current-goal strong { color: #11130D; }
+.daily-quest-current-goal button { padding: 0; border: 0; background: transparent; color: #526F00; font-size: 12px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+:root[data-theme="dark"] .alifly-settings-panel, :root[data-theme="dark"] .daily-mission-dialog { border-color: rgba(255,255,255,.12); background: #151517; color: #FFFFFF; }
+:root[data-theme="dark"] .alifly-settings-panel h2, :root[data-theme="dark"] .alifly-settings-panel h3, :root[data-theme="dark"] .daily-mission-dialog h2 { color: #FFFFFF; }
+:root[data-theme="dark"] .settings-group { border-top-color: rgba(255,255,255,.12); }
+:root[data-theme="dark"] .settings-group p, :root[data-theme="dark"] .settings-group small, :root[data-theme="dark"] .daily-mission-dialog > p, :root[data-theme="dark"] .daily-mission-dialog > small { color: #C2C2C7; }
+:root[data-theme="dark"] .settings-choice { border-color: rgba(255,255,255,.15); background: #222226; color: #FFFFFF; }
+:root[data-theme="dark"] .settings-choice.is-active { border-color: #C6F432; background: rgba(198,244,50,.14); color: #E6FF9A; }
+:root[data-theme="dark"] .daily-mission-options button { border-color: rgba(255,255,255,.15); background: #222226; color: #FFFFFF; }
+:root[data-theme="dark"] .daily-mission-symbol { background: rgba(198,244,50,.14); color: #C6F432; }
+:root[data-theme="dark"] .daily-quest-current-goal, :root[data-theme="dark"] .daily-quest-current-goal strong { color: #FFFFFF; }
+:root[data-theme="dark"] .daily-quest-current-goal button { color: #C6F432; }
+@media (max-width: 520px) {
+  .alifly-settings-backdrop, .daily-mission-backdrop { padding: 12px; align-items: end; }
+  .alifly-settings-panel, .daily-mission-dialog { max-height: 88dvh; border-radius: 24px 24px 18px 18px; padding: 26px 20px calc(20px + env(safe-area-inset-bottom)); }
+  .settings-choice-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .settings-choice-row .settings-choice { width: 100%; }
+  .daily-mission-options { gap: 7px; }
+  .daily-mission-options button { min-height: 82px; }
+}
+@media (prefers-reduced-motion: reduce) { .daily-mission-options button { transition: none !important; } }
