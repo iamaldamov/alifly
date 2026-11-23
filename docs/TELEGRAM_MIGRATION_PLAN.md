@@ -78,3 +78,20 @@ Turn ALIFLY into a complete Arabic-learning experience inside Telegram. The bot 
 - Telegram identity is validated server-side and secrets are not exposed.
 - Existing website still builds and works.
 - Build, tests, security checks and end-to-end Telegram checks pass before production rollout.
+
+## Implementation status
+
+Completed on the `telegram-edition` branch:
+- Created a protected work branch; `main` remains untouched.
+- Added this migration plan and a BotFather setup guide.
+- Extracted the current stages, lessons, question types, accepted-answer logic and exam question builder from `src/App.tsx` into `src/data/curriculum.ts`.
+- Updated the website to import the shared curriculum module, preserving its existing UI and learning behavior.
+- Added an initial Cloudflare Worker with Telegram webhook handling, `/start`, `/help`, `/progress`, D1 profile storage, duplicate-update protection and server-side Telegram Mini App `initData` validation.
+- Added D1 schema, Worker configuration, setup instructions and a GitHub Actions TypeScript-check workflow.
+
+Not yet completed:
+- Worker is not deployed; D1 database ID and domain are placeholders.
+- No Telegram bot has been created yet; BotFather username and token are not configured.
+- Mini App UI and lesson delivery from the shared curriculum are still to be implemented.
+- The current curriculum has three stages; the full six-stage target remains unfinished.
+- Typecheck/build results must be confirmed from CI before release.
