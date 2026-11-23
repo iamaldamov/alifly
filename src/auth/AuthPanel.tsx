@@ -190,8 +190,8 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
         {error && <p className="auth-error" role="alert">{error}</p>}
 
         {!user && (
-          <a className="auth-support-button" href={TELEGRAM_SUPPORT_URL} target="_blank" rel="noreferrer" aria-label="Поддержать проект ALIFLY в Telegram">
-            Поддержать проект <span aria-hidden="true">↗</span>
+          <a className="auth-support-button" href={TELEGRAM_SUPPORT_URL} target="_blank" rel="noopener noreferrer" aria-label="Открыть страницу поддержки ALIFLY в Telegram">
+            Поддержать ALIFLY в Telegram <span aria-hidden="true">↗</span>
           </a>
         )}
       </section>
