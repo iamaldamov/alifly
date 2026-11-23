@@ -974,6 +974,7 @@ export default function App() {
   const [memoryOwnerId, setMemoryOwnerId] = useState("guest");
   const [selectedMemoryGrade, setSelectedMemoryGrade] = useState<MemoryGrade | null>(null);
   const [selectedMemoryError, setSelectedMemoryError] = useState<MemoryErrorType>("unknown");
+  const savedMemoryAssessmentRef = useRef<string | null>(null);
   const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
@@ -1019,10 +1020,13 @@ export default function App() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        saveCurrentMemoryAssessment();
         setSelectedStage(null);
         setSelectedLesson(null);
         setQuestionIndex(0);
         setSelectedAnswer(null);
+        setSelectedMemoryGrade(null);
+        setSelectedMemoryError("unknown");
         setCorrectAnswers(0);
         setLessonFinished(false);
         setReviewMode(false);
@@ -1177,6 +1181,7 @@ export default function App() {
   };
 
   const closeStage = () => {
+    saveCurrentMemoryAssessment();
     setSelectedStage(null);
     setSelectedLesson(null);
     setQuestionIndex(0);
@@ -1191,6 +1196,7 @@ export default function App() {
   };
 
   const startLesson = (lesson: Lesson) => {
+    savedMemoryAssessmentRef.current = null;
     setSelectedLesson({ ...lesson, questions: buildLessonQuestions(lesson) });
     setLessonPhase("study");
     setShowAlphabetTips(false);
@@ -1250,6 +1256,9 @@ export default function App() {
       ? reviewMistakeIds[questionIndex]
       : `${selectedLesson.id}:${question.prompt}${question.stimulus ? `:${question.stimulus}` : ""}`;
     if (!mistakeId) return;
+    const assessmentKey = `${selectedLesson.id}:${questionIndex}:${mistakeId}`;
+    if (savedMemoryAssessmentRef.current === assessmentKey) return;
+    savedMemoryAssessmentRef.current = assessmentKey;
     const sourceMistake = reviewMode ? mistakes.find((item) => item.id === mistakeId) : undefined;
     const sourceQuestion = sourceMistake?.question ?? question;
     const identity = createLessonMemoryIdentity(
@@ -1321,6 +1330,7 @@ export default function App() {
 
   const startExam = () => {
     if (firstStageCompletedCount < lessons.length) return;
+    savedMemoryAssessmentRef.current = null;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 99,
@@ -1380,6 +1390,7 @@ export default function App() {
         return getWeaknessScore(b) - getWeaknessScore(a);
       });
     if (weak.length === 0) return;
+    savedMemoryAssessmentRef.current = null;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 0,
@@ -1404,6 +1415,7 @@ export default function App() {
   const startReview = () => {
     const due = dueMistakes;
     if (due.length === 0) return;
+    savedMemoryAssessmentRef.current = null;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 0,
