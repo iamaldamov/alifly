@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
-import { db } from "./lib/firebase";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "./lib/firebase";
+import { addDoc, collection, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { signInAnonymously } from "firebase/auth";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
 const arabicLetterNames: Record<string, string> = {
@@ -971,6 +972,10 @@ export default function App() {
   const [reviewMistakeIds, setReviewMistakeIds] = useState<string[]>([]);
   const [examMode, setExamMode] = useState(false);
   const [examPassed, setExamPassed] = useState<boolean>(() => readBoolean("alifly-stage-1-exam-passed"));
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportCategory, setReportCategory] = useState("incorrect_answer");
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportStatus, setReportStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     try {
@@ -1322,6 +1327,27 @@ export default function App() {
   const currentQuestionCorrect = currentQuestion && selectedAnswer !== null
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
     : false;
+
+  const submitLessonReport = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedLesson || !currentQuestion || reportStatus === "sending") return;
+    setReportStatus("sending");
+    try {
+      const reporter = auth.currentUser ?? (await signInAnonymously(auth)).user;
+      await addDoc(collection(db, "lessonReports"), {
+        category: reportCategory, description: reportDescription.trim(),
+        lessonId: selectedLesson.id, lessonTitle: selectedLesson.title,
+        questionIndex: questionIndex + 1, prompt: currentQuestion.prompt,
+        stimulus: currentQuestion.stimulus ?? "", reporterUid: reporter.uid,
+        source: "lesson", status: "new", createdAt: serverTimestamp(),
+      });
+      setReportStatus("sent");
+      setReportDescription("");
+    } catch (error) {
+      console.error("Не удалось отправить жалобу ALIFLY:", error);
+      setReportStatus("error");
+    }
+  };
   const firstStageCompletedCount = lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
   const progressPercent = Math.round((firstStageCompletedCount / lessons.length) * 100);
   const today = localDateKey();
@@ -1744,6 +1770,31 @@ export default function App() {
                     </div>
                   )}
                 </div>
+                <button type="button" className="lesson-report-trigger" onClick={() => { setReportOpen((open) => !open); setReportStatus("idle"); }} aria-expanded={reportOpen}>⚑ Сообщить о проблеме</button>
+                {reportOpen && (
+                  <form className="lesson-report-panel" onSubmit={submitLessonReport}>
+                    {reportStatus === "sent" ? <p className="lesson-report-success" role="status">Спасибо! Жалоба отправлена на проверку.</p> : (
+                      <>
+                        <label htmlFor="lesson-report-category">Что не так?</label>
+                        <select id="lesson-report-category" value={reportCategory} onChange={(event) => setReportCategory(event.target.value)}>
+                          <option value="incorrect_translation">Неверный перевод</option>
+                          <option value="arabic_text">Ошибка в арабском тексте</option>
+                          <option value="pronunciation">Неправильное произношение</option>
+                          <option value="incorrect_answer">Неверный правильный ответ</option>
+                          <option value="technical_issue">Техническая проблема</option>
+                          <option value="other">Другое</option>
+                        </select>
+                        <label htmlFor="lesson-report-description">Подробности (необязательно)</label>
+                        <textarea id="lesson-report-description" value={reportDescription} onChange={(event) => setReportDescription(event.target.value.slice(0, 1000))} placeholder="Опиши проблему..." rows={3} maxLength={1000} />
+                        {reportStatus === "error" && <p className="lesson-report-error" role="alert">Не удалось отправить. Попробуй ещё раз позже.</p>}
+                        <div className="lesson-report-actions">
+                          <button type="button" className="lesson-report-cancel" onClick={() => setReportOpen(false)}>Отмена</button>
+                          <button type="submit" className="lesson-report-submit" disabled={reportStatus === "sending"}>{reportStatus === "sending" ? "Отправка..." : "Отправить жалобу"}</button>
+                        </div>
+                      </>
+                    )}
+                  </form>
+                )}
                 {selectedAnswer !== null && (
                   <button className="primary-button modal-button" onClick={nextQuestion}>
                     {questionIndex === selectedLesson.questions.length - 1 ? "Завершить урок" : "Следующий вопрос →"}
