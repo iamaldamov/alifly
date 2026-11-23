@@ -58,7 +58,13 @@ function isMemoryEvent(value: unknown): value is MemoryReviewEvent {
 
 export function memoryStorageKey(userId: string | null): string {
   const normalizedUserId = userId?.trim();
-  const scope = normalizedUserId ? `user:${encodeURIComponent(normalizedUserId)}` : "guest";
+  // Preserve existing signed-in keys; reserve a distinct key only for the
+  // unusual authenticated UID literally equal to "guest".
+  const scope = !normalizedUserId
+    ? "guest"
+    : normalizedUserId === "guest"
+      ? "%75ser%3Aguest"
+      : encodeURIComponent(normalizedUserId);
   return `${STORAGE_PREFIX}:v${MEMORY_SCHEMA_VERSION}:${scope}`;
 }
 
