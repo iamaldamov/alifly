@@ -7,10 +7,10 @@ compatibility_date = "2026-11-23"
 # 2. Run: npx wrangler d1 execute alifly-telegram --file=./schema.sql
 # 3. Set secrets with: npx wrangler secret put TELEGRAM_BOT_TOKEN
 #    npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
-# 4. Set APP_ORIGIN to the HTTPS origin hosting the Telegram Mini App.
+# 4. Set APP_URL to the full HTTPS URL hosting the Telegram Mini App.
 
 [vars]
-APP_ORIGIN = "https://YOUR-MINI-APP-DOMAIN"
+APP_URL = "https://YOUR-MINI-APP-DOMAIN"
 
 [[d1_databases]]
 binding = "DB"
