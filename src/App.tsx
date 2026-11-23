@@ -7,6 +7,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { appendReviewResult, createMemoryItem, getDueMemoryItems, reviewMemoryItem } from "./memory/engine";
 import { loadMemoryState, saveMemoryState } from "./memory/storage";
 import { createLessonMemoryIdentity } from "./memory/lessonAdapter";
+import { getMemoryInsights, memorySkillLabel } from "./memory/analytics";
 import type { MemoryState } from "./memory/types";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
@@ -1324,6 +1325,7 @@ export default function App() {
     setExamMode(true);
   };
 
+  const memoryInsights = getMemoryInsights(memoryState);
   const dueMemoryItemIds = new Set(
     getDueMemoryItems(memoryState, Date.now(), 500).map((item) => item.id),
   );
@@ -1468,6 +1470,22 @@ export default function App() {
           <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
           <p>{firstStageCompletedCount === lessons.length ? "Все девять уроков алфавита завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          <div className="memory-insights" aria-label="Состояние памяти">
+            <div className="memory-insight"><strong>{memoryInsights.totalItems}</strong><span>карточек в памяти</span></div>
+            <div className="memory-insight"><strong>{memoryInsights.dueItems}</strong><span>пора повторить</span></div>
+            <div className="memory-insight"><strong>{memoryInsights.accuracyPercent}%</strong><span>успешных ответов</span></div>
+            {memoryInsights.skillCounts.length > 0 && (
+              <div className="memory-skill-list">
+                <span className="memory-skill-heading">Что требует внимания</span>
+                {memoryInsights.skillCounts.slice(0, 3).map((skill) => (
+                  <div className="memory-skill-row" key={skill.skill}>
+                    <span>{memorySkillLabel(skill.skill)}</span>
+                    <strong>{skill.accuracyPercent}%</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="memory-actions">
             {dueMistakes.length > 0 && (
               <button className="review-button" type="button" onClick={startReview}>
