@@ -61,6 +61,7 @@ service cloud.firestore {
           'exam_passed',
           'daily_goal',
           'daily_activity',
+          'starting_level',
           'updated_at'
         ])
         && request.resource.data.keys().hasAll([
@@ -89,6 +90,14 @@ service cloud.firestore {
         && request.resource.data.daily_activity.keys().hasAll(['date', 'lessonIds'])
         && request.resource.data.daily_activity.date is string
         && request.resource.data.daily_activity.lessonIds is list
+        && (
+          !('starting_level' in request.resource.data)
+          || request.resource.data.starting_level == null
+          || (
+            request.resource.data.starting_level is int
+            && request.resource.data.starting_level in [1, 2, 3, 4]
+          )
+        )
         && request.resource.data.updated_at is timestamp
         && request.resource.data.updated_at == request.time;
     }
