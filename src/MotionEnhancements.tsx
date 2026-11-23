@@ -71,24 +71,36 @@ export default function MotionEnhancements() {
 
   return (
     <>
-      <div className="alifly-pattern-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as CSSProperties}>
-        <svg className="alifly-pattern-art" viewBox="0 0 300 300" fill="none">
-          <g className="alifly-pattern-lines" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M150 18 183 117 282 150 183 183 150 282 117 183 18 150 117 117 150 18Z" />
-            <path d="M150 54 174 126 246 150 174 174 150 246 126 174 54 150 126 126 150 54Z" />
-            <path d="M150 18 150 282M18 150 282 150M56.5 56.5 243.5 243.5M243.5 56.5 56.5 243.5" />
-            <path d="M150 84 166 134 216 150 166 166 150 216 134 166 84 150 134 134 150 84Z" />
-          </g>
-          <circle cx="150" cy="150" r="4" fill="currentColor" />
+      <div className="alifly-crescent-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as CSSProperties}>
+        <div className="alifly-crescent-halo" />
+        <svg className="alifly-crescent-art" viewBox="0 0 260 300" fill="none">
+          <defs>
+            <linearGradient id="alifly-crescent-gradient" x1="54" y1="42" x2="210" y2="250" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#E8D6A8" />
+              <stop offset=".52" stopColor="#B99A62" />
+              <stop offset="1" stopColor="#80643D" />
+            </linearGradient>
+            <filter id="alifly-crescent-glow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
+          </defs>
+          <path className="alifly-crescent-glow" d="M174 28C112 42 72 100 79 164c7 64 62 112 126 105-23 13-50 20-78 17C49 278 0 218 7 140 14 62 82 4 160 11c5 0 10 1 14 2Z" stroke="url(#alifly-crescent-gradient)" strokeWidth="3" />
+          <path className="alifly-crescent-outline" d="M174 28C112 42 72 100 79 164c7 64 62 112 126 105-23 13-50 20-78 17C49 278 0 218 7 140 14 62 82 4 160 11c5 0 10 1 14 2Z" stroke="url(#alifly-crescent-gradient)" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M177 30C122 47 88 101 94 158c6 55 48 98 101 106" stroke="url(#alifly-crescent-gradient)" strokeWidth=".7" strokeLinecap="round" opacity=".5" />
+          <circle cx="190" cy="55" r="2.2" fill="#D7BE8D" opacity=".8" />
         </svg>
       </div>
       <style>{[
-        ".alifly-pattern-scene{position:fixed;z-index:0;top:10svh;right:-5vw;width:min(38vw,440px);aspect-ratio:1;pointer-events:none;overflow:hidden;color:#B79B63;opacity:calc(.045 + var(--alifly-scroll-progress,0)*.075);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2vh),0);transition:opacity .5s ease;contain:layout paint}",
-        ".alifly-pattern-art{width:100%;height:100%;overflow:visible;transform:rotate(calc(var(--alifly-scroll-progress,0)*10deg)) scale(calc(.94 + var(--alifly-scroll-progress,0)*.06));transform-origin:center}",
-        ".alifly-pattern-lines{stroke-dasharray:780;stroke-dashoffset:calc(780 - var(--alifly-scroll-progress,0)*150);transition:stroke-dashoffset .35s ease}",
-        ":root[data-theme=light] .alifly-pattern-scene{opacity:calc(.035 + var(--alifly-scroll-progress,0)*.045)}",
-        "@media(max-width:700px){.alifly-pattern-scene{top:12svh;right:-19vw;width:58vw;opacity:calc(.035 + var(--alifly-scroll-progress,0)*.055)}:root[data-theme=light] .alifly-pattern-scene{opacity:calc(.025 + var(--alifly-scroll-progress,0)*.035)}}",
-        "@media(prefers-reduced-motion:reduce){.alifly-pattern-scene,.alifly-pattern-art,.alifly-pattern-lines{transition:none!important;transform:none!important}}"
+        ".alifly-crescent-scene{position:fixed;z-index:0;top:8svh;right:-1vw;width:min(34vw,390px);aspect-ratio:260/300;pointer-events:none;overflow:visible;color:#B99A62;opacity:calc(.12 + var(--alifly-scroll-progress,0)*.12);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2.5vh),0);transition:opacity .7s ease;contain:layout paint}",
+        ".alifly-crescent-halo{position:absolute;inset:13%;border-radius:50%;background:radial-gradient(ellipse at 56% 48%,rgba(185,154,98,.15),rgba(185,154,98,.045) 42%,transparent 72%);filter:blur(15px);animation:alifly-crescent-breathe 7s ease-in-out infinite}",
+        ".alifly-crescent-art{position:relative;width:100%;height:100%;overflow:visible;transform:rotate(calc(var(--alifly-scroll-progress,0)*-5deg)) scale(calc(.97 + var(--alifly-scroll-progress,0)*.035));transform-origin:58% 48%;animation:alifly-crescent-float 9s ease-in-out infinite}",
+        ".alifly-crescent-glow{opacity:.42;filter:url(#alifly-crescent-glow)}",
+        ".alifly-crescent-outline{stroke-dasharray:650;stroke-dashoffset:calc(650 - var(--alifly-scroll-progress,0)*34);}",
+        "@keyframes alifly-crescent-float{0%,100%{translate:0 0}50%{translate:0 -7px}}",
+        "@keyframes alifly-crescent-breathe{0%,100%{opacity:.55;scale:.96}50%{opacity:1;scale:1.04}}",
+        ":root[data-theme=light] .alifly-crescent-scene{opacity:calc(.075 + var(--alifly-scroll-progress,0)*.07)}",
+        "@media(max-width:700px){.alifly-crescent-scene{top:11svh;right:-13vw;width:53vw;opacity:calc(.085 + var(--alifly-scroll-progress,0)*.08)}:root[data-theme=light] .alifly-crescent-scene{opacity:calc(.055 + var(--alifly-scroll-progress,0)*.05)}.alifly-crescent-halo{filter:blur(10px)}}",
+        "@media(prefers-reduced-motion:reduce){.alifly-crescent-scene,.alifly-crescent-art,.alifly-crescent-halo{transition:none!important;animation:none!important;transform:none!important;translate:none!important}}"
       ].join("\n")}</style>
       <div className={"alifly-touch-hint " + (touchHint ? "is-visible" : "")} role="status" aria-live="polite">{touchHint}</div>
     </>
