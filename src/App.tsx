@@ -8,7 +8,7 @@ import { appendReviewResult, createMemoryItem, getDueMemoryItems, reviewMemoryIt
 import { loadMemoryState, saveMemoryState } from "./memory/storage";
 import { createLessonMemoryIdentity } from "./memory/lessonAdapter";
 import { getMemoryInsights, memorySkillLabel } from "./memory/analytics";
-import type { MemoryErrorType, MemoryGrade, MemoryState } from "./memory/types";
+import { EMPTY_MEMORY_STATE, type MemoryErrorType, type MemoryGrade, type MemoryState } from "./memory/types";
 
 // Arabic letter names are spoken in Arabic, not through Russian transliteration.
 const arabicLetterNames: Record<string, string> = {
@@ -951,11 +951,12 @@ function readDailyGoal(userId: string): DailyGoal {
 }
 
 export default function App() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
   const [cloudReady, setCloudReady] = useState(false);
+  const [progressOwnerId, setProgressOwnerId] = useState("guest");
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
@@ -1044,32 +1045,48 @@ export default function App() {
   }, [selectedStage]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds)); } catch { /* Storage may be unavailable. */ }
-  }, [completedLessonIds]);
+  }, [completedLessonIds, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-mistakes", JSON.stringify(mistakes)); } catch { /* Storage may be unavailable. */ }
-  }, [mistakes]);
+  }, [mistakes, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-streak", String(streak)); } catch { /* Storage may be unavailable. */ }
-  }, [streak]);
+  }, [streak, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-last-study-date", lastStudyDate); } catch { /* Storage may be unavailable. */ }
-  }, [lastStudyDate]);
+  }, [lastStudyDate, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed)); } catch { /* Storage may be unavailable. */ }
-  }, [examPassed]);
+  }, [examPassed, dailyUserId, progressOwnerId]);
 
   // Load the signed-in learner's progress before allowing cloud writes.
   useEffect(() => {
     let cancelled = false;
 
+    if (authLoading) return;
+
     if (!user) {
       setCloudReady(false);
       setCloudSaveStatus("idle");
+      // Restore the guest snapshot after sign-out; never expose the previous account's in-memory progress.
+      setCompletedLessonIds(readCompletedLessons());
+      setMistakes(readMistakes());
+      setStreak(readNumber("alifly-streak"));
+      setLastStudyDate(readLastStudyDate());
+      setExamPassed(readBoolean("alifly-stage-1-exam-passed"));
+      setDailyGoal(readDailyGoal("guest"));
+      setDailyActivity(readDailyActivity("guest"));
+      setProgressOwnerId("guest");
       return;
     }
 
@@ -1092,13 +1109,6 @@ export default function App() {
 
       if (cancelled) return;
 
-      let previousCloudUserId = "";
-      try {
-        previousCloudUserId = localStorage.getItem("alifly-last-cloud-user-id") || "";
-      } catch {
-        // Cloud data remains authoritative when local storage is unavailable.
-      }
-
       if (data) {
         setCompletedLessonIds(normalizeCompletedLessonIds(data.completed_lesson_ids));
         setMistakes(Array.isArray(data.mistakes) ? data.mistakes as Mistake[] : []);
@@ -1110,9 +1120,8 @@ export default function App() {
         setDailyActivity(cloudDailyActivity && typeof cloudDailyActivity.date === "string" && Array.isArray(cloudDailyActivity.lessonIds)
           ? { date: cloudDailyActivity.date, lessonIds: normalizeDailyLessonIds(cloudDailyActivity.lessonIds) }
           : { date: "", lessonIds: [] });
-      } else if (previousCloudUserId && previousCloudUserId !== user.uid) {
-        // A different person signed in on this device. Do not copy the previous
-        // person's local learning history into the new account.
+      } else {
+        // An empty/new account must never inherit guest or another account's local progress.
         setCompletedLessonIds([]);
         setMistakes([]);
         setStreak(0);
@@ -1122,19 +1131,14 @@ export default function App() {
         setDailyActivity({ date: "", lessonIds: [] });
       }
 
-      try {
-        localStorage.setItem("alifly-last-cloud-user-id", user.uid);
-      } catch {
-        // The authenticated cloud account still works without local storage.
-      }
-
+      setProgressOwnerId(user.uid);
       setCloudSaveStatus(data ? "saved" : "pending");
       setCloudReady(true);
     };
 
     void loadProgress();
     return () => { cancelled = true; };
-  }, [user?.uid]);
+  }, [user?.uid, authLoading]);
 
   // Debounce writes and expose whether cloud sync actually succeeded.
   useEffect(() => {
@@ -1251,7 +1255,7 @@ export default function App() {
   };
 
   const saveCurrentMemoryAssessment = () => {
-    if (!selectedLesson || selectedAnswer === null || examMode || !selectedMemoryGrade) return;
+    if (memoryOwnerId !== dailyUserId || !selectedLesson || selectedAnswer === null || examMode || !selectedMemoryGrade) return;
     const question = selectedLesson.questions[questionIndex];
     const mistakeId = reviewMode
       ? reviewMistakeIds[questionIndex]
@@ -1356,9 +1360,10 @@ export default function App() {
     setExamMode(true);
   };
 
-  const memoryInsights = getMemoryInsights(memoryState);
+  const memoryForCurrentUser = memoryOwnerId === dailyUserId ? memoryState : EMPTY_MEMORY_STATE;
+  const memoryInsights = getMemoryInsights(memoryForCurrentUser);
   const dueMemoryItemIds = new Set(
-    getDueMemoryItems(memoryState, Date.now(), Number.MAX_SAFE_INTEGER).map((item) => item.id),
+    getDueMemoryItems(memoryForCurrentUser, Date.now(), Number.MAX_SAFE_INTEGER).map((item) => item.id),
   );
   const dueMistakes = mistakes.filter((item) => {
     const identity = createLessonMemoryIdentity(
@@ -1366,7 +1371,7 @@ export default function App() {
       item.id,
       item.question.mode === "recall",
     );
-    const memoryItem = memoryState.items.find((candidate) => candidate.id === identity.id);
+    const memoryItem = memoryForCurrentUser.items.find((candidate) => candidate.id === identity.id);
     // New cards follow MEMORY ENGINE scheduling; legacy cards keep their old due date.
     return memoryItem ? dueMemoryItemIds.has(memoryItem.id) : item.dueAt <= Date.now();
   });
@@ -1379,7 +1384,7 @@ export default function App() {
       item.id,
       item.question.mode === "recall",
     );
-    const memoryItem = memoryState.items.find((candidate) => candidate.id === identity.id);
+    const memoryItem = memoryForCurrentUser.items.find((candidate) => candidate.id === identity.id);
     return item.errorCount > 0 || (memoryItem?.lapseCount ?? 0) > 0;
   });
 
@@ -1388,7 +1393,7 @@ export default function App() {
       .sort((a, b) => {
         const getWeaknessScore = (item: Mistake) => {
           const identity = createLessonMemoryIdentity(item.lessonId, item.id, item.question.mode === "recall");
-          const memoryItem = memoryState.items.find((candidate) => candidate.id === identity.id);
+          const memoryItem = memoryForCurrentUser.items.find((candidate) => candidate.id === identity.id);
           return item.errorCount + (memoryItem?.lapseCount ?? 0) * 2;
         };
         return getWeaknessScore(b) - getWeaknessScore(a);
