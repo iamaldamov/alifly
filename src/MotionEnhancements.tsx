@@ -17,7 +17,7 @@ export default function MotionEnhancements() {
     const targets = Array.from(document.querySelectorAll<HTMLElement>(REVEAL_TARGETS));
     targets.forEach((target, index) => {
       target.classList.add("alifly-reveal");
-      target.style.setProperty("--alifly-reveal-delay", (index % 4) * 65 + "ms");
+      target.style.setProperty("--alifly-reveal-delay", (index % 4) * 55 + "ms");
     });
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -73,29 +73,32 @@ export default function MotionEnhancements() {
     <>
       <div className="alifly-celestial-scene" aria-hidden="true" style={{ "--alifly-scroll-progress": scrollProgress } as CSSProperties}>
         <div className="alifly-celestial-glow" />
-        <svg className="alifly-celestial-art" viewBox="0 0 360 520" fill="none">
+        <svg className="alifly-celestial-art" viewBox="0 0 240 280" fill="none">
           <defs>
-            <radialGradient id="alifly-moon-light"><stop offset="0" stopColor="#F7E8B5" stopOpacity=".42" /><stop offset="1" stopColor="#F7E8B5" stopOpacity="0" /></radialGradient>
-            <linearGradient id="alifly-moon-fill" x1="90" y1="40" x2="245" y2="220"><stop offset="0" stopColor="#FFF4D0" /><stop offset="1" stopColor="#D8C18B" /></linearGradient>
+            <radialGradient id="alifly-moon-halo">
+              <stop offset="0" stopColor="#E8D5A5" stopOpacity=".22" />
+              <stop offset="1" stopColor="#E8D5A5" stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id="alifly-moon-fill" x1="56" y1="42" x2="194" y2="226" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stopColor="#FFF1C9" />
+              <stop offset="1" stopColor="#C9AD72" />
+            </linearGradient>
           </defs>
-          <circle cx="190" cy="155" r="145" fill="url(#alifly-moon-light)" />
-          <path d="M224 48c-67 10-111 73-101 140 10 66 72 112 139 102-23 23-57 37-94 37-74 0-134-60-134-134S94 59 168 59c20 0 39 4 56 12Z" fill="url(#alifly-moon-fill)" />
-          <g className="alifly-celestial-stars" fill="#F8EBC9">
-            <circle cx="63" cy="94" r="2.2" /><circle cx="282" cy="92" r="1.7" /><circle cx="302" cy="202" r="2.1" /><circle cx="76" cy="250" r="1.5" /><circle cx="245" cy="330" r="1.8" /><circle cx="124" cy="360" r="1.4" />
-            <path d="M294 278v12m-6-6h12M84 166v9m-4.5-4.5h9" stroke="#F8EBC9" strokeWidth="1.4" strokeLinecap="round" />
-          </g>
-          <path d="M30 486V350c0-55 44-99 99-99h102c55 0 99 44 99 99v136M65 486V362c0-36 29-65 65-65h100c36 0 65 29 65 65v124" stroke="#D8C18B" strokeOpacity=".14" strokeWidth="2" />
+          <circle cx="120" cy="132" r="116" fill="url(#alifly-moon-halo)" />
+          <path
+            d="M158 34C99 44 58 98 65 157C72 215 124 254 181 244C161 262 134 273 104 270C34 263 -9 197 5 130C19 63 82 20 149 31C152 32 155 33 158 34Z"
+            transform="translate(28 -12)"
+            fill="url(#alifly-moon-fill)"
+          />
         </svg>
       </div>
       <style>{[
-        ".alifly-celestial-scene{position:fixed;z-index:0;top:0;right:0;width:min(48vw,560px);height:100svh;overflow:hidden;pointer-events:none;opacity:calc(.14 + var(--alifly-scroll-progress,0)*.28);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-3vh),0);transition:opacity .35s ease;contain:layout paint}",
-        ".alifly-celestial-glow{position:absolute;width:75%;aspect-ratio:1;top:4%;right:-8%;border-radius:50%;background:radial-gradient(circle,rgba(218,190,126,.16),rgba(218,190,126,0) 68%);filter:blur(10px)}",
-        ".alifly-celestial-art{position:absolute;width:100%;height:min(86vh,700px);top:3%;right:-16%;overflow:visible;filter:drop-shadow(0 0 26px rgba(239,214,159,.13));transform:scale(calc(.88 + var(--alifly-scroll-progress,0)*.18));transform-origin:70% 28%}",
-        ".alifly-celestial-stars{animation:alifly-star-glimmer 7s ease-in-out infinite alternate}",
-        "@keyframes alifly-star-glimmer{from{opacity:.45}to{opacity:1}}",
-        ":root[data-theme=light] .alifly-celestial-scene{opacity:calc(.06 + var(--alifly-scroll-progress,0)*.1)}",
-        "@media(max-width:700px){.alifly-celestial-scene{width:76vw;height:66svh;opacity:calc(.1 + var(--alifly-scroll-progress,0)*.2)}.alifly-celestial-art{width:112%;height:62svh;right:-29%;top:0}:root[data-theme=light] .alifly-celestial-scene{opacity:calc(.04 + var(--alifly-scroll-progress,0)*.08)}}",
-        "@media(prefers-reduced-motion:reduce){.alifly-celestial-scene,.alifly-celestial-stars{animation:none!important;transition:none!important;transform:none!important}}"
+        ".alifly-celestial-scene{position:fixed;z-index:0;top:0;right:0;width:min(34vw,390px);height:72svh;overflow:hidden;pointer-events:none;opacity:calc(.10 + var(--alifly-scroll-progress,0)*.13);transform:translate3d(0,calc(var(--alifly-scroll-progress,0)*-2vh),0);transition:opacity .45s ease;contain:layout paint}",
+        ".alifly-celestial-glow{position:absolute;width:82%;aspect-ratio:1;top:3%;right:-12%;border-radius:50%;background:radial-gradient(circle,rgba(218,190,126,.13),rgba(218,190,126,0) 68%);filter:blur(12px)}",
+        ".alifly-celestial-art{position:absolute;width:88%;height:auto;max-height:430px;top:2%;right:-13%;overflow:visible;filter:drop-shadow(0 0 20px rgba(239,214,159,.10));transform:scale(calc(.92 + var(--alifly-scroll-progress,0)*.12));transform-origin:68% 42%}",
+        ":root[data-theme=light] .alifly-celestial-scene{opacity:calc(.055 + var(--alifly-scroll-progress,0)*.07)}",
+        "@media(max-width:700px){.alifly-celestial-scene{width:48vw;height:42svh;opacity:calc(.075 + var(--alifly-scroll-progress,0)*.09)}.alifly-celestial-art{width:100%;max-height:290px;right:-23%;top:1%}:root[data-theme=light] .alifly-celestial-scene{opacity:calc(.035 + var(--alifly-scroll-progress,0)*.05)}}",
+        "@media(prefers-reduced-motion:reduce){.alifly-celestial-scene,.alifly-celestial-art{transition:none!important;transform:none!important}}"
       ].join("\n")}</style>
       <div className={"alifly-touch-hint " + (touchHint ? "is-visible" : "")} role="status" aria-live="polite">{touchHint}</div>
     </>
