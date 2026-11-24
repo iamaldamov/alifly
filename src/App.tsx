@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlacement";
+import WordGame, { type Word } from "./WordGame";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
 import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
@@ -1162,6 +1163,7 @@ export default function App() {
   const [cloudReady, setCloudReady] = useState(false);
   const [startingLevel, setStartingLevel] = useState<LearningLevel | null>(() => readStartingLevel("guest"));
   const [showLevelSettings, setShowLevelSettings] = useState(false);
+  const [showWordGame, setShowWordGame] = useState(false);
   const [progressOwnerId, setProgressOwnerId] = useState("guest");
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -1555,6 +1557,23 @@ export default function App() {
     setShowLevelSettings(false);
     setSelectedStage(stage);
     startLesson(firstLesson);
+  };
+
+  const recordWordGameAnswer = (word: Word, correct: boolean) => {
+    if (memoryOwnerId !== dailyUserId) return;
+    const identity = createLessonMemoryIdentity(90, "word-game-" + word.arabic, true);
+    const previous = memoryState.items.find((item) => item.id === identity.id) ?? createMemoryItem({
+      id: identity.id,
+      contentType: "word",
+      contentId: identity.contentId,
+      skill: "meaning",
+    });
+    const result = reviewMemoryItem(previous, {
+      grade: correct ? "good" : "again",
+      errorType: correct ? null : "meaning",
+      usedHint: false,
+    }, "word-game-event-" + identity.id + "-" + Date.now());
+    setMemoryState((current) => appendReviewResult(current, result));
   };
 
   const answerQuestion = (answer: string) => {
@@ -1970,6 +1989,9 @@ export default function App() {
             )}
           </div>
           <div className="memory-actions">
+            <button className="review-button" type="button" onClick={() => setShowWordGame((visible) => !visible)}>
+              {showWordGame ? "Скрыть игру" : "Мини-игра: слова"}
+            </button>
             {dueMistakes.length > 0 && (
               <button className="review-button" type="button" onClick={startReview}>
                 Повторить по расписанию · {dueMistakes.length}
@@ -1987,6 +2009,7 @@ export default function App() {
               Изменить уровень
             </button>
           </div>
+          {showWordGame && <WordGame onAnswer={recordWordGameAnswer} />}
         </div>
       </section>
 
