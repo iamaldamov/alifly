@@ -7,6 +7,12 @@ import { useAuth } from "./AuthContext";
 
 type CloudStatus = "idle" | "loading" | "pending" | "saving" | "saved" | "error";
 type AuthMode = "signup" | "signin";
+function getFirebaseAuthErrorCode(error: unknown): string | null {
+  if (typeof error !== "object" || error === null || !("code" in error)) return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
+
 const AUTH_PROMPT_KEY = "alifly-auth-prompt-dismissed";
 const TELEGRAM_SUPPORT_URL = "https://t.me/tribute/app?startapp=g6Qg";
 
@@ -108,7 +114,13 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
         setMessage("");
       }
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "Не удалось выполнить вход. Проверь почту и пароль.");
+      if (mode === "signup" && getFirebaseAuthErrorCode(authError) === "auth/email-already-in-use") {
+        setMode("signin");
+        setPassword("");
+        setMessage("Эта почта уже зарегистрирована. Войди в аккаунт или воспользуйся восстановлением пароля.");
+      } else {
+        setError(authError instanceof Error ? authError.message : "Не удалось выполнить вход. Проверь почту и пароль.");
+      }
     } finally {
       setBusy(false);
     }
