@@ -9,6 +9,17 @@ export function staticSeoPages(routes: SeoRoute[]): Plugin {
     name: "alifly-static-seo-pages",
     apply: "build",
     generateBundle() {
+      const siteBase = "https://iamaldamov.github.io/alifly";
+      const sitemapUrls = routes.map((route) => {
+        const path = route.path === "/" ? "/" : route.path;
+        const location = `${siteBase}${path}`;
+        return `  <url><loc>${escapeHtml(location)}</loc></url>`;
+      }).join("\n");
+      this.emitFile({
+        type: "asset",
+        fileName: "sitemap.xml",
+        source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls}\n</urlset>`,
+      });
       for (const route of routes) {
         if (route.path === "/") continue; // Vite's index.html remains the canonical homepage.
         const path = route.path.split("/").filter(Boolean).join("/");
