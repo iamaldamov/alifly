@@ -13,7 +13,7 @@ export const arabicLetterAudio: Record<string, string> = {
   "ذ": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/869bc801-bda9-4da3-8391-fb057422643f.mp3",
   "ر": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4940e0eb-9a37-4040-902c-ca3c5415cd48.mp3",
   "ز": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b8650c28-9ee7-469d-a0dc-a8826ccb0005.mp3",
-  "س": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/5d9265a8-784b-44bc-9bcf-343b2821c116.mp3",
+  "س": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/5d9265a8-784b-44bc-9b96-343b2821c116.mp3",
   "ش": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/935dcae0-3924-4fe8-8530-8507a9091b8b.mp3",
   "ص": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e8d4d3e5-1606-4330-96fe-bd50e86830d9.mp3",
   "ض": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/525cae59-22a7-4293-8f3c-71cf9e72d53c.mp3",
