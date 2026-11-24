@@ -13,7 +13,6 @@ test("a learner can skip the alphabet and start with simple words", async ({ pag
 
 test("the diagnostic recommends a level and opens the matching route", async ({ page }) => {
   await page.goto("./");
-  await page.getByRole("button", { name: "Закрыть" }).click();
 
   await page.getByRole("button", { name: "Не знаю свой уровень — проверить" }).click();
   await expect(page.getByRole("heading", { name: "Короткая диагностика" })).toBeVisible();
