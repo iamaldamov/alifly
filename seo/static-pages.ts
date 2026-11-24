@@ -8,7 +8,13 @@ export function staticSeoPages(routes: SeoRoute[]): Plugin {
   return {
     name: "alifly-static-seo-pages",
     apply: "build",
-    generateBundle() {
+    generateBundle(_options, bundle) {
+      const entryChunk = Object.values(bundle).find((item) => item.type === "chunk" && item.isEntry);
+      const cssLinks = Object.values(bundle)
+        .filter((item) => item.type === "asset" && item.fileName.endsWith(".css"))
+        .map((item) => `<link rel="stylesheet" crossorigin href="/alifly/${item.fileName}">`)
+        .join("\n");
+      if (!entryChunk) throw new Error("ALIFLY: Vite entry bundle was not found for static SEO routes.");
       const siteBase = "https://iamaldamov.github.io/alifly";
       const sitemapUrls = routes.map((route) => {
         const path = route.path === "/" ? "/" : route.path;
@@ -33,6 +39,11 @@ export function staticSeoPages(routes: SeoRoute[]): Plugin {
         const hubLinks = route.kind === "hub"
           ? `<section><h2>Буквы арабского алфавита</h2><ul>${routes.filter((item) => item.kind === "letter").map((item) => `<li><a href="/alifly${item.path}">${escapeHtml(item.h1)}</a></li>`).join("")}</ul><h2>Учебные уроки</h2><ul>${routes.filter((item) => item.kind === "lesson").map((item) => `<li><a href="/alifly${item.path}">${escapeHtml(item.h1)}</a></li>`).join("")}</ul></section>`
           : "";
+        const interactive = route.kind === "hub" || route.path === "/lessons/alif/";
+        const appAssets = interactive ? `${cssLinks}\n` : "";
+        const appMount = interactive
+          ? `<div id="root"></div><noscript><main><h1>${heading}</h1>${arabic}<p>${summary}</p></main></noscript><script type="module" crossorigin src="/alifly/${entryChunk.fileName}"></script>`
+          : `<main><p><a href="/alifly/">ALIFLY</a> / <a href="/alifly/lessons/">Уроки</a></p><h1>${heading}</h1>${arabic}<p>${summary}</p><p>ALIFLY помогает изучать арабский язык постепенно: знакомиться с буквами, разбирать произношение и закреплять материал практикой.</p><p><a href="/alifly/">Открыть ALIFLY</a></p>${hubLinks}</main>`;
         const html = `<!doctype html>
 <html lang="ru">
 <head>
@@ -41,8 +52,8 @@ export function staticSeoPages(routes: SeoRoute[]): Plugin {
 <link rel="canonical" href="${canonical}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="ALIFLY"><meta property="og:locale" content="ru_RU"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="${canonical}">
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="${title}"><meta name="twitter:description" content="${description}">
-</head>
-<body><main><p><a href="/alifly/">ALIFLY</a> / <a href="/alifly/lessons/">Уроки</a></p><h1>${heading}</h1>${arabic}<p>${summary}</p><p>ALIFLY помогает изучать арабский язык постепенно: знакомиться с буквами, разбирать произношение и закреплять материал практикой.</p><p><a href="/alifly/">Открыть ALIFLY</a></p>${hubLinks}</main></body>
+${appAssets}</head>
+<body>${appMount}</body>
 </html>`;
         this.emitFile({ type: "asset", fileName, source: html });
       }
