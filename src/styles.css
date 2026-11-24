@@ -2093,3 +2093,41 @@ html, body {
   .letter-audio-status { font-size: 10px; }
   .letter-mouth-diagram { max-height: 225px; }
 }
+
+
+/* Human-speaker full alphabet reference */
+.letter-learning-hint { flex-wrap: wrap; }
+.letter-learning-hint p { flex: 1 1 210px; min-width: 0; }
+.letter-alphabet-audio-button {
+  display: inline-flex;
+  min-height: 40px;
+  flex: 1 1 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid #B5D18E;
+  border-radius: 13px;
+  background: #EAF4D8;
+  color: #244A30;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+.letter-alphabet-audio-button:active { transform: scale(.985); }
+.letter-alphabet-audio-button:hover { background: #DDF0C3; }
+.letter-alphabet-audio-credit {
+  flex: 1 1 100%;
+  margin-left: 50px;
+  color: #718071 !important;
+  font-size: 10px !important;
+}
+:root[data-theme="dark"] .letter-alphabet-audio-button {
+  border-color: rgba(198,244,50,.32);
+  background: rgba(198,244,50,.12);
+  color: #E4F7C0;
+}
+:root[data-theme="dark"] .letter-alphabet-audio-button:hover { background: rgba(198,244,50,.18); }
+:root[data-theme="dark"] .letter-alphabet-audio-credit { color: #AEBBB0 !important; }
