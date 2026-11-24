@@ -267,3 +267,53 @@ test("a learner cannot create a profile for another user", async () => {
 
   await assertFails(setDoc(doc(alice.firestore(), "users/bob"), profileDocument()));
 });
+
+
+test("an authenticated learner can submit a validated lesson report", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+  await assertSucceeds(setDoc(doc(alice.firestore(), "lessonReports/report-1"), {
+    category: "incorrect_translation",
+    description: "Перевод не совпадает с аудио",
+    lessonId: 1,
+    lessonTitle: "Первые буквы",
+    questionIndex: 2,
+    prompt: "Что означает слово?",
+    stimulus: "بَيْت",
+    reporterUid: "alice",
+    source: "lesson",
+    status: "new",
+    createdAt: serverTimestamp(),
+  }));
+});
+
+test("lesson reports cannot be submitted by unauthenticated visitors", async () => {
+  const guest = testEnv.unauthenticatedContext();
+  await assertFails(setDoc(doc(guest.firestore(), "lessonReports/report-1"), {
+    category: "other", description: "", lessonId: 1, lessonTitle: "Урок",
+    questionIndex: 1, prompt: "Вопрос", stimulus: "", reporterUid: "guest",
+    source: "lesson", status: "new", createdAt: serverTimestamp(),
+  }));
+});
+
+test("lesson reports reject forged authors, unknown fields and unsafe categories", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+  const valid = {
+    category: "other", description: "", lessonId: 1, lessonTitle: "Урок",
+    questionIndex: 1, prompt: "Вопрос", stimulus: "", reporterUid: "alice",
+    source: "lesson", status: "new", createdAt: serverTimestamp(),
+  };
+  await assertFails(setDoc(doc(alice.firestore(), "lessonReports/forged"), { ...valid, reporterUid: "bob" }));
+  await assertFails(setDoc(doc(alice.firestore(), "lessonReports/extra"), { ...valid, email: "alice@example.com" }));
+  await assertFails(setDoc(doc(alice.firestore(), "lessonReports/category"), { ...valid, category: "spam" }));
+});
+
+test("lesson reports are private and immutable from client sessions", async () => {
+  const alice = testEnv.authenticatedContext("alice");
+  const reportRef = doc(alice.firestore(), "lessonReports/report-1");
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "lessonReports/report-1"), { private: true });
+  });
+  await assertFails(getDoc(reportRef));
+  await assertFails(updateDoc(reportRef, { status: "resolved" }));
+  await assertFails(deleteDoc(reportRef));
+});
