@@ -27,6 +27,13 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Build Nabra TTS browser bundle
+        run: |
+          git clone --depth 1 https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
+          npm --prefix /tmp/nabra-tts ci
+          npm --prefix /tmp/nabra-tts run build
+          mkdir -p node_modules/nabra-tts/dist
+          cp -R /tmp/nabra-tts/dist/. node_modules/nabra-tts/dist/
       - name: Build ALIFLY
         run: npm run build
       - name: Configure GitHub Pages
