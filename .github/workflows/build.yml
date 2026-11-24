@@ -34,5 +34,7 @@ jobs:
           npm --prefix /tmp/nabra-tts ci
           npm --prefix /tmp/nabra-tts run build
           node scripts/generate-arabic-audio.mjs /tmp/nabra-tts
+      - name: Run unit tests
+        run: npm test
       - name: Build project
         run: npm run build
