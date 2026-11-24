@@ -2054,3 +2054,42 @@ html, body {
   .letter-makhraj-copy { padding: 11px; }
   .letter-makhraj-copy p { font-size: 12px; }
 }
+
+
+/* Clear audio state and articulation diagrams */
+.letter-audio-status {
+  display: block;
+  min-height: 16px;
+  margin: 7px 0 12px;
+  color: var(--text-muted, #647267);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+}
+.letter-speak-button.is-playing {
+  border-color: #83A82B;
+  background: #EAF5D3;
+  color: #24452D;
+  box-shadow: 0 0 0 4px rgba(198,244,50,.16);
+}
+.letter-makhraj { overflow: hidden; }
+.letter-mouth-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 5px auto 8px;
+}
+.letter-makhraj-target {
+  flex-wrap: wrap;
+  text-align: center;
+}
+:root[data-theme="dark"] .letter-audio-status { color: #C5D0C7; }
+:root[data-theme="dark"] .letter-speak-button.is-playing {
+  border-color: #C6F432;
+  background: rgba(198,244,50,.16);
+  color: #E7FFAA;
+}
+@media (max-width: 480px) {
+  .letter-audio-status { font-size: 10px; }
+  .letter-mouth-diagram { max-height: 225px; }
+}
