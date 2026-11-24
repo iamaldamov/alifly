@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./auth/AuthContext";
 import "./styles.css";
@@ -14,12 +15,20 @@ import MotionEnhancements from "./MotionEnhancements";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <>
-        <App />
-        <MotionEnhancements />
-      </>
-    </AuthProvider>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <AuthProvider>
+        <>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/lessons" element={<App />} />
+            <Route path="/lessons/*" element={<App />} />
+            <Route path="/login" element={<App />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <MotionEnhancements />
+        </>
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
