@@ -14,7 +14,7 @@
         var restoredPath = params.get("p");
 
         if (restoredPath) {
-          var restoredUrl = base.replace(/\\/$/, "") + restoredPath;
+          var restoredUrl = base.replace(/\/$/, "") + restoredPath;
           var originalQuery = params.get("q");
           if (originalQuery) restoredUrl += "?" + originalQuery;
           restoredUrl += window.location.hash;
