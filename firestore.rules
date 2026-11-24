@@ -116,5 +116,22 @@ service cloud.firestore {
         allow delete: if false;
       }
     }
+    match /lessonReports/{reportId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['category','description','lessonId','lessonTitle','questionIndex','prompt','stimulus','reporterUid','source','status','createdAt'])
+        && request.resource.data.category in ['incorrect_translation','arabic_text','pronunciation','incorrect_answer','technical_issue','other']
+        && request.resource.data.description is string && request.resource.data.description.size() <= 1000
+        && request.resource.data.lessonId is int
+        && request.resource.data.lessonTitle is string && request.resource.data.lessonTitle.size() <= 120
+        && request.resource.data.questionIndex is int
+        && request.resource.data.prompt is string && request.resource.data.prompt.size() <= 500
+        && request.resource.data.stimulus is string && request.resource.data.stimulus.size() <= 500
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.source == 'lesson'
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if false;
+    }
+
   }
 }
