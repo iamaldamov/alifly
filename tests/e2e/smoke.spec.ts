@@ -17,3 +17,27 @@ test("homepage exposes a usable main landmark", async ({ page }) => {
   await page.goto("./");
   await expect(page.getByRole("main")).toBeVisible();
 });
+
+test("direct first-lesson URL opens the interactive lesson", async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  await page.goto("./lessons/alif/");
+  await expect(page).toHaveURL(/\\/alifly\\/lessons\\/alif\\/?$/);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Алиф, ба, та и са" })).toBeVisible();
+
+  expect(pageErrors).toEqual([]);
+});
+
+test("direct sign-in URL opens the sign-in dialog", async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  await page.goto("./login");
+  await expect(page).toHaveURL(/\\/alifly\\/login\\/?$/);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "С возвращением" })).toBeVisible();
+
+  expect(pageErrors).toEqual([]);
+});
