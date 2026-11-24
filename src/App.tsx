@@ -10,7 +10,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 // It is a teaching aid, not a substitute for listening to a qualified teacher.
 type MakhrajGroup =
   | "jawf" | "lips" | "rounded-lips" | "lip-teeth"
-  | "tip-roots" | "interdental" | "tip-lower-teeth"
+  | "tip-roots" | "interdental" | "tip-sibilants"
   | "tip-gums" | "middle-tongue" | "side-tongue"
   | "lam" | "back-qaf" | "back-kaf"
   | "throat-deep" | "throat-middle" | "throat-near";
@@ -28,10 +28,10 @@ const makhrajByLetter: Record<string, MakhrajInfo> = {
   "د": { group: "tip-roots", title: "Корни верхних передних зубов", description: "Кончик языка касается корней верхних резцов и отходит со звонким звуком." },
   "ذ": { group: "interdental", title: "Край верхних передних зубов", description: "Кончик языка слегка выходит между передними зубами. Звук произносится с голосом." },
   "ر": { group: "tip-gums", title: "Кончик языка у дёсен", description: "Кончик языка касается дёсен за верхними передними зубами. Не делай долгую раскатистую вибрацию." },
-  "ز": { group: "tip-lower-teeth", title: "Передняя часть языка у нижних резцов", description: "Кончик языка располагается близко к нижним передним зубам; воздух проходит узкой струёй с голосом." },
-  "س": { group: "tip-lower-teeth", title: "Передняя часть языка у нижних резцов", description: "Кончик языка остаётся низко у нижних передних зубов. Воздух проходит по узкому каналу без голоса." },
+  "ز": { group: "tip-sibilants", title: "Передняя часть языка у нижних резцов", description: "Кончик языка располагается близко к нижним передним зубам; воздух проходит узкой струёй с голосом." },
+  "س": { group: "tip-sibilants", title: "Передняя часть языка у передних резцов", description: "Передняя часть языка остаётся близко к передним резцам, формируя узкий канал для воздуха без голоса." },
   "ش": { group: "middle-tongue", title: "Середина языка и твёрдое нёбо", description: "Середина языка поднимается к нёбу, оставляя проход для воздуха." },
-  "ص": { group: "tip-lower-teeth", title: "Передняя часть языка и подъём задней части", description: "Передняя часть языка остаётся у нижних резцов, а задняя часть языка приподнимается: звук получается твёрдым и глубоким." },
+  "ص": { group: "tip-sibilants", title: "Передняя часть языка и подъём задней части", description: "Передняя часть языка формирует узкий проход у передних резцов, а задняя часть языка приподнимается: звук получается твёрдым и глубоким." },
   "ض": { group: "side-tongue", title: "Боковая сторона языка и верхние коренные зубы", description: "Боковая сторона языка прижимается к верхним коренным зубам. Это особая артикуляция; на схеме показан вид сверху." },
   "ط": { group: "tip-roots", title: "Корни верхних передних зубов", description: "Кончик языка касается корней верхних резцов, а задняя часть языка приподнята. Звук твёрдый." },
   "ظ": { group: "interdental", title: "Край верхних передних зубов", description: "Кончик языка касается края верхних передних зубов и слегка выходит между ними. Звук твёрдый и звонкий." },
@@ -55,7 +55,7 @@ const tongueShapes: Record<MakhrajGroup, string> = {
   "lip-teeth": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
   "tip-roots": "M48 145 C61 137 69 119 83 112 C106 112 129 141 169 158 C214 176 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   interdental: "M31 140 C40 129 43 111 56 108 C75 107 86 132 111 148 C151 173 206 176 259 165 C285 160 305 164 321 180 L304 205 C245 205 196 197 153 181 C105 167 62 157 31 140Z",
-  "tip-lower-teeth": "M48 145 C64 151 74 151 87 148 C111 149 135 161 169 171 C214 184 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
+  "tip-sibilants": "M48 145 C64 151 74 151 87 148 C111 149 135 161 169 171 C214 184 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   "tip-gums": "M48 145 C62 139 73 124 91 119 C111 119 134 145 169 160 C214 177 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   "middle-tongue": "M48 145 C93 164 124 157 157 128 C181 108 218 106 244 125 C267 143 291 161 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   "side-tongue": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
@@ -74,7 +74,7 @@ const articulationPoints: Record<MakhrajGroup, { x: number; y: number; label: st
   "lip-teeth": { x: 59, y: 145, label: "НИЖНЯЯ ГУБА + ЗУБЫ" },
   "tip-roots": { x: 82, y: 113, label: "КОРНИ ВЕРХНИХ РЕЗЦОВ" },
   interdental: { x: 54, y: 109, label: "КРАЙ ВЕРХНИХ РЕЗЦОВ" },
-  "tip-lower-teeth": { x: 83, y: 149, label: "ОБЛАСТЬ НИЖНИХ РЕЗЦОВ" },
+  "tip-sibilants": { x: 83, y: 149, label: "ОБЛАСТЬ ПЕРЕДНИХ РЕЗЦОВ" },
   "tip-gums": { x: 99, y: 118, label: "ВЕРХНИЕ ДЁСНЫ" },
   "middle-tongue": { x: 203, y: 111, label: "СЕРЕДИНА НЁБА" },
   "side-tongue": { x: 160, y: 132, label: "БОК ЯЗЫКА У КОРЕННЫХ ЗУБОВ" },
@@ -1045,6 +1045,13 @@ export default function App() {
     }
   });
 
+  useEffect(() => {
+    if (!selectedLesson || !selectedStage) {
+      letterAudioRef.current?.pause();
+      setLetterAudioStatus("idle");
+    }
+  }, [selectedLesson, selectedStage]);
+
   useEffect(() => () => {
     if (letterAudioRef.current) {
       letterAudioRef.current.pause();
@@ -1762,7 +1769,7 @@ export default function App() {
                                 data-touch-hint={`Перейти к букве ${index + 1}`}
                                 aria-label={`Перейти к букве ${index + 1}`}
                                 aria-current={index === activeLetterIndex ? "step" : undefined}
-                                onClick={() => setActiveLetterIndex(index)}
+                                onClick={() => { letterAudioRef.current?.pause(); setLetterAudioStatus("idle"); setActiveLetterIndex(index); }}
                               />
                             ))}
                           </div>
