@@ -25,7 +25,7 @@ function PersonIcon({ className }: { className: string }) {
   );
 }
 
-export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialPrompt = false }: { cloudStatus: CloudStatus; onChangeLevel?: () => void; suppressInitialPrompt?: boolean }) {
+export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialPrompt = false, openOnMount = false, onClose }: { cloudStatus: CloudStatus; onChangeLevel?: () => void; suppressInitialPrompt?: boolean; openOnMount?: boolean; onClose?: () => void }) {
   const { user, isLoading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AuthMode>("signup");
@@ -38,7 +38,19 @@ export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialP
   useEffect(() => {
     if (authLoading) return;
 
-    if (user || suppressInitialPrompt) {
+    if (user) {
+      setIsOpen(false);
+      if (openOnMount) onClose?.();
+      return;
+    }
+
+    if (openOnMount) {
+      setMode("signin");
+      setIsOpen(true);
+      return;
+    }
+
+    if (suppressInitialPrompt) {
       setIsOpen(false);
       return;
     }
@@ -48,7 +60,7 @@ export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialP
     } catch {
       setIsOpen(true);
     }
-  }, [authLoading, user?.uid, suppressInitialPrompt]);
+  }, [authLoading, user?.uid, suppressInitialPrompt, openOnMount]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -79,6 +91,7 @@ export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialP
   function closePanel() {
     setIsOpen(false);
     if (!user) markPromptDismissed();
+    onClose?.();
   }
 
   const openPanel = () => {
