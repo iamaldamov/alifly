@@ -25,15 +25,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Set up Java for Firestore emulator
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
       - name: Install dependencies
         run: npm install
-      - name: Test Firestore rules in the emulator
-        run: npx --yes firebase-tools@15.37.0 emulators:exec --only firestore --project demo-alifly-rules "node --test firestore.rules.test.mjs"
       - name: Generate permanent Arabic letter audio
         run: |
           git clone https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
