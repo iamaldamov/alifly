@@ -2026,3 +2026,108 @@ html, body {
 .modal-button { border-radius: 17px; }
 .answer-option,
 .reading-option { min-height: 54px; }
+
+
+/* Clear, readable articulation guide — tuned for phone screens */
+.letter-makhraj { max-width: 520px; padding: 16px 14px; border-radius: 22px; }
+.letter-makhraj-heading { display: grid; gap: 5px; margin: 2px 0 8px; text-align: left; }
+.letter-makhraj-heading strong { color: #193B2A; font-size: 14px; line-height: 1.35; }
+.letter-makhraj-heading small { color: #68786D; font-size: 11px; line-height: 1.4; }
+.letter-mouth-diagram { max-height: none; width: 100%; }
+.letter-makhraj-target { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; margin: 2px 0 10px; padding: 9px 12px; border: 1px solid #CFE0C3; border-radius: 13px; background: #EAF3DF; color: #234C32; font-size: 13px; font-weight: 800; line-height: 1.35; }
+.letter-makhraj-target span { color: #79A93F; font-size: 16px; }
+.letter-makhraj-copy { padding: 13px 14px; border-radius: 14px; background: #FFFFFF; text-align: left; }
+.letter-makhraj-copy strong { display: block; color: #193B2A; font-size: 14px; line-height: 1.4; }
+.letter-makhraj-copy p { margin: 6px 0 0; color: #4E5F53; font-size: 13px; line-height: 1.6; }
+.letter-makhraj-disclaimer { display: block; margin-top: 9px; color: #788579; font-size: 10px; line-height: 1.5; }
+:root[data-theme="dark"] .letter-makhraj-heading strong { color: #E3F0E4; }
+:root[data-theme="dark"] .letter-makhraj-heading small { color: #B7C7BA; }
+:root[data-theme="dark"] .letter-makhraj-target { border-color: #496548; background: #2B4030; color: #DDF2C3; }
+:root[data-theme="dark"] .letter-makhraj-copy { background: #26382D; }
+:root[data-theme="dark"] .letter-makhraj-copy strong { color: #E3F0E4; }
+:root[data-theme="dark"] .letter-makhraj-copy p { color: #D0DDD1; }
+:root[data-theme="dark"] .letter-makhraj-disclaimer { color: #AABBAE; }
+@media (max-width: 480px) {
+  .letter-makhraj { padding: 12px 9px; }
+  .letter-makhraj-heading strong { font-size: 13px; }
+  .letter-makhraj-target { font-size: 12px; }
+  .letter-makhraj-copy { padding: 11px; }
+  .letter-makhraj-copy p { font-size: 12px; }
+}
+
+
+/* Clear audio state and articulation diagrams */
+.letter-audio-status {
+  display: block;
+  min-height: 16px;
+  margin: 7px 0 12px;
+  color: var(--text-muted, #647267);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+}
+.letter-speak-button.is-playing {
+  border-color: #83A82B;
+  background: #EAF5D3;
+  color: #24452D;
+  box-shadow: 0 0 0 4px rgba(198,244,50,.16);
+}
+.letter-makhraj { overflow: hidden; }
+.letter-mouth-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 5px auto 8px;
+}
+.letter-makhraj-target {
+  flex-wrap: wrap;
+  text-align: center;
+}
+:root[data-theme="dark"] .letter-audio-status { color: #C5D0C7; }
+:root[data-theme="dark"] .letter-speak-button.is-playing {
+  border-color: #C6F432;
+  background: rgba(198,244,50,.16);
+  color: #E7FFAA;
+}
+@media (max-width: 480px) {
+  .letter-audio-status { font-size: 10px; }
+  .letter-mouth-diagram { max-height: 225px; }
+}
+
+
+/* Human-speaker full alphabet reference */
+.letter-learning-hint { flex-wrap: wrap; }
+.letter-learning-hint p { flex: 1 1 210px; min-width: 0; }
+.letter-alphabet-audio-button {
+  display: inline-flex;
+  min-height: 40px;
+  flex: 1 1 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid #B5D18E;
+  border-radius: 13px;
+  background: #EAF4D8;
+  color: #244A30;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+.letter-alphabet-audio-button:active { transform: scale(.985); }
+.letter-alphabet-audio-button:hover { background: #DDF0C3; }
+.letter-alphabet-audio-credit {
+  flex: 1 1 100%;
+  margin-left: 50px;
+  color: #718071 !important;
+  font-size: 10px !important;
+}
+:root[data-theme="dark"] .letter-alphabet-audio-button {
+  border-color: rgba(198,244,50,.32);
+  background: rgba(198,244,50,.12);
+  color: #E4F7C0;
+}
+:root[data-theme="dark"] .letter-alphabet-audio-button:hover { background: rgba(198,244,50,.18); }
+:root[data-theme="dark"] .letter-alphabet-audio-credit { color: #AEBBB0 !important; }

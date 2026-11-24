@@ -27,6 +27,13 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Generate permanent Arabic letter audio
+        run: |
+          git clone https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
+          git -C /tmp/nabra-tts checkout 16b5281ce61993df3526740990cf845a3f3036f4
+          npm --prefix /tmp/nabra-tts ci
+          npm --prefix /tmp/nabra-tts run build
+          node scripts/generate-arabic-audio.mjs /tmp/nabra-tts
       - name: Build ALIFLY
         run: npm run build
       - name: Configure GitHub Pages

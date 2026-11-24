@@ -1,0 +1,142 @@
+[
+  {
+    "character": "ا",
+    "slug": "alif",
+    "name": "أَلِف"
+  },
+  {
+    "character": "ب",
+    "slug": "ba",
+    "name": "بَاء"
+  },
+  {
+    "character": "ت",
+    "slug": "ta",
+    "name": "تَاء"
+  },
+  {
+    "character": "ث",
+    "slug": "tha",
+    "name": "ثَاء"
+  },
+  {
+    "character": "ج",
+    "slug": "jim",
+    "name": "جِيم"
+  },
+  {
+    "character": "ح",
+    "slug": "ha",
+    "name": "حَاء"
+  },
+  {
+    "character": "خ",
+    "slug": "kha",
+    "name": "خَاء"
+  },
+  {
+    "character": "د",
+    "slug": "dal",
+    "name": "دَال"
+  },
+  {
+    "character": "ذ",
+    "slug": "dhal",
+    "name": "ذَال"
+  },
+  {
+    "character": "ر",
+    "slug": "ra",
+    "name": "رَاء"
+  },
+  {
+    "character": "ز",
+    "slug": "zay",
+    "name": "زَاي"
+  },
+  {
+    "character": "س",
+    "slug": "sin",
+    "name": "سِين"
+  },
+  {
+    "character": "ش",
+    "slug": "shin",
+    "name": "شِين"
+  },
+  {
+    "character": "ص",
+    "slug": "sad",
+    "name": "صَاد"
+  },
+  {
+    "character": "ض",
+    "slug": "dad",
+    "name": "ضَاد"
+  },
+  {
+    "character": "ط",
+    "slug": "ta-emphatic",
+    "name": "طَاء"
+  },
+  {
+    "character": "ظ",
+    "slug": "za-emphatic",
+    "name": "ظَاء"
+  },
+  {
+    "character": "ع",
+    "slug": "ayn",
+    "name": "عَيْن"
+  },
+  {
+    "character": "غ",
+    "slug": "ghayn",
+    "name": "غَيْن"
+  },
+  {
+    "character": "ف",
+    "slug": "fa",
+    "name": "فَاء"
+  },
+  {
+    "character": "ق",
+    "slug": "qaf",
+    "name": "قَاف"
+  },
+  {
+    "character": "ك",
+    "slug": "kaf",
+    "name": "كَاف"
+  },
+  {
+    "character": "ل",
+    "slug": "lam",
+    "name": "لَام"
+  },
+  {
+    "character": "م",
+    "slug": "mim",
+    "name": "مِيم"
+  },
+  {
+    "character": "ن",
+    "slug": "nun",
+    "name": "نُون"
+  },
+  {
+    "character": "ه",
+    "slug": "ha-final",
+    "name": "هَاء"
+  },
+  {
+    "character": "و",
+    "slug": "waw",
+    "name": "وَاو"
+  },
+  {
+    "character": "ي",
+    "slug": "ya",
+    "name": "يَاء"
+  }
+]
