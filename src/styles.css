@@ -2539,3 +2539,19 @@ html, body {
   .word-game-progress span,
   .word-game-option { transition: none; }
 }
+
+
+/* Lesson issue reporting */
+.lesson-report-trigger{display:inline-flex;margin-top:16px;padding:8px 2px;border:0;background:transparent;color:var(--muted,#78827A);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.lesson-report-panel{display:grid;gap:10px;margin-top:10px;padding:16px;border:1px solid var(--border,rgba(120,140,120,.28));border-radius:18px;background:var(--surface,rgba(120,140,120,.07))}
+.lesson-report-panel label{color:var(--text);font-size:13px;font-weight:650}
+.lesson-report-panel select,.lesson-report-panel textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--border,#9AA59A);border-radius:12px;padding:12px;background:var(--background,transparent);color:var(--text);font:inherit;font-size:14px}
+.lesson-report-panel textarea{resize:vertical}
+.lesson-report-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.lesson-report-actions button{min-height:42px;padding:0 14px;border-radius:12px;font:inherit;cursor:pointer}
+.lesson-report-cancel{border:1px solid var(--border,#9AA59A);background:transparent;color:var(--text)}
+.lesson-report-submit{border:0;background:var(--accent,#C6F432);color:#1B2A1E;font-weight:700}
+.lesson-report-submit:disabled{opacity:.6;cursor:wait}
+.lesson-report-success{margin:0;color:#398052;font-size:14px}.lesson-report-error{margin:0;color:#C45B52;font-size:14px}
+:root[data-theme="dark"] .lesson-report-panel{background:#202923;border-color:rgba(255,255,255,.14)}
+:root[data-theme="dark"] .lesson-report-panel select,:root[data-theme="dark"] .lesson-report-panel textarea{background:#151B17;color:#F4F7F1;border-color:rgba(255,255,255,.2)}
