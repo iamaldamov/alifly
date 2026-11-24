@@ -57,7 +57,6 @@ const tongueShapes: Record<MakhrajGroup, string> = {
   interdental: "M31 140 C40 129 43 111 56 108 C75 107 86 132 111 148 C151 173 206 176 259 165 C285 160 305 164 321 180 L304 205 C245 205 196 197 153 181 C105 167 62 157 31 140Z",
   "tip-lower-teeth": "M48 145 C64 151 74 151 87 148 C111 149 135 161 169 171 C214 184 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   "tip-gums": "M48 145 C62 139 73 124 91 119 C111 119 134 145 169 160 C214 177 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
-  middle: "M48 145 C93 164 124 157 157 128 C181 108 218 106 244 125 C267 143 291 161 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   "middle-tongue": "M48 145 C93 164 124 157 157 128 C181 108 218 106 244 125 C267 143 291 161 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
   "side-tongue": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
   lam: "M48 145 C61 137 74 120 97 117 C118 117 140 145 173 160 C215 177 266 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
@@ -1721,6 +1720,8 @@ export default function App() {
                         void audio.play().catch(() => setLetterAudioStatus("error"));
                       };
                       const moveLetter = (direction: -1 | 1) => {
+                        letterAudioRef.current?.pause();
+                        setLetterAudioStatus("idle");
                         setActiveLetterIndex((current) => Math.max(0, Math.min(selectedLesson.letters.length - 1, current + direction)));
                       };
                       return (
