@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
-import { arabicLetterAudio, fullAlphabetAudioUrl } from "./data/arabic-letter-audio";
+import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
 import { db } from "./lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+
+type NabraTtsInstance = import("nabra-tts").NabraTTS;
 
 // The diagram groups each Arabic letter by its traditional articulation area.
 // It is a teaching aid, not a substitute for listening to a qualified teacher.
@@ -1022,6 +1024,12 @@ export default function App() {
   const [activeLetterIndex, setActiveLetterIndex] = useState(0);
   const letterTouchStartX = useRef<number | null>(null);
   const letterAudioRef = useRef<HTMLAudioElement | null>(null);
+  const letterAudioObjectUrlRef = useRef<string | null>(null);
+  const audioRequestIdRef = useRef(0);
+  const nabraTtsRef = useRef<NabraTtsInstance | null>(null);
+  const nabraTtsLoadingRef = useRef<Promise<NabraTtsInstance> | null>(null);
+  const [nabraReady, setNabraReady] = useState(false);
+  const [letterAudioProgress, setLetterAudioProgress] = useState<number | null>(null);
   const [letterAudioStatus, setLetterAudioStatus] = useState<"idle" | "loading" | "playing" | "error">("idle");
   const [letterAudioType, setLetterAudioType] = useState<"letter" | "alphabet">("letter");
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -1046,31 +1054,83 @@ export default function App() {
     }
   });
 
-  const playAudioSample = (url: string, type: "letter" | "alphabet") => {
-    if (letterAudioRef.current && letterAudioStatus === "playing" && letterAudioType === type) {
+  const stopLetterAudio = () => {
+    audioRequestIdRef.current += 1;
+    if (letterAudioRef.current) {
       letterAudioRef.current.pause();
-      letterAudioRef.current.currentTime = 0;
-      setLetterAudioStatus("idle");
+      letterAudioRef.current.onended = null;
+      letterAudioRef.current.onerror = null;
+      letterAudioRef.current.onplaying = null;
+      letterAudioRef.current = null;
+    }
+    if (letterAudioObjectUrlRef.current) {
+      URL.revokeObjectURL(letterAudioObjectUrlRef.current);
+      letterAudioObjectUrlRef.current = null;
+    }
+    setLetterAudioStatus("idle");
+    setLetterAudioProgress(null);
+  };
+
+  const getArabicNeuralVoice = async (): Promise<NabraTtsInstance> => {
+    if (nabraTtsRef.current) return nabraTtsRef.current;
+
+    if (!nabraTtsLoadingRef.current) {
+      nabraTtsLoadingRef.current = (async () => {
+        const { NabraTTS } = await import("nabra-tts");
+        const instance = await NabraTTS.load({
+          dtype: "fp16",
+          device: "auto",
+          cache: true,
+          onProgress: ({ loaded, total }) => {
+            setLetterAudioProgress(total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : null);
+          },
+        });
+        nabraTtsRef.current = instance;
+        setNabraReady(true);
+        setLetterAudioProgress(null);
+        return instance;
+      })();
+    }
+
+    try {
+      return await nabraTtsLoadingRef.current;
+    } finally {
+      if (!nabraTtsRef.current) nabraTtsLoadingRef.current = null;
+    }
+  };
+
+  const playAudioSample = (url: string) => {
+    if (letterAudioStatus === "playing" && letterAudioType === "alphabet") {
+      stopLetterAudio();
       return;
     }
 
-    letterAudioRef.current?.pause();
+    stopLetterAudio();
+    const requestId = audioRequestIdRef.current;
     const audio = new Audio(url);
     audio.preload = "none";
-    audio.onplaying = () => setLetterAudioStatus("playing");
-    audio.onended = () => setLetterAudioStatus("idle");
-    audio.onerror = () => setLetterAudioStatus("error");
+    audio.onplaying = () => {
+      if (requestId === audioRequestIdRef.current) setLetterAudioStatus("playing");
+    };
+    audio.onended = () => {
+      if (requestId === audioRequestIdRef.current) {
+        setLetterAudioStatus("idle");
+        letterAudioRef.current = null;
+      }
+    };
+    audio.onerror = () => {
+      if (requestId === audioRequestIdRef.current) setLetterAudioStatus("error");
+    };
     letterAudioRef.current = audio;
-    setLetterAudioType(type);
+    setLetterAudioType("alphabet");
     setLetterAudioStatus("loading");
-    void audio.play().catch(() => setLetterAudioStatus("error"));
+    void audio.play().catch(() => {
+      if (requestId === audioRequestIdRef.current) setLetterAudioStatus("error");
+    });
   };
 
   useEffect(() => {
-    if (!selectedLesson || !selectedStage) {
-      letterAudioRef.current?.pause();
-      setLetterAudioStatus("idle");
-    }
+    if (!selectedLesson || !selectedStage) stopLetterAudio();
   }, [selectedLesson, selectedStage]);
 
   useEffect(() => () => {
@@ -1080,6 +1140,8 @@ export default function App() {
       letterAudioRef.current.onerror = null;
       letterAudioRef.current.onplaying = null;
     }
+    if (letterAudioObjectUrlRef.current) URL.revokeObjectURL(letterAudioObjectUrlRef.current);
+    if (nabraTtsRef.current) void nabraTtsRef.current.dispose();
   }, []);
 
   useEffect(() => {
@@ -1724,17 +1786,62 @@ export default function App() {
                     {(() => {
                       const letter = selectedLesson.letters[activeLetterIndex];
                       if (!letter) return null;
-                      const speakLetter = () => {
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (!audioUrl) {
+                      const speakLetter = async () => {
+                        const arabicName = arabicLetterNames[letter.character];
+                        if (!arabicName) {
                           setLetterAudioStatus("error");
                           return;
                         }
-                        playAudioSample(audioUrl, "letter");
+                        if (letterAudioStatus === "playing" && letterAudioType === "letter") {
+                          stopLetterAudio();
+                          return;
+                        }
+                        if (letterAudioStatus === "loading" && letterAudioType === "letter") return;
+
+                        stopLetterAudio();
+                        const requestId = audioRequestIdRef.current;
+                        setLetterAudioType("letter");
+                        setLetterAudioStatus("loading");
+                        try {
+                          const tts = await getArabicNeuralVoice();
+                          if (requestId !== audioRequestIdRef.current) return;
+                          const { audio } = await tts.generate(arabicName, { speed: 0.92 });
+                          if (requestId !== audioRequestIdRef.current) return;
+
+                          const audioUrl = URL.createObjectURL(tts.toWav(audio));
+                          letterAudioObjectUrlRef.current = audioUrl;
+                          const player = new Audio(audioUrl);
+                          player.onplaying = () => {
+                            if (requestId === audioRequestIdRef.current) setLetterAudioStatus("playing");
+                          };
+                          player.onended = () => {
+                            if (requestId === audioRequestIdRef.current) {
+                              setLetterAudioStatus("idle");
+                              letterAudioRef.current = null;
+                              URL.revokeObjectURL(audioUrl);
+                              letterAudioObjectUrlRef.current = null;
+                            }
+                          };
+                          player.onerror = () => {
+                            if (requestId === audioRequestIdRef.current) {
+                              setLetterAudioStatus("error");
+                              letterAudioRef.current = null;
+                              URL.revokeObjectURL(audioUrl);
+                              letterAudioObjectUrlRef.current = null;
+                            }
+                          };
+                          letterAudioRef.current = player;
+                          await player.play();
+                        } catch (error) {
+                          console.error("ALIFLY Arabic neural voice failed:", error);
+                          if (requestId === audioRequestIdRef.current) {
+                            setLetterAudioStatus("error");
+                            setLetterAudioProgress(null);
+                          }
+                        }
                       };
                       const moveLetter = (direction: -1 | 1) => {
-                        letterAudioRef.current?.pause();
-                        setLetterAudioStatus("idle");
+                        stopLetterAudio();
                         setActiveLetterIndex((current) => Math.max(0, Math.min(selectedLesson.letters.length - 1, current + direction)));
                       };
                       return (
@@ -1742,7 +1849,7 @@ export default function App() {
                           <div className="letter-learning-hint">
                             <span className="letter-hint-icon">ا</span>
                             <p><strong>Изучай по одной букве</strong><small>Посмотри на форму, послушай название и повтори его вслух. Листай карточки в своём темпе.</small></p>
-                            <button className="letter-alphabet-audio-button" type="button" onClick={() => playAudioSample(fullAlphabetAudioUrl, "alphabet")}>Слушать весь алфавит · голос носителя</button>
+                            <button className="letter-alphabet-audio-button" type="button" onClick={() => playAudioSample(fullAlphabetAudioUrl)}>Слушать весь алфавит · голос носителя</button>
                             <small className="letter-alphabet-audio-credit">Запись M. Abuhelwa · общественное достояние</small>
                           </div>
                           <div
@@ -1765,7 +1872,7 @@ export default function App() {
                             <button className={letterAudioStatus === "playing" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} data-touch-hint="Прослушай арабское название буквы" title="Прослушать название">
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                             </button>
-                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? "Загружаем аудио…" : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится полный алфавит" : "Воспроизводится название буквы") : letterAudioStatus === "error" ? "Не удалось загрузить аудио. Проверь интернет." : "Арабское название · аудиообразец"}</small>
+                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : letterAudioProgress !== null ? `Загрузка арабского голоса: ${letterAudioProgress}%` : nabraReady ? "Создаём произношение…" : "Первый запуск: загружаем арабский нейроголос (~16 МБ)…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось подготовить голос. Проверь интернет и попробуй снова." : nabraReady ? "Арабский нейроголос готов · кэшируется на устройстве" : "Нейроголос на литературном арабском · первая загрузка ~16 МБ"}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
@@ -1777,7 +1884,7 @@ export default function App() {
                                 data-touch-hint={`Перейти к букве ${index + 1}`}
                                 aria-label={`Перейти к букве ${index + 1}`}
                                 aria-current={index === activeLetterIndex ? "step" : undefined}
-                                onClick={() => { letterAudioRef.current?.pause(); setLetterAudioStatus("idle"); setActiveLetterIndex(index); }}
+                                onClick={() => { stopLetterAudio(); setActiveLetterIndex(index); }}
                               />
                             ))}
                           </div>
