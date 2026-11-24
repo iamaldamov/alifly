@@ -27,6 +27,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Run unit tests
+        run: npm test
       - name: Generate permanent Arabic letter audio
         run: |
           git clone https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
