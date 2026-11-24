@@ -7,7 +7,7 @@ test("a learner can skip the alphabet and start with simple words", async ({ pag
   await page.getByRole("button", { name: /Читаю простые слова/ }).click();
 
   await expect(page.getByRole("heading", { name: "Книга и ручка" })).toBeVisible();
-  await expect(page.getByText("كِتَاب")).toBeVisible();
+  await expect(page.locator(".study-phrase-arabic").first()).toHaveText("كِتَاب");
 });
 
 test("the diagnostic recommends a level and opens the matching route", async ({ page }) => {
