@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlacement";
@@ -1154,6 +1155,13 @@ function readLearningLevel(userId: string): LearningLevel {
 
 export default function App() {
   const { user, isLoading: authLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const routeHandled = useRef<string | null>(null);
+  const routePath = location.pathname.replace(/\\/+$/, "") || "/";
+  const isLessonsRoute = routePath === "/lessons";
+  const isAlifRoute = routePath === "/lessons/alif";
+  const isLoginRoute = routePath === "/login";
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
@@ -1506,6 +1514,7 @@ export default function App() {
   };
 
   const closeStage = () => {
+    if (routePath === "/lessons/alif") navigate("/lessons");
     saveCurrentMemoryAssessment();
     setSelectedStage(null);
     setSelectedLesson(null);
@@ -1536,6 +1545,7 @@ export default function App() {
     setReviewMode(false);
     setReviewMistakeIds([]);
     setExamMode(false);
+    if (lesson.id === 20 && routePath !== "/lessons/alif") navigate("/lessons/alif");
   };
 
   const startLearningLevel = (level: LearningLevel) => {
@@ -1804,6 +1814,45 @@ export default function App() {
     setExamMode(false);
   };
 
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      "/": "ALIFLY — арабский язык с нуля | Уроки и практика",
+      "/lessons": "Уроки арабского языка с нуля | ALIFLY",
+      "/lessons/alif": "Алиф — первая буква арабского алфавита | ALIFLY",
+      "/login": "Вход в аккаунт ALIFLY | Сохранение прогресса",
+    };
+    document.title = titles[routePath] ?? titles["/"];
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+      description.setAttribute("content", routePath === "/lessons"
+        ? "Последовательные бесплатные уроки арабского языка для начинающих: алфавит, огласовки, чтение и практика."
+        : routePath === "/lessons/alif"
+          ? "Изучи арабскую букву алиф: форма, название, произношение и первое упражнение в интерактивном уроке ALIFLY."
+          : "Изучайте арабский язык с нуля вместе с ALIFLY: интерактивные уроки алфавита, произношение букв, огласовки, упражнения и отслеживание прогресса.");
+    }
+
+    if (isLessonsRoute && routeHandled.current !== routePath) {
+      if (routeHandled.current === "/lessons/alif") closeStage();
+      routeHandled.current = routePath;
+      window.requestAnimationFrame(() => {
+        document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" });
+      });
+      return;
+    }
+
+    if (routePath === "/" && routeHandled.current === "/lessons/alif") {
+      routeHandled.current = "/";
+      closeStage();
+      return;
+    }
+
+    if (isAlifRoute && routeHandled.current !== routePath) {
+      routeHandled.current = routePath;
+      setSelectedStage(stages[0]);
+      startLesson(lessons[0]);
+    }
+  }, [location.pathname]);
+
   const currentQuestion = selectedLesson?.questions[questionIndex];
   const currentQuestionCorrect = currentQuestion && selectedAnswer !== null
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
@@ -1841,7 +1890,7 @@ export default function App() {
   return (
     <main className="app">
       <header className="topbar">
-        <a className="logo" href="#" aria-label="ALIFLY — главная">
+        <a className="logo" href={import.meta.env.BASE_URL} aria-label="ALIFLY — главная">
           <span className="logo-mark">ا</span>
           <span>ALIFLY</span>
         </a>
@@ -1850,7 +1899,7 @@ export default function App() {
             <span className="streak-icon" aria-hidden="true">🔥</span>
             <span className="streak-count">{streak}</span>
           </span>
-          <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} suppressInitialPrompt={shouldShowLevelPlacement || showLevelSettings || selectedLesson !== null || !hasDailyGoalChoice(dailyUserId)} />
+          <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} suppressInitialPrompt={shouldShowLevelPlacement || showLevelSettings || selectedLesson !== null || !hasDailyGoalChoice(dailyUserId)} openOnMount={isLoginRoute} onClose={() => { if (isLoginRoute) navigate("/"); }} />
           <button
             className="theme-toggle"
             data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
@@ -1937,7 +1986,7 @@ export default function App() {
           <h1>Открой для себя <span>арабский язык.</span></h1>
           <p>Понятный путь от первой буквы до уверенного чтения. Короткие уроки и заметный прогресс — в твоём темпе.</p>
           <div className="hero-actions">
-            <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" })}>
+            <button className="primary-button" data-touch-hint="Перейди к программе и начни с первого короткого урока" onClick={() => { if (location.pathname !== "/lessons") navigate("/lessons"); else document.getElementById("learning-path")?.scrollIntoView({ behavior: "smooth" }); }}>
               Начать обучение <span>↗</span>
             </button>
             <span className="hero-action-note">Первые уроки доступны бесплатно</span>
