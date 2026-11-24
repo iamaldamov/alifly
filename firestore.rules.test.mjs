@@ -35,7 +35,6 @@ beforeEach(async () => {
 function profileDocument() {
   return {
     email: "alice@example.com",
-    avatarId: "duck",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -93,21 +92,23 @@ test("a learner cannot add trial or subscription fields to their profile", async
   }));
 });
 
-test("a learner can change their avatar but cannot edit protected profile fields", async () => {
+test("legacy avatar data is preserved but cannot be created or changed by clients", async () => {
   const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
   const profileRef = doc(alice.firestore(), "users/alice");
 
   await testEnv.withSecurityRulesDisabled(async (context) => {
     await setDoc(doc(context.firestore(), "users/alice"), {
       email: "alice@example.com",
-      avatarId: "duck",
+      avatarId: "legacy",
       createdAt: Timestamp.fromDate(new Date("2026-11-20T00:00:00Z")),
       updatedAt: Timestamp.fromDate(new Date("2026-11-20T00:00:00Z")),
     });
   });
 
-  await assertSucceeds(updateDoc(profileRef, {
-    avatarId: "owl",
+  // A timestamp-only update must keep the old field intact for compatibility.
+  await assertSucceeds(updateDoc(profileRef, { updatedAt: serverTimestamp() }));
+  await assertFails(updateDoc(profileRef, {
+    avatarId: "person",
     updatedAt: serverTimestamp(),
   }));
   await assertFails(updateDoc(profileRef, {
@@ -130,8 +131,7 @@ test("a learner cannot read another learner's profile", async () => {
 
   await testEnv.withSecurityRulesDisabled(async (context) => {
     await setDoc(doc(context.firestore(), "users/alice"), {
-      avatarId: "duck",
-      updatedAt: Timestamp.fromDate(new Date("2026-11-20T00:00:00Z")),
+        updatedAt: Timestamp.fromDate(new Date("2026-11-20T00:00:00Z")),
     });
   });
 
@@ -144,12 +144,12 @@ test("learners cannot list the profiles collection", async () => {
   await assertFails(getDocs(collection(alice.firestore(), "users")));
 });
 
-test("a learner cannot create a profile with an avatar outside the allowlist", async () => {
+test("a learner cannot create a profile with a legacy avatar field", async () => {
   const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
 
   await assertFails(setDoc(doc(alice.firestore(), "users/alice"), {
     ...profileDocument(),
-    avatarId: "dragon",
+    avatarId: "legacy",
   }));
 });
 

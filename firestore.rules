@@ -5,20 +5,11 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    function isValidAvatar(avatarId) {
-      return avatarId is string
-        && avatarId in ['duck', 'owl', 'turtle', 'fox', 'cat', 'panda'];
-    }
-
     function validProfileCreate() {
       return request.resource.data.keys().hasOnly([
-          'email', 'avatarId', 'createdAt', 'updatedAt'
+          'email', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll(['updatedAt'])
-        && (
-          !('avatarId' in request.resource.data)
-          || isValidAvatar(request.resource.data.avatarId)
-        )
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.updatedAt == request.time
         && (
@@ -42,12 +33,10 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'email', 'avatarId', 'createdAt', 'updatedAt'
         ])
-        && changed.hasOnly(['avatarId', 'updatedAt'])
+        // Keep any pre-existing avatarId untouched for legacy profile documents.
+        // New clients use the neutral person icon and cannot create/change avatar IDs.
+        && changed.hasOnly(['updatedAt'])
         && changed.hasAll(['updatedAt'])
-        && (
-          !('avatarId' in request.resource.data)
-          || isValidAvatar(request.resource.data.avatarId)
-        )
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.updatedAt == request.time;
     }
