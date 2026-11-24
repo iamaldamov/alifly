@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
+import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlacement";
+import WordGame, { type Word } from "./WordGame";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
 import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
@@ -239,7 +241,8 @@ type Lesson = {
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
   { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
-  { id: 3, title: "Знакомство", description: "Первые диалоги на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
+  { id: 3, title: "Читаем первые слова", description: "Короткие слова с огласовками и чтение без подсказок", icon: "ك", lessons: 3, status: "locked" },
+  { id: 4, title: "Первые диалоги", description: "Приветствия и простые разговоры на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
 ];
 
 const legacyLessons: Lesson[] = [
@@ -412,6 +415,120 @@ const stageTwoLessons: Lesson[] = [
   },
 ];
 
+
+type VocabularyCard = StudyCard & {
+  acceptedTransliterations: string[];
+};
+
+function makeVocabularyLesson(
+  id: number,
+  title: string,
+  goal: string,
+  cards: VocabularyCard[],
+): Lesson {
+  const questions: Question[] = cards.flatMap((card) => [
+    {
+      prompt: "Прочитай слово и введи его звучание.",
+      options: [],
+      correct: card.transliteration,
+      acceptedAnswers: card.acceptedTransliterations,
+      mode: "recall" as const,
+      stimulus: card.arabic,
+      stimulusLang: "ar",
+      stimulusDir: "rtl",
+      explanation: card.arabic + " — " + card.transliteration + ".",
+    },
+    {
+      prompt: "Что означает это слово?",
+      options: cards.map((item) => item.translation),
+      correct: card.translation,
+      mode: "choice" as const,
+      stimulus: card.arabic,
+      stimulusLang: "ar",
+      stimulusDir: "rtl",
+      explanation: card.arabic + " — «" + card.translation + "».",
+    },
+  ]);
+
+  return { id, title, goal, letters: [], studyCards: cards, questions };
+}
+
+const stageThreeLessons: Lesson[] = [
+  makeVocabularyLesson(
+    35,
+    "Книга и ручка",
+    "Прочитай два простых существительных. Обрати внимание на долгий гласный в слове كِتَاب.",
+    [
+      {
+        arabic: "كِتَاب",
+        transliteration: "kitāb",
+        translation: "книга",
+        note: "Алиф после ت передаёт долгий гласный ā.",
+        acceptedTransliterations: ["kitāb", "kitab", "китаб"],
+      },
+      {
+        arabic: "قَلَم",
+        transliteration: "qalam",
+        translation: "ручка",
+        note: "Буква ق произносится глубже, чем ك.",
+        acceptedTransliterations: ["qalam", "калам", "къалам"],
+      },
+    ],
+  ),
+  makeVocabularyLesson(
+    36,
+    "Дом и дверь",
+    "Прочитай ещё два коротких слова и сравни долгие гласные и сочетания букв.",
+    [
+      {
+        arabic: "بَاب",
+        transliteration: "bāb",
+        translation: "дверь",
+        note: "Алиф после ب обозначает долгий гласный ā.",
+        acceptedTransliterations: ["bāb", "bab", "баб"],
+      },
+      {
+        arabic: "بَيْت",
+        transliteration: "bayt",
+        translation: "дом",
+        note: "Сочетание بَيْ читается как bay.",
+        acceptedTransliterations: ["bayt", "бейт"],
+      },
+    ],
+  ),
+  makeVocabularyLesson(
+    37,
+    "Повторение первых слов",
+    "Повтори четыре знакомых слова: сначала вспомни их чтение, затем значение.",
+    [
+      {
+        arabic: "كِتَاب",
+        transliteration: "kitāb",
+        translation: "книга",
+        acceptedTransliterations: ["kitāb", "kitab", "китаб"],
+      },
+      {
+        arabic: "قَلَم",
+        transliteration: "qalam",
+        translation: "ручка",
+        acceptedTransliterations: ["qalam", "калам", "къалам"],
+      },
+      {
+        arabic: "بَاب",
+        transliteration: "bāb",
+        translation: "дверь",
+        acceptedTransliterations: ["bāb", "bab", "баб"],
+      },
+      {
+        arabic: "بَيْت",
+        transliteration: "bayt",
+        translation: "дом",
+        acceptedTransliterations: ["bayt", "бейт"],
+      },
+    ],
+  ),
+];
+
 type IntroCard = StudyCard & {
   acceptedTransliterations: string[];
   acceptedTranslations?: string[];
@@ -458,7 +575,7 @@ function makeIntroductionLesson(
   };
 }
 
-const stageThreeLessons: Lesson[] = [
+const stageFourLessons: Lesson[] = [
   makeIntroductionLesson(
     30,
     "Приветствие и ответ",
@@ -830,9 +947,9 @@ const legacyAlphabetProgress: Record<number, number[]> = {
 function normalizeCompletedLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34));
+  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37));
   const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34) || (id >= 6 && id <= 8))
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37) || (id >= 6 && id <= 8))
     : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
   return [...new Set(normalized)];
 }
@@ -840,9 +957,9 @@ function normalizeCompletedLessonIds(value: unknown): number[] {
 function normalizeDailyLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34));
+  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37));
   const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 34) || (id >= 6 && id <= 8))
+    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37) || (id >= 6 && id <= 8))
     : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
   return [...new Set(normalized)];
 }
@@ -946,6 +1063,21 @@ function readBoolean(key: string): boolean {
   try { return localStorage.getItem(key) === "true"; } catch { return false; }
 }
 
+function startingLevelStorageKey(userId: string): string {
+  return "alifly-starting-level:" + userId;
+}
+
+function readStartingLevel(userId: string): LearningLevel | null {
+  try {
+    const saved = Number(localStorage.getItem(startingLevelStorageKey(userId)));
+    if (isLearningLevel(saved)) return saved;
+    const legacy = Number(localStorage.getItem(learningLevelStorageKey(userId)));
+    return isLearningLevel(legacy) ? legacy : null;
+  } catch {
+    return null;
+  }
+}
+
 function readLastStudyDate(): string {
   try {
     return localStorage.getItem("alifly-last-study-date") || "";
@@ -1007,8 +1139,6 @@ function hasDailyGoalChoice(userId: string): boolean {
   }
 }
 
-type LearningLevel = 1 | 2 | 3;
-
 function learningLevelStorageKey(userId: string): string {
   return `alifly-learning-level:${userId}`;
 }
@@ -1016,7 +1146,7 @@ function learningLevelStorageKey(userId: string): string {
 function readLearningLevel(userId: string): LearningLevel {
   try {
     const value = Number(localStorage.getItem(learningLevelStorageKey(userId)));
-    return value === 2 || value === 3 ? value : 1;
+    return isLearningLevel(value) ? value : 1;
   } catch {
     return 1;
   }
@@ -1027,10 +1157,13 @@ export default function App() {
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
-  const [showDailyMissionSetup, setShowDailyMissionSetup] = useState(() => !hasDailyGoalChoice("guest"));
+  const [showDailyMissionSetup, setShowDailyMissionSetup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [learningLevel, setLearningLevel] = useState<LearningLevel>(() => readLearningLevel("guest"));
   const [cloudReady, setCloudReady] = useState(false);
+  const [startingLevel, setStartingLevel] = useState<LearningLevel | null>(() => readStartingLevel("guest"));
+  const [showLevelSettings, setShowLevelSettings] = useState(false);
+  const [showWordGame, setShowWordGame] = useState(false);
   const [progressOwnerId, setProgressOwnerId] = useState("guest");
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -1134,9 +1267,28 @@ export default function App() {
   useEffect(() => {
     setDailyGoal(readDailyGoal(dailyUserId));
     setDailyActivity(readDailyActivity(dailyUserId));
-    setLearningLevel(readLearningLevel(dailyUserId));
-    setShowDailyMissionSetup(!hasDailyGoalChoice(dailyUserId));
+    const restoredLevel = readStartingLevel(dailyUserId);
+    setStartingLevel(restoredLevel);
+    setLearningLevel(restoredLevel ?? readLearningLevel(dailyUserId));
+    setShowDailyMissionSetup(false);
   }, [dailyUserId]);
+
+  useEffect(() => {
+    if (startingLevel === null) return;
+    try {
+      localStorage.setItem(startingLevelStorageKey(dailyUserId), String(startingLevel));
+      localStorage.setItem(learningLevelStorageKey(dailyUserId), String(startingLevel));
+    } catch {
+      // The selected route remains available for this session if storage is blocked.
+    }
+  }, [dailyUserId, startingLevel]);
+
+  useEffect(() => {
+    const hasExistingLearningData = completedLessonIds.length > 0 || mistakes.length > 0 || dailyActivity.lessonIds.length > 0;
+    if (selectedLesson === null && (startingLevel !== null || hasExistingLearningData) && !hasDailyGoalChoice(dailyUserId)) {
+      setShowDailyMissionSetup(true);
+    }
+  }, [dailyUserId, startingLevel, selectedLesson, completedLessonIds.length, mistakes.length, dailyActivity.lessonIds.length]);
 
   // Keep the new memory store isolated per guest/account on this device.
   useEffect(() => {
@@ -1222,6 +1374,8 @@ export default function App() {
       setExamPassed(readBoolean("alifly-stage-1-exam-passed"));
       setDailyGoal(readDailyGoal("guest"));
       setDailyActivity(readDailyActivity("guest"));
+      setStartingLevel(readStartingLevel("guest"));
+      setLearningLevel(readLearningLevel("guest"));
       setProgressOwnerId("guest");
       return;
     }
@@ -1230,7 +1384,7 @@ export default function App() {
     setCloudSaveStatus("loading");
 
     const loadProgress = async () => {
-      type CloudProgress = { completed_lesson_ids?: unknown; mistakes?: unknown; streak?: number; last_study_date?: string | null; exam_passed?: boolean; daily_goal?: number; daily_activity?: unknown };
+      type CloudProgress = { completed_lesson_ids?: unknown; mistakes?: unknown; streak?: number; last_study_date?: string | null; exam_passed?: boolean; daily_goal?: number; daily_activity?: unknown; starting_level?: unknown };
       let data: CloudProgress | null = null;
       try {
         const progressRef = doc(db, "users", user.uid, "progress", "current");
@@ -1255,6 +1409,11 @@ export default function App() {
       if (cancelled) return;
 
       if (data) {
+        const restoredLevel = isLearningLevel(data.starting_level)
+          ? data.starting_level
+          : readStartingLevel(user.uid) ?? readStartingLevel("guest");
+        setStartingLevel(restoredLevel);
+        setLearningLevel(restoredLevel ?? readLearningLevel(user.uid));
         setCompletedLessonIds(normalizeCompletedLessonIds(data.completed_lesson_ids));
         setMistakes(Array.isArray(data.mistakes) ? data.mistakes as Mistake[] : []);
         setStreak(typeof data.streak === "number" && Number.isFinite(data.streak) ? data.streak : 0);
@@ -1266,6 +1425,9 @@ export default function App() {
           ? { date: cloudDailyActivity.date, lessonIds: normalizeDailyLessonIds(cloudDailyActivity.lessonIds) }
           : { date: "", lessonIds: [] });
       } else {
+        const restoredLevel = readStartingLevel(user.uid) ?? readStartingLevel("guest");
+        setStartingLevel(restoredLevel);
+        setLearningLevel(restoredLevel ?? readLearningLevel(user.uid));
         // An empty/new account must never inherit guest or another account's local progress.
         setCompletedLessonIds([]);
         setMistakes([]);
@@ -1302,6 +1464,7 @@ export default function App() {
           exam_passed: examPassed,
           daily_goal: dailyGoal,
           daily_activity: dailyActivity,
+          starting_level: startingLevel,
           updated_at: serverTimestamp(),
         }, { merge: true });
 
@@ -1318,7 +1481,7 @@ export default function App() {
       cancelled = true;
       window.clearTimeout(timeout);
     };
-  }, [user?.uid, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity]);
+  }, [user?.uid, cloudReady, completedLessonIds, mistakes, streak, lastStudyDate, examPassed, dailyGoal, dailyActivity, startingLevel]);
 
 
   const updateDailyGoal = (goal: DailyGoal) => {
@@ -1333,8 +1496,10 @@ export default function App() {
 
   const updateLearningLevel = (level: LearningLevel) => {
     setLearningLevel(level);
+    setStartingLevel(level);
     try {
       localStorage.setItem(learningLevelStorageKey(dailyUserId), String(level));
+      localStorage.setItem(startingLevelStorageKey(dailyUserId), String(level));
     } catch {
       // The selected route remains active for this session if storage is blocked.
     }
@@ -1371,6 +1536,44 @@ export default function App() {
     setReviewMode(false);
     setReviewMistakeIds([]);
     setExamMode(false);
+  };
+
+  const startLearningLevel = (level: LearningLevel) => {
+    const stage = level === 1 ? stages[0] : level === 2 ? stages[1] : level === 3 ? stages[2] : stages[3];
+    const firstLesson = level === 1
+      ? lessons[0]
+      : level === 2
+        ? stageTwoLessons[0]
+        : level === 3
+          ? stageThreeLessons[0]
+          : stageFourLessons[0];
+
+    setStartingLevel(level);
+    setLearningLevel(level);
+    try {
+      localStorage.setItem(learningLevelStorageKey(dailyUserId), String(level));
+      localStorage.setItem(startingLevelStorageKey(dailyUserId), String(level));
+    } catch { /* The chosen level remains active for this session. */ }
+    setShowLevelSettings(false);
+    setSelectedStage(stage);
+    startLesson(firstLesson);
+  };
+
+  const recordWordGameAnswer = (word: Word, correct: boolean) => {
+    if (memoryOwnerId !== dailyUserId) return;
+    const identity = createLessonMemoryIdentity(90, "word-game-" + word.arabic, true);
+    const previous = memoryState.items.find((item) => item.id === identity.id) ?? createMemoryItem({
+      id: identity.id,
+      contentType: "word",
+      contentId: identity.contentId,
+      skill: "meaning",
+    });
+    const result = reviewMemoryItem(previous, {
+      grade: correct ? "good" : "again",
+      errorType: correct ? null : "meaning",
+      usedHint: false,
+    }, "word-game-event-" + identity.id + "-" + Date.now());
+    setMemoryState((current) => appendReviewResult(current, result));
   };
 
   const answerQuestion = (answer: string) => {
@@ -1606,11 +1809,22 @@ export default function App() {
     ? isCorrectAnswer(currentQuestion, selectedAnswer)
     : false;
   const firstStageCompletedCount = lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
-  const progressPercent = Math.round((firstStageCompletedCount / lessons.length) * 100);
   const today = localDateKey();
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
-  const stageTwoUnlocked = examPassed || learningLevel >= 2;
-  const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || learningLevel >= 3;
+  const stageTwoUnlocked = examPassed || (startingLevel !== null && startingLevel >= 2);
+  const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 3);
+  const stageFourUnlocked = stageThreeLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || (startingLevel !== null && startingLevel >= 4) || (startingLevel === null && stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id))) || stageFourLessons.some((lesson) => completedLessonIds.includes(lesson.id));
+  const activeRoute = stageFourUnlocked
+    ? { title: "диалогов", stageTitle: "Первые диалоги", lessons: stageFourLessons }
+    : stageThreeUnlocked
+      ? { title: "чтения слов", stageTitle: "Читаем первые слова", lessons: stageThreeLessons }
+      : stageTwoUnlocked
+        ? { title: "огласовок", stageTitle: "Огласовки", lessons: stageTwoLessons }
+        : { title: "алфавита", stageTitle: "Арабский алфавит", lessons };
+  const activeRouteCompletedCount = activeRoute.lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
+  const activeRoutePercent = Math.round((activeRouteCompletedCount / activeRoute.lessons.length) * 100);
+  const hasExistingLearningData = completedLessonIds.length > 0 || mistakes.length > 0 || dailyActivity.lessonIds.length > 0;
+  const shouldShowLevelPlacement = startingLevel === null && !hasExistingLearningData && (!user || cloudReady);
 
   if (authLoading || progressOwnerId !== dailyUserId) {
     return (
@@ -1636,7 +1850,7 @@ export default function App() {
             <span className="streak-icon" aria-hidden="true">🔥</span>
             <span className="streak-count">{streak}</span>
           </span>
-          <AuthPanel cloudStatus={cloudSaveStatus} />
+          <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} suppressInitialPrompt={shouldShowLevelPlacement || showLevelSettings || selectedLesson !== null || !hasDailyGoalChoice(dailyUserId)} />
           <button
             className="theme-toggle"
             data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
@@ -1681,6 +1895,8 @@ export default function App() {
                 <button type="button" className={learningLevel === 1 ? "settings-level is-active" : "settings-level"} aria-pressed={learningLevel === 1} onClick={() => updateLearningLevel(1)}><strong>1 · С нуля</strong><span>Начинаю с арабских букв</span></button>
                 <button type="button" className={learningLevel === 2 ? "settings-level is-active" : "settings-level"} aria-pressed={learningLevel === 2} onClick={() => updateLearningLevel(2)}><strong>2 · Знаю буквы</strong><span>Хочу изучать огласовки</span></button>
                 <button type="button" className={learningLevel === 3 ? "settings-level is-active" : "settings-level"} aria-pressed={learningLevel === 3} onClick={() => updateLearningLevel(3)}><strong>3 · Читаю слова</strong><span>Хочу перейти к простым фразам</span></button>
+                <button type="button" className={learningLevel === 4 ? "settings-level is-active" : "settings-level"} aria-pressed={learningLevel === 4} onClick={() => updateLearningLevel(4)}><strong>4 · Уже умею читать</strong><span>Хочу сразу перейти к диалогам</span></button>
+                <button type="button" className="level-diagnostic-button" onClick={() => setShowLevelSettings(true)}>Пройти короткую диагностику уровня</button>
               </div>
             </div>
             <button className="settings-done-button" type="button" onClick={() => setShowSettings(false)}>Готово</button>
@@ -1703,12 +1919,20 @@ export default function App() {
         </div>
       )}
 
+      {(shouldShowLevelPlacement || showLevelSettings) && (
+        <LevelPlacement
+          currentLevel={startingLevel}
+          onSelectLevel={startLearningLevel}
+          onClose={showLevelSettings && !shouldShowLevelPlacement ? () => setShowLevelSettings(false) : undefined}
+        />
+      )}
+
       <section className="hero">
         <div className="hero-content">
           <div className="hero-overline">
             <span className="hero-overline-line" />
-            <span>АРАБСКИЙ · С НУЛЯ</span>
-            <span className="hero-overline-index">01 / 03</span>
+            <span>{startingLevel === 4 ? "АРАБСКИЙ · ПРАКТИКА" : startingLevel === 3 ? "АРАБСКИЙ · ЧТЕНИЕ" : startingLevel === 2 ? "АРАБСКИЙ · ОГЛАСОВКИ" : "АРАБСКИЙ · С НУЛЯ"}</span>
+            <span className="hero-overline-index">01 / 04</span>
           </div>
           <h1>Открой для себя <span>арабский язык.</span></h1>
           <p>Понятный путь от первой буквы до уверенного чтения. Короткие уроки и заметный прогресс — в твоём темпе.</p>
@@ -1745,9 +1969,9 @@ export default function App() {
           <h2>Каждый шаг важен</h2>
         </div>
         <div className="progress-card">
-          <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
-          <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
-          <p>{firstStageCompletedCount === lessons.length ? "Все девять уроков алфавита завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          <div className="progress-info"><span>{activeRouteCompletedCount} из {activeRoute.lessons.length} уроков · {activeRoute.stageTitle}</span><strong>{activeRoutePercent}%</strong></div>
+          <div className="progress-track"><div className="progress-fill" style={{ width: `${activeRoutePercent}%` }} /></div>
+          <p>{activeRouteCompletedCount === activeRoute.lessons.length ? "Этот учебный маршрут завершён. Отличная работа!" : "Продолжай с того места, где остановился. Прогресс сохраняется в твоём аккаунте."}</p>
           <div className="memory-insights" aria-label="Состояние памяти">
             <div className="memory-insight"><strong>{memoryInsights.totalItems}</strong><span>карточек в памяти</span></div>
             <div className="memory-insight"><strong>{dueMistakes.length}</strong><span>пора повторить</span></div>
@@ -1765,6 +1989,9 @@ export default function App() {
             )}
           </div>
           <div className="memory-actions">
+            <button className="review-button" type="button" onClick={() => setShowWordGame((visible) => !visible)}>
+              {showWordGame ? "Скрыть игру" : "Мини-игра: слова"}
+            </button>
             {dueMistakes.length > 0 && (
               <button className="review-button" type="button" onClick={startReview}>
                 Повторить по расписанию · {dueMistakes.length}
@@ -1778,18 +2005,22 @@ export default function App() {
             {dueMistakes.length === 0 && mistakes.length > 0 && (
               <p className="memory-next-review">Следующее повторение запланировано автоматически.</p>
             )}
+            <button className="review-button level-change-button" type="button" onClick={() => setShowLevelSettings(true)}>
+              Изменить уровень
+            </button>
           </div>
+          {showWordGame && <WordGame onAnswer={recordWordGameAnswer} />}
         </div>
       </section>
 
       <section className="learning-section" id="learning-path">
         <div className="section-heading">
           <div><span className="section-label">ПРОГРАММА ОБУЧЕНИЯ</span><h2>Твой путь</h2></div>
-          <span className="stage-count">3 этапа</span>
+          <span className="stage-count">4 этапа</span>
         </div>
         <div className="stage-list">
           {stages.map((stage) => {
-            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked) || (stage.id === 3 && stageThreeUnlocked);
+            const unlocked = stage.id === 1 || (stage.id === 2 && stageTwoUnlocked) || (stage.id === 3 && stageThreeUnlocked) || (stage.id === 4 && stageFourUnlocked);
             return (
               <button className={`stage-card ${unlocked ? "" : "stage-locked"}`} key={stage.id} data-touch-hint={unlocked ? `Открой этап «${stage.title}» и выбери доступный урок` : undefined} disabled={!unlocked} onClick={() => { setSelectedStage(stage); setSelectedLesson(null); }}>
                 <span className="stage-icon">{stage.icon}</span>
@@ -1797,7 +2028,15 @@ export default function App() {
                   <span className="stage-number">ЭТАП {stage.id}</span>
                   <strong>{stage.title}</strong>
                   <span className="stage-description">{stage.description}</span>
-                  <span className="lesson-count">{stage.id === 1 ? `${firstStageCompletedCount}/${lessons.length} уроков алфавита` : stage.id === 2 && unlocked ? "Открыт после экзамена" : stage.id === 3 ? `${stageThreeLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length}/5 уроков знакомства` : `${stage.lessons} уроков`}</span>
+                  <span className="lesson-count">
+                    {stage.id === 1
+                      ? firstStageCompletedCount + "/" + lessons.length + " уроков алфавита"
+                      : stage.id === 2
+                        ? unlocked ? (examPassed ? "Открыт после экзамена" : "Открыт по выбранному уровню") : stage.lessons + " урока"
+                        : stage.id === 3
+                          ? stageThreeLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length + "/" + stageThreeLessons.length + " урока чтения"
+                          : stageFourLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length + "/" + stageFourLessons.length + " уроков диалогов"}
+                  </span>
                 </span>
                 <span className="stage-arrow">{unlocked ? "→" : "🔒"}</span>
               </button>
@@ -1844,13 +2083,33 @@ export default function App() {
                   </div>
                 ) : selectedStage.id === 3 && stageThreeUnlocked ? (
                   <div className="lesson-picker">
-                    <p className="modal-note">Пять уроков на современном литературном арабском (MSA). Сначала изучи фразы в ситуации, затем вспомни их перевод и звучание без подсказки.</p>
+                    <p className="modal-note">Короткий словарь современного литературного арабского. Сначала изучи слово и его значение, затем введи чтение без подсказки.</p>
                     {stageThreeLessons.map((lesson, index) => {
                       const previousLesson = index > 0 ? stageThreeLessons[index - 1] : undefined;
                       const isOpen = index === 0 || (previousLesson !== undefined && completedLessonIds.includes(previousLesson.id));
                       const isCompleted = completedLessonIds.includes(lesson.id);
                       return (
-                        <button key={lesson.id} className={`lesson-pick ${isCompleted ? "lesson-pick-done" : ""}`} disabled={!isOpen} onClick={() => startLesson(lesson)}>
+                        <button key={lesson.id} className={"lesson-pick " + (isCompleted ? "lesson-pick-done" : "")} disabled={!isOpen} onClick={() => startLesson(lesson)}>
+                          <span className="lesson-pick-number">{isCompleted ? "✓" : String(index + 1).padStart(2, "0")}</span>
+                          <span className="lesson-pick-text">
+                            <strong>{lesson.title}</strong>
+                            <small>{lesson.studyCards?.length ?? 0} слова · {lesson.questions.length} задания</small>
+                          </span>
+                          <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
+                        </button>
+                      );
+                    })}
+                    <p className="local-progress-note">Следующий урок откроется после завершения предыдущего. Прогресс сохраняется на устройстве и в аккаунте.</p>
+                  </div>
+                ) : selectedStage.id === 4 && stageFourUnlocked ? (
+                  <div className="lesson-picker">
+                    <p className="modal-note">Пять коротких уроков на современном литературном арабском (MSA): приветствие, знакомство, происхождение и самочувствие.</p>
+                    {stageFourLessons.map((lesson, index) => {
+                      const previousLesson = index > 0 ? stageFourLessons[index - 1] : undefined;
+                      const isOpen = index === 0 || (previousLesson !== undefined && completedLessonIds.includes(previousLesson.id));
+                      const isCompleted = completedLessonIds.includes(lesson.id);
+                      return (
+                        <button key={lesson.id} className={"lesson-pick " + (isCompleted ? "lesson-pick-done" : "")} disabled={!isOpen} onClick={() => startLesson(lesson)}>
                           <span className="lesson-pick-number">{isCompleted ? "✓" : String(index + 1).padStart(2, "0")}</span>
                           <span className="lesson-pick-text">
                             <strong>{lesson.title}</strong>
@@ -1860,9 +2119,9 @@ export default function App() {
                         </button>
                       );
                     })}
-                    <p className="local-progress-note">Следующий урок откроется после завершения предыдущего. Прогресс сохраняется на устройстве и в аккаунте.</p>
+                    <p className="local-progress-note">Прогресс сохраняется на устройстве и в аккаунте. Расширенная грамматика будет добавлена отдельным блоком.</p>
                   </div>
-                ) : selectedStage.id === 1 ? (
+) : selectedStage.id === 1 ? (
                   <div className="lesson-picker">
                     <p className="modal-note">Девять коротких уроков доступны бесплатно. Проходи их по порядку или повторяй для закрепления.</p>
                     {lessons.map((lesson) => {

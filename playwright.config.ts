@@ -10,6 +10,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:4173/alifly/",
     trace: "retain-on-failure",
     ...devices["Desktop Chrome"],
+    channel: "chrome",
   },
   webServer: {
     command: "npm run preview -- --host 127.0.0.1",

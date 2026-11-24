@@ -25,7 +25,7 @@ function PersonIcon({ className }: { className: string }) {
   );
 }
 
-export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus }) {
+export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialPrompt = false }: { cloudStatus: CloudStatus; onChangeLevel?: () => void; suppressInitialPrompt?: boolean }) {
   const { user, isLoading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AuthMode>("signup");
@@ -38,7 +38,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
   useEffect(() => {
     if (authLoading) return;
 
-    if (user) {
+    if (user || suppressInitialPrompt) {
       setIsOpen(false);
       return;
     }
@@ -48,7 +48,7 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
     } catch {
       setIsOpen(true);
     }
-  }, [authLoading, user?.uid]);
+  }, [authLoading, user?.uid, suppressInitialPrompt]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -172,6 +172,16 @@ export default function AuthPanel({ cloudStatus }: { cloudStatus: CloudStatus })
               {cloudStatus === "loading" ? "Загружаем твой прогресс…" : cloudStatus === "pending" || cloudStatus === "saving" ? "Сохраняем прогресс…" : cloudStatus === "error" ? "Не удалось синхронизировать прогресс. Проверь интернет." : cloudStatus === "saved" ? "Прогресс успешно сохранён в аккаунте." : "Аккаунт подключён."}
             </p>
             <p className="auth-user-email">{user.email || user.phoneNumber || "Аккаунт ALIFLY"}</p>
+            {onChangeLevel && (
+              <button
+                className="auth-reset-button"
+                type="button"
+                onClick={() => { closePanel(); onChangeLevel(); }}
+                disabled={busy}
+              >
+                Изменить уровень обучения
+              </button>
+            )}
             <button className="auth-submit" type="button" onClick={signOut} disabled={busy}>{busy ? "Подожди…" : "Выйти из аккаунта"}</button>
           </>
         ) : (
