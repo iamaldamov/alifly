@@ -8,6 +8,7 @@ test("the vocabulary mini-game gives feedback after an answer", async ({ page })
   });
 
   await page.goto("./");
+  await page.getByRole("button", { name: "Закрыть" }).click();
   await page.getByRole("button", { name: "Мини-игра: слова" }).click();
 
   await expect(page.getByRole("heading", { name: "Слово за словом" })).toBeVisible();
