@@ -1850,7 +1850,7 @@ export default function App() {
             <span className="streak-icon" aria-hidden="true">🔥</span>
             <span className="streak-count">{streak}</span>
           </span>
-          <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} suppressInitialPrompt={shouldShowLevelPlacement || showLevelSettings || selectedLesson !== null || showDailyMissionSetup} />
+          <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} suppressInitialPrompt={shouldShowLevelPlacement || showLevelSettings || selectedLesson !== null || !hasDailyGoalChoice(dailyUserId)} />
           <button
             className="theme-toggle"
             data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
