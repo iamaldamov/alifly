@@ -1,0 +1,33 @@
+// AI-generated Arabic letter-name audio samples for ALIFLY.
+// Loaded only after a learner taps the listen button.
+// These are letter-name references (not isolated phoneme demonstrations).
+export const arabicLetterAudio: Record<string, string> = {
+  "ا": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/136677ef-8fec-4654-9260-c910efca74d4.mp3",
+  "ب": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/0d4e26b9-fe38-4148-89ac-639d1df6eef2.mp3",
+  "ت": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/901ad977-9a6f-41ab-9e6e-ae890ec29c7e.mp3",
+  "ث": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/15a13648-41e7-43a0-a62d-ffaf67cdea14.mp3",
+  "ج": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/49477e4b-6e16-4f9e-93c4-16de68da00d9.mp3",
+  "ح": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ec3c340c-5471-496b-ae7d-253d2f3516f2.mp3",
+  "خ": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ea50d906-2392-477b-be54-50c5f0b5b98a.mp3",
+  "د": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/889ad852-9f80-4ce6-b9d3-31fc6c50b9c1.mp3",
+  "ذ": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/869bc801-bda9-4da3-8391-fb057422643f.mp3",
+  "ر": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4940e0eb-9a37-4040-902c-ca3c5415cd48.mp3",
+  "ز": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b8650c28-9ee7-469d-a0dc-a8826ccb0005.mp3",
+  "س": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/5d9265a8-784b-44bc-9bcf-343b2821c116.mp3",
+  "ش": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/935dcae0-3924-4fe8-8530-8507a9091b8b.mp3",
+  "ص": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e8d4d3e5-1606-4330-96fe-bd50e86830d9.mp3",
+  "ض": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/525cae59-22a7-4293-8f3c-71cf9e72d53c.mp3",
+  "ط": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/92fde285-28eb-4336-b870-c0653202b170.mp3",
+  "ظ": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ed4616f1-dcc8-4bba-b5d6-f9cf89287c47.mp3",
+  "ع": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8f680ddb-0b47-412b-8256-a76a9c200711.mp3",
+  "غ": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/cd156209-3c4c-4f9c-bc3d-1560997f6142.mp3",
+  "ف": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6e47a4fe-e3c6-4d4f-8d23-c9ec34aa3e67.mp3",
+  "ق": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4879ea71-a47e-4fff-b45f-5d219c2e2b8a.mp3",
+  "ك": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3ac5dae6-2de7-479b-bba0-d73ef2696698.mp3",
+  "ل": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/668edbc2-154f-4cf7-a15c-931a89b02dfe.mp3",
+  "م": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a4e81299-9ad2-44be-a369-c4199ae49aab.mp3",
+  "ن": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4a0076d0-b311-41ce-ba43-23d2443d2270.mp3",
+  "ه": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a40899f2-8022-4b76-86de-88ff5021532e.mp3",
+  "و": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e9f1991f-7c0c-4999-be37-079b85743a79.mp3",
+  "ي": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/20496857-5990-41b5-889d-52c08dd5ee41.mp3",
+};
