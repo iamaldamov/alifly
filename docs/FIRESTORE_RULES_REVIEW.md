@@ -4,7 +4,7 @@
 
 The current React application uses only these Firestore paths:
 
-- `users/{uid}` for the learner's email, selected avatar, and creation/update timestamps.
+- `users/{uid}` for the learner's email and creation/update timestamps.
 - `users/{uid}/progress/current` for learning progress.
 
 The rules allow a signed-in learner to read only their own profile and current progress document.
@@ -14,7 +14,7 @@ The rules allow a signed-in learner to read only their own profile and current p
 The root profile document has an explicit field allowlist. `avatarId` is an optional legacy field; the current `AuthPanel.tsx` sign-up flow creates the profile with `createdAt` and `updatedAt` only:
 
 - `email` (optional; when present it must match the authenticated token)
-- `avatarId` (optional; when present, one of the six supported IDs)
+- `avatarId` is legacy-only: existing documents may still contain it, but clients cannot create, change, or remove it. The current interface uses a neutral person icon.
 - `createdAt` (optional for legacy/minimal profile creation; immutable after creation)
 - `updatedAt` (must be the server request time)
 
@@ -42,4 +42,4 @@ The CI workflow runs the same command for this branch and its pull request.
 
 ## Deployment status
 
-These rules are proposed in a draft PR only. They have not been deployed to Firebase. Keep the production rules unchanged until the emulator suite passes and the app's email sign-up, avatar selection, and progress synchronization are manually verified against a staging Firebase project.
+These rules are proposed in a draft PR only. They have not been deployed to Firebase. Keep the production rules unchanged until the emulator suite passes and the app's email sign-up and progress synchronization are manually verified against a staging Firebase project.
