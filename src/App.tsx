@@ -6,6 +6,11 @@ import ArabicLetterNames from "./data/arabic-letter-names.json";
 import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
 import { db } from "./lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { appendReviewResult, createMemoryItem, getDueMemoryItems, reviewMemoryItem } from "./memory/engine";
+import { loadMemoryState, saveMemoryState } from "./memory/storage";
+import { createLessonMemoryIdentity } from "./memory/lessonAdapter";
+import { getMemoryInsights, memorySkillLabel } from "./memory/analytics";
+import { EMPTY_MEMORY_STATE, type MemoryErrorType, type MemoryGrade, type MemoryState } from "./memory/types";
 
 const arabicLetterNames = Object.fromEntries(
   ArabicLetterNames.map(({ character, name }) => [character, name]),
@@ -1018,7 +1023,7 @@ function readLearningLevel(userId: string): LearningLevel {
 }
 
 export default function App() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const dailyUserId = user?.uid ?? "guest";
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(() => readDailyGoal("guest"));
   const [dailyActivity, setDailyActivity] = useState<DailyActivity>(() => readDailyActivity("guest"));
@@ -1026,6 +1031,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [learningLevel, setLearningLevel] = useState<LearningLevel>(() => readLearningLevel("guest"));
   const [cloudReady, setCloudReady] = useState(false);
+  const [progressOwnerId, setProgressOwnerId] = useState("guest");
   const [cloudSaveStatus, setCloudSaveStatus] = useState<"idle" | "loading" | "pending" | "saving" | "saved" | "error">("idle");
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
@@ -1044,6 +1050,12 @@ export default function App() {
   const [lessonFinished, setLessonFinished] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(readCompletedLessons);
   const [mistakes, setMistakes] = useState<Mistake[]>(readMistakes);
+  const [memoryState, setMemoryState] = useState<MemoryState>(() => loadMemoryState(null));
+  const [memoryOwnerId, setMemoryOwnerId] = useState("guest");
+  const [selectedMemoryGrade, setSelectedMemoryGrade] = useState<MemoryGrade | null>(null);
+  const [selectedMemoryError, setSelectedMemoryError] = useState<MemoryErrorType>("unknown");
+  const savedMemoryAssessmentRef = useRef<string | null>(null);
+  const saveMemoryAssessmentRef = useRef<() => void>(() => {});
   const [streak, setStreak] = useState<number>(() => readNumber("alifly-streak"));
   const [lastStudyDate, setLastStudyDate] = useState<string>(readLastStudyDate);
   const [reviewMode, setReviewMode] = useState(false);
@@ -1126,6 +1138,18 @@ export default function App() {
     setShowDailyMissionSetup(!hasDailyGoalChoice(dailyUserId));
   }, [dailyUserId]);
 
+  // Keep the new memory store isolated per guest/account on this device.
+  useEffect(() => {
+    const storageUserId = dailyUserId === "guest" ? null : dailyUserId;
+    setMemoryState(loadMemoryState(storageUserId));
+    setMemoryOwnerId(dailyUserId);
+  }, [dailyUserId]);
+
+  useEffect(() => {
+    if (memoryOwnerId !== dailyUserId) return;
+    saveMemoryState(dailyUserId === "guest" ? null : dailyUserId, memoryState);
+  }, [dailyUserId, memoryOwnerId, memoryState]);
+
   useEffect(() => {
     if (!selectedStage) return;
 
@@ -1134,10 +1158,13 @@ export default function App() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        saveMemoryAssessmentRef.current();
         setSelectedStage(null);
         setSelectedLesson(null);
         setQuestionIndex(0);
         setSelectedAnswer(null);
+        setSelectedMemoryGrade(null);
+        setSelectedMemoryError("unknown");
         setCorrectAnswers(0);
         setLessonFinished(false);
         setReviewMode(false);
@@ -1154,32 +1181,48 @@ export default function App() {
   }, [selectedStage]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-completed-lessons", JSON.stringify(completedLessonIds)); } catch { /* Storage may be unavailable. */ }
-  }, [completedLessonIds]);
+  }, [completedLessonIds, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-mistakes", JSON.stringify(mistakes)); } catch { /* Storage may be unavailable. */ }
-  }, [mistakes]);
+  }, [mistakes, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-streak", String(streak)); } catch { /* Storage may be unavailable. */ }
-  }, [streak]);
+  }, [streak, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-last-study-date", lastStudyDate); } catch { /* Storage may be unavailable. */ }
-  }, [lastStudyDate]);
+  }, [lastStudyDate, dailyUserId, progressOwnerId]);
 
   useEffect(() => {
+    if (dailyUserId !== "guest" || progressOwnerId !== "guest") return;
     try { localStorage.setItem("alifly-stage-1-exam-passed", String(examPassed)); } catch { /* Storage may be unavailable. */ }
-  }, [examPassed]);
+  }, [examPassed, dailyUserId, progressOwnerId]);
 
   // Load the signed-in learner's progress before allowing cloud writes.
   useEffect(() => {
     let cancelled = false;
 
+    if (authLoading) return;
+
     if (!user) {
       setCloudReady(false);
       setCloudSaveStatus("idle");
+      // Restore the guest snapshot after sign-out; never expose the previous account's in-memory progress.
+      setCompletedLessonIds(readCompletedLessons());
+      setMistakes(readMistakes());
+      setStreak(readNumber("alifly-streak"));
+      setLastStudyDate(readLastStudyDate());
+      setExamPassed(readBoolean("alifly-stage-1-exam-passed"));
+      setDailyGoal(readDailyGoal("guest"));
+      setDailyActivity(readDailyActivity("guest"));
+      setProgressOwnerId("guest");
       return;
     }
 
@@ -1196,18 +1239,20 @@ export default function App() {
       } catch (error) {
         if (cancelled) return;
         console.error("ALIFLY: could not load cloud progress", error);
+        // Keep the signed-in learner isolated even when the network is unavailable.
+        setCompletedLessonIds([]);
+        setMistakes([]);
+        setStreak(0);
+        setLastStudyDate("");
+        setExamPassed(false);
+        setDailyGoal(1);
+        setDailyActivity({ date: "", lessonIds: [] });
+        setProgressOwnerId(user.uid);
         setCloudSaveStatus("error");
         return;
       }
 
       if (cancelled) return;
-
-      let previousCloudUserId = "";
-      try {
-        previousCloudUserId = localStorage.getItem("alifly-last-cloud-user-id") || "";
-      } catch {
-        // Cloud data remains authoritative when local storage is unavailable.
-      }
 
       if (data) {
         setCompletedLessonIds(normalizeCompletedLessonIds(data.completed_lesson_ids));
@@ -1220,9 +1265,8 @@ export default function App() {
         setDailyActivity(cloudDailyActivity && typeof cloudDailyActivity.date === "string" && Array.isArray(cloudDailyActivity.lessonIds)
           ? { date: cloudDailyActivity.date, lessonIds: normalizeDailyLessonIds(cloudDailyActivity.lessonIds) }
           : { date: "", lessonIds: [] });
-      } else if (previousCloudUserId && previousCloudUserId !== user.uid) {
-        // A different person signed in on this device. Do not copy the previous
-        // person's local learning history into the new account.
+      } else {
+        // An empty/new account must never inherit guest or another account's local progress.
         setCompletedLessonIds([]);
         setMistakes([]);
         setStreak(0);
@@ -1232,19 +1276,14 @@ export default function App() {
         setDailyActivity({ date: "", lessonIds: [] });
       }
 
-      try {
-        localStorage.setItem("alifly-last-cloud-user-id", user.uid);
-      } catch {
-        // The authenticated cloud account still works without local storage.
-      }
-
+      setProgressOwnerId(user.uid);
       setCloudSaveStatus(data ? "saved" : "pending");
       setCloudReady(true);
     };
 
     void loadProgress();
     return () => { cancelled = true; };
-  }, [user?.uid]);
+  }, [user?.uid, authLoading]);
 
   // Debounce writes and expose whether cloud sync actually succeeded.
   useEffect(() => {
@@ -1302,10 +1341,13 @@ export default function App() {
   };
 
   const closeStage = () => {
+    saveCurrentMemoryAssessment();
     setSelectedStage(null);
     setSelectedLesson(null);
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(false);
@@ -1314,12 +1356,15 @@ export default function App() {
   };
 
   const startLesson = (lesson: Lesson) => {
+    savedMemoryAssessmentRef.current = null;
     setSelectedLesson({ ...lesson, questions: buildLessonQuestions(lesson) });
     setLessonPhase("study");
     setShowAlphabetTips(false);
     setActiveLetterIndex(0);
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
@@ -1332,6 +1377,9 @@ export default function App() {
     if (selectedAnswer !== null || !selectedLesson) return;
     setSelectedAnswer(answer);
     const question = selectedLesson.questions[questionIndex];
+    const answerIsCorrect = isCorrectAnswer(question, answer);
+    setSelectedMemoryGrade(answerIsCorrect ? "good" : "again");
+    setSelectedMemoryError("unknown");
     const mistakeId = reviewMode
       ? reviewMistakeIds[questionIndex]
       : `${selectedLesson.id}:${question.prompt}${question.stimulus ? `:${question.stimulus}` : ""}`;
@@ -1346,7 +1394,14 @@ export default function App() {
         const previous = current.find((item) => item.id === mistakeId);
         const card = updateReviewCard(
           previous,
-          { id: mistakeId, lessonId: selectedLesson.id, lessonTitle: selectedLesson.title, question },
+          {
+            id: mistakeId,
+            // Preserve original lesson metadata when the question is replayed
+            // inside the combined review lesson (whose temporary ID is 0).
+            lessonId: previous?.lessonId ?? selectedLesson.id,
+            lessonTitle: previous?.lessonTitle ?? selectedLesson.title,
+            question: previous?.question ?? question,
+          },
           isCorrect,
         );
         return [...current.filter((item) => item.id !== mistakeId), card];
@@ -1354,8 +1409,47 @@ export default function App() {
     }
   };
 
+  const saveCurrentMemoryAssessment = () => {
+    if (memoryOwnerId !== dailyUserId || !selectedLesson || selectedAnswer === null || examMode || !selectedMemoryGrade) return;
+    const question = selectedLesson.questions[questionIndex];
+    const mistakeId = reviewMode
+      ? reviewMistakeIds[questionIndex]
+      : `${selectedLesson.id}:${question.prompt}${question.stimulus ? `:${question.stimulus}` : ""}`;
+    if (!mistakeId) return;
+    const assessmentKey = `${selectedLesson.id}:${questionIndex}:${mistakeId}`;
+    if (savedMemoryAssessmentRef.current === assessmentKey) return;
+    savedMemoryAssessmentRef.current = assessmentKey;
+    const sourceMistake = reviewMode ? mistakes.find((item) => item.id === mistakeId) : undefined;
+    const sourceQuestion = sourceMistake?.question ?? question;
+    const identity = createLessonMemoryIdentity(
+      sourceMistake?.lessonId ?? selectedLesson.id,
+      sourceMistake?.id ?? mistakeId,
+      sourceQuestion.mode === "recall",
+    );
+    setMemoryState((current) => {
+      const previous = current.items.find((item) => item.id === identity.id);
+      const memoryItem = previous ?? createMemoryItem({
+        ...identity,
+        contentType: "lesson_question",
+      });
+      const reviewed = reviewMemoryItem(
+        memoryItem,
+        {
+          grade: selectedMemoryGrade,
+          errorType: selectedMemoryGrade === "again" ? selectedMemoryError : null,
+        },
+        `${identity.id}-${Date.now().toString(36)}-${current.recentEvents.length.toString(36)}`,
+      );
+      return appendReviewResult(current, reviewed);
+    });
+  };
+
+  // Keep the latest assessment callback available to the Escape-key listener.
+  saveMemoryAssessmentRef.current = saveCurrentMemoryAssessment;
+
   const nextQuestion = () => {
     if (!selectedLesson) return;
+    saveCurrentMemoryAssessment();
     if (questionIndex === selectedLesson.questions.length - 1) {
       if (examMode) {
         if (correctAnswers >= 8 && !examPassed) {
@@ -1392,11 +1486,14 @@ export default function App() {
     }
     setQuestionIndex((index) => index + 1);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
   };
 
   const startExam = () => {
     if (firstStageCompletedCount < lessons.length) return;
+    savedMemoryAssessmentRef.current = null;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 99,
@@ -1408,6 +1505,8 @@ export default function App() {
     setLessonPhase("practice");
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
@@ -1416,14 +1515,46 @@ export default function App() {
     setExamMode(true);
   };
 
-  const dueMistakes = mistakes.filter((item) => item.dueAt <= Date.now());
-  const weakMistakes = mistakes.filter((item) => item.errorCount > 0);
+  const memoryForCurrentUser = memoryOwnerId === dailyUserId ? memoryState : EMPTY_MEMORY_STATE;
+  const memoryInsights = getMemoryInsights(memoryForCurrentUser);
+  const dueMemoryItemIds = new Set(
+    getDueMemoryItems(memoryForCurrentUser, Date.now(), Number.MAX_SAFE_INTEGER).map((item) => item.id),
+  );
+  const dueMistakes = mistakes.filter((item) => {
+    const identity = createLessonMemoryIdentity(
+      item.lessonId,
+      item.id,
+      item.question.mode === "recall",
+    );
+    const memoryItem = memoryForCurrentUser.items.find((candidate) => candidate.id === identity.id);
+    // New cards follow MEMORY ENGINE scheduling; legacy cards keep their old due date.
+    return memoryItem ? dueMemoryItemIds.has(memoryItem.id) : item.dueAt <= Date.now();
+  });
+  // Include cards marked difficult in MEMORY ENGINE, even when the legacy
+  // mistake counter did not increase (for example, a learner chose "Again"
+  // after a correct guess). Keep legacy-only cards in the same queue.
+  const weakMistakes = mistakes.filter((item) => {
+    const identity = createLessonMemoryIdentity(
+      item.lessonId,
+      item.id,
+      item.question.mode === "recall",
+    );
+    const memoryItem = memoryForCurrentUser.items.find((candidate) => candidate.id === identity.id);
+    return item.errorCount > 0 || (memoryItem?.lapseCount ?? 0) > 0;
+  });
 
   const startWeakReview = () => {
-    const weak = [...mistakes]
-      .filter((item) => item.errorCount > 0)
-      .sort((a, b) => b.errorCount - a.errorCount);
+    const weak = [...weakMistakes]
+      .sort((a, b) => {
+        const getWeaknessScore = (item: Mistake) => {
+          const identity = createLessonMemoryIdentity(item.lessonId, item.id, item.question.mode === "recall");
+          const memoryItem = memoryForCurrentUser.items.find((candidate) => candidate.id === identity.id);
+          return item.errorCount + (memoryItem?.lapseCount ?? 0) * 2;
+        };
+        return getWeaknessScore(b) - getWeaknessScore(a);
+      });
     if (weak.length === 0) return;
+    savedMemoryAssessmentRef.current = null;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 0,
@@ -1436,6 +1567,8 @@ export default function App() {
     setReviewMistakeIds(weak.map((item) => item.id));
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
@@ -1444,8 +1577,9 @@ export default function App() {
   };
 
   const startReview = () => {
-    const due = mistakes.filter((item) => item.dueAt <= Date.now());
+    const due = dueMistakes;
     if (due.length === 0) return;
+    savedMemoryAssessmentRef.current = null;
     setSelectedStage(stages[0]);
     setSelectedLesson({
       id: 0,
@@ -1458,10 +1592,13 @@ export default function App() {
     setReviewMistakeIds(due.map((item) => item.id));
     setQuestionIndex(0);
     setSelectedAnswer(null);
+    setSelectedMemoryGrade(null);
+    setSelectedMemoryError("unknown");
     setTypedAnswer("");
     setCorrectAnswers(0);
     setLessonFinished(false);
     setReviewMode(true);
+    setExamMode(false);
   };
 
   const currentQuestion = selectedLesson?.questions[questionIndex];
@@ -1474,6 +1611,18 @@ export default function App() {
   const dailyCompletedCount = dailyActivity.date === today ? dailyActivity.lessonIds.length : 0;
   const stageTwoUnlocked = examPassed || learningLevel >= 2;
   const stageThreeUnlocked = stageTwoLessons.every((lesson) => completedLessonIds.includes(lesson.id)) || learningLevel >= 3;
+
+  if (authLoading || progressOwnerId !== dailyUserId) {
+    return (
+      <main className="app app-loading" aria-live="polite">
+        <div className="app-loading-message">
+          <span className="logo-mark" aria-hidden="true">ا</span>
+          <strong>ALIFLY</strong>
+          <p>Загружаем твой прогресс…</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="app">
@@ -1599,6 +1748,22 @@ export default function App() {
           <div className="progress-info"><span>{firstStageCompletedCount} из {lessons.length} коротких уроков</span><strong>{progressPercent}%</strong></div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
           <p>{firstStageCompletedCount === lessons.length ? "Все девять уроков алфавита завершены. Отличная работа!" : "Пройди уроки по порядку и возвращайся к ним для повторения."}</p>
+          <div className="memory-insights" aria-label="Состояние памяти">
+            <div className="memory-insight"><strong>{memoryInsights.totalItems}</strong><span>карточек в памяти</span></div>
+            <div className="memory-insight"><strong>{dueMistakes.length}</strong><span>пора повторить</span></div>
+            <div className="memory-insight"><strong>{memoryInsights.accuracyPercent}%</strong><span>успешных ответов</span></div>
+            {memoryInsights.skillCounts.length > 0 && (
+              <div className="memory-skill-list">
+                <span className="memory-skill-heading">Что требует внимания</span>
+                {memoryInsights.skillCounts.slice(0, 3).map((skill) => (
+                  <div className="memory-skill-row" key={skill.skill}>
+                    <span>{memorySkillLabel(skill.skill)}</span>
+                    <strong>{skill.accuracyPercent}%</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="memory-actions">
             {dueMistakes.length > 0 && (
               <button className="review-button" type="button" onClick={startReview}>
@@ -1929,6 +2094,42 @@ export default function App() {
                     <div className={`answer-feedback ${currentQuestionCorrect ? "feedback-correct" : "feedback-wrong"}`} aria-live="polite">
                       <strong>{currentQuestionCorrect ? "Правильно!" : "Правильный ответ"}</strong>
                       <span>{currentQuestionCorrect ? currentQuestion.explanation : `${currentQuestion.correct}. ${currentQuestion.explanation}`}</span>
+                    </div>
+                  )}
+                  {selectedAnswer !== null && !examMode && (
+                    <div className="memory-rating" aria-label="Оцени, насколько легко вспомнил">
+                      <span className="memory-rating-title">Насколько легко вспомнил?</span>
+                      <div className="memory-rating-options">
+                        {([
+                          ["again", "Не вспомнил"],
+                          ["hard", "Трудно"],
+                          ["good", "Нормально"],
+                          ["easy", "Легко"],
+                        ] as Array<[MemoryGrade, string]>).map(([grade, label]) => (
+                          <button
+                            key={grade}
+                            type="button"
+                            className={`memory-rating-button ${selectedMemoryGrade === grade ? "is-selected" : ""}`}
+                            aria-pressed={selectedMemoryGrade === grade}
+                            onClick={() => setSelectedMemoryGrade(grade)}
+                          >{label}</button>
+                        ))}
+                      </div>
+                      {selectedMemoryGrade === "again" && (
+                        <div className="memory-error-options">
+                          <label htmlFor="memory-error-type">Что именно было сложно?</label>
+                          <select id="memory-error-type" value={selectedMemoryError} onChange={(event) => setSelectedMemoryError(event.target.value as MemoryErrorType)}>
+                            <option value="unknown">Пока не знаю</option>
+                            <option value="shape">Перепутал форму</option>
+                            <option value="dots">Перепутал точки</option>
+                            <option value="letter_name">Забыл название</option>
+                            <option value="pronunciation">Сложно произнести</option>
+                            <option value="meaning">Забыл значение</option>
+                            <option value="reading">Сложно прочитать</option>
+                            <option value="attention">Невнимательность</option>
+                          </select>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
