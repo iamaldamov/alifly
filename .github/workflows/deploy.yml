@@ -29,7 +29,8 @@ jobs:
         run: npm install
       - name: Build Nabra TTS browser bundle
         run: |
-          git clone --depth 1 https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
+          git clone https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
+          git -C /tmp/nabra-tts checkout 16b5281ce61993df3526740990cf845a3f3036f4
           npm --prefix /tmp/nabra-tts ci
           npm --prefix /tmp/nabra-tts run build
           mkdir -p node_modules/nabra-tts/dist
