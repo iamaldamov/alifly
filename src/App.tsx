@@ -8,6 +8,38 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 type NabraTtsInstance = import("nabra-tts").NabraTTS;
 
+// Fully vowelled letter names: tashkeel is important for Arabic TTS fidelity.
+const arabicLetterNames: Record<string, string> = {
+  "ا": "أَلِف",
+  "ب": "بَاء",
+  "ت": "تَاء",
+  "ث": "ثَاء",
+  "ج": "جِيم",
+  "ح": "حَاء",
+  "خ": "خَاء",
+  "د": "دَال",
+  "ذ": "ذَال",
+  "ر": "رَاء",
+  "ز": "زَاي",
+  "س": "سِين",
+  "ش": "شِين",
+  "ص": "صَاد",
+  "ض": "ضَاد",
+  "ط": "طَاء",
+  "ظ": "ظَاء",
+  "ع": "عَيْن",
+  "غ": "غَيْن",
+  "ف": "فَاء",
+  "ق": "قَاف",
+  "ك": "كَاف",
+  "ل": "لَام",
+  "م": "مِيم",
+  "ن": "نُون",
+  "ه": "هَاء",
+  "و": "وَاو",
+  "ي": "يَاء",
+};
+
 // The diagram groups each Arabic letter by its traditional articulation area.
 // It is a teaching aid, not a substitute for listening to a qualified teacher.
 type MakhrajGroup =
