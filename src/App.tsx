@@ -1488,9 +1488,6 @@ export default function App() {
             <span className="streak-count">{streak}</span>
           </span>
           <AuthPanel cloudStatus={cloudSaveStatus} />
-          <button className="settings-toggle" type="button" onClick={() => setShowSettings(true)} aria-label="Открыть настройки" title="Настройки">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" /><path d="m19.4 13.5 1.1.8-1.1 1.9-1.3-.5a7.7 7.7 0 0 1-1.4.8l-.2 1.4h-2.2l-.2-1.4a7.7 7.7 0 0 1-1.5-.8l-1.2.5-1.1-1.9 1.1-.8a7 7 0 0 1 0-1.7l-1.1-.8 1.1-1.9 1.2.5a7.7 7.7 0 0 1 1.5-.8l.2-1.4h2.2l.2 1.4a7.7 7.7 0 0 1 1.4.8l1.3-.5 1.1 1.9-1.1.8a7 7 0 0 1 0 1.7Z" /></svg>
-          </button>
           <button
             className="theme-toggle"
             data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
