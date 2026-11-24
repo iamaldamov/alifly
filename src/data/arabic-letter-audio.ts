@@ -31,3 +31,6 @@ export const arabicLetterAudio: Record<string, string> = {
   "و": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e9f1991f-7c0c-4999-be37-079b85743a79.mp3",
   "ي": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/20496857-5990-41b5-889d-52c08dd5ee41.mp3",
 };
+
+export const fullAlphabetAudioUrl = "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/ef/Arabic_alphabet_%2831s%2C_80kbps%29.ogg/Arabic_alphabet_%2831s%2C_80kbps%29.ogg.mp3";
+export const fullAlphabetAudioAttribution = "M. Abuhelwa · Egyptian Arabic speaker · public domain";
