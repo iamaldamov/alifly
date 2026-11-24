@@ -38,3 +38,14 @@ jobs:
         run: npm test
       - name: Build project
         run: npm run build
+      - name: Verify GitHub Pages routes and SEO files
+        run: |
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/robots.txt
+          test -f dist/sitemap.xml
+          test -f dist/lessons/index.html
+          test -f dist/lessons/alif/index.html
+          grep -q "Уроки арабского языка" dist/lessons/index.html
+          grep -q "Арабская буква Алиф" dist/lessons/alif/index.html
+          grep -q "assets/" dist/lessons/alif/index.html
