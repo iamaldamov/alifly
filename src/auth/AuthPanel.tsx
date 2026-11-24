@@ -25,7 +25,7 @@ function PersonIcon({ className }: { className: string }) {
   );
 }
 
-export default function AuthPanel({ cloudStatus, onChangeLevel }: { cloudStatus: CloudStatus; onChangeLevel?: () => void }) {
+export default function AuthPanel({ cloudStatus, onChangeLevel, suppressInitialPrompt = false }: { cloudStatus: CloudStatus; onChangeLevel?: () => void; suppressInitialPrompt?: boolean }) {
   const { user, isLoading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AuthMode>("signup");
@@ -38,7 +38,7 @@ export default function AuthPanel({ cloudStatus, onChangeLevel }: { cloudStatus:
   useEffect(() => {
     if (authLoading) return;
 
-    if (user) {
+    if (user || suppressInitialPrompt) {
       setIsOpen(false);
       return;
     }
@@ -48,7 +48,7 @@ export default function AuthPanel({ cloudStatus, onChangeLevel }: { cloudStatus:
     } catch {
       setIsOpen(true);
     }
-  }, [authLoading, user?.uid]);
+  }, [authLoading, user?.uid, suppressInitialPrompt]);
 
   useEffect(() => {
     if (!isOpen) return;
