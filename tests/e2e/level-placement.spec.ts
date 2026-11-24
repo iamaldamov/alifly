@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 test("a learner can skip the alphabet and start with simple words", async ({ page }) => {
   await page.goto("./");
 
+  await expect(page.locator(".auth-backdrop")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "С какого уровня начнём?" })).toBeVisible();
   await page.getByRole("button", { name: /Читаю простые слова/ }).click();
 
