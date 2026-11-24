@@ -64,7 +64,7 @@ Alifly должен проверять не только узнавание пр
 ### Источники для сверки MSA-форм
 
 - King Salman Global Academy for Arabic Language, *100 Questions About the Arabic Language*: https://ksaa.gov.sa/
-- Elon.io, MSA introductions and grammar examples: https://elon.io/learn-arabic
+- Elon.io, MSA introductions and grammar examples: https://elon.io/learn-arabic-%28modern-standard%29/lessons
 - Open University, *Introduction to Arabic*: https://www.open.edu/openlearn/languages/introduction-arabic/content-section-0
 
 Материал в приложении является авторским учебным пересказом и требует финальной вычитки преподавателем арабского языка перед тем, как считать курс полностью утверждённым.
