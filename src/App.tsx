@@ -2,43 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import { useAuth } from "./auth/AuthContext";
+import ArabicLetterNames from "./data/arabic-letter-names.json";
 import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
 import { db } from "./lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
-type NabraTtsInstance = import("nabra-tts").NabraTTS;
+const arabicLetterNames = Object.fromEntries(
+  ArabicLetterNames.map(({ character, name }) => [character, name]),
+) as Record<string, string>;
 
-// Fully vowelled letter names: tashkeel is important for Arabic TTS fidelity.
-const arabicLetterNames: Record<string, string> = {
-  "ا": "أَلِف",
-  "ب": "بَاء",
-  "ت": "تَاء",
-  "ث": "ثَاء",
-  "ج": "جِيم",
-  "ح": "حَاء",
-  "خ": "خَاء",
-  "د": "دَال",
-  "ذ": "ذَال",
-  "ر": "رَاء",
-  "ز": "زَاي",
-  "س": "سِين",
-  "ش": "شِين",
-  "ص": "صَاد",
-  "ض": "ضَاد",
-  "ط": "طَاء",
-  "ظ": "ظَاء",
-  "ع": "عَيْن",
-  "غ": "غَيْن",
-  "ف": "فَاء",
-  "ق": "قَاف",
-  "ك": "كَاف",
-  "ل": "لَام",
-  "م": "مِيم",
-  "ن": "نُون",
-  "ه": "هَاء",
-  "و": "وَاو",
-  "ي": "يَاء",
-};
+const arabicLetterAudio = Object.fromEntries(
+  ArabicLetterNames.map(({ character, slug }) => [
+    character,
+    `${import.meta.env.BASE_URL}audio/letters/${slug}.wav`,
+  ]),
+) as Record<string, string>;
 
 // The diagram groups each Arabic letter by its traditional articulation area.
 // It is a teaching aid, not a substitute for listening to a qualified teacher.
