@@ -23,7 +23,7 @@ test("direct first-lesson URL opens the interactive lesson", async ({ page }) =>
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   await page.goto("./lessons/alif/");
-  await expect(page).toHaveURL(/\\/alifly\\/lessons\\/alif\\/?$/);
+  await expect(page).toHaveURL("http://127.0.0.1:4173/alifly/lessons/alif/");
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Алиф, ба, та и са" })).toBeVisible();
 
@@ -35,7 +35,7 @@ test("direct sign-in URL opens the sign-in dialog", async ({ page }) => {
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   await page.goto("./login");
-  await expect(page).toHaveURL(/\\/alifly\\/login\\/?$/);
+  await expect(page).toHaveURL("http://127.0.0.1:4173/alifly/login");
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByRole("heading", { name: "С возвращением" })).toBeVisible();
 
