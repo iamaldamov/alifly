@@ -30,6 +30,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install ffmpeg for SILMA audio preprocessing
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ffmpeg
       - name: Install JavaScript dependencies
         run: npm install
       - name: Install SILMA TTS v1 with CPU PyTorch
