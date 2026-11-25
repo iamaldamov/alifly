@@ -31,10 +31,8 @@ service cloud.firestore {
     function validProfileUpdate() {
       let changed = request.resource.data.diff(resource.data).affectedKeys();
       return request.resource.data.keys().hasOnly([
-          'email', 'avatarId', 'createdAt', 'updatedAt'
+          'email', 'createdAt', 'updatedAt'
         ])
-        // Keep any pre-existing avatarId untouched for legacy profile documents.
-        // New clients use the neutral person icon and cannot create/change avatar IDs.
         && changed.hasOnly(['updatedAt'])
         && changed.hasAll(['updatedAt'])
         && request.resource.data.updatedAt is timestamp
