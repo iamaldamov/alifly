@@ -1,25 +1,36 @@
 # ALIFLY — Arabic pronunciation audio sources
 
-## Individual letter names: generated neural voice
+## Individual Arabic letter names: SILMA TTS v1
 
-The 28 individual Arabic letter-name samples are generated during the GitHub Actions site build using **Nabra-7M-Distill** in the NabraTTS project.
+ALIFLY generates 28 separate static audio files during the GitHub Actions build. The browser plays these local WAV files; it does not call an external speech API or download the TTS model for learners.
 
-- Language: Modern Standard Arabic (MSA)
-- Voice: one synthetic female MSA voice, consistent across all 28 letter names
-- Input: Arabic letter names with tashkeel (diacritics), for example `أَلِف` and `بَاء`
-- Output: 24 kHz mono WAV files stored in `public/audio/letters/` in the build workspace and copied into the deployed site
-- Runtime for learners: ordinary static WAV playback; no TTS model, external speech API, or 16 MB model download is required in the learner's browser
-- Model: https://huggingface.co/oddadmix/Nabra-7M-Distill-ONNX
-- Nabra source and model repository: https://github.com/Oddadmix/nabra-tts
-- Model license: Apache-2.0
+- Model: SILMA TTS v1, bilingual Arabic/English, with MSA/Fusha support
+- Model weights: Apache-2.0
+- Inference package: `silma-tts==1.0.5`; upstream code is MIT-licensed
+- Reference recording: `silma-ref-voice-commercial.wav`
+- Reference recording source: https://huggingface.co/spaces/silma-ai/silma-tts-v1-demo
+- Pinned reference-file revision: `ef964ebeb35684e7a02a44b9aa8f26c42c1a3bb2`
+- Reference-file SHA-256: `1c2e349fe42bf562932c00a51001e94970d3c210128e6a1ade89bb18148bd6ec`
+- Reference transcript supplied by the official demo: `ويدقق النظر في القرآن الكريم وسائر الكتب السماوية ويتبع مسالك الرسل العظام عليهم الصلاة والسلام.`
+- Input: the vowelled Arabic letter names from `src/data/arabic-letter-names.json`
+- Output: one 24 kHz, mono, 16-bit PCM WAV file per letter in `public/audio/letters/`
+- Runtime for learners: ordinary static WAV playback; no TTS API, account, or paid service is required
 
-The samples are AI-generated, not human recordings, and are not a substitute for teacher-guided pronunciation or tajwīd instruction. The model expects diacritized text; ALIFLY supplies vowelled letter names from the shared manifest at `src/data/arabic-letter-names.json`.
+### Reference voice and licensing
 
-### Build-time third-party notices
+SILMA's official model README distinguishes its demonstration reference voice from the commercially designated recording. It says the default demo voice is not for commercial use, and specifically identifies `silma-ref-voice-commercial.wav` as a reference recording that may be used for commercial use cases. ALIFLY pins that exact file revision and verifies its SHA-256 before generation, rather than relying on a mutable URL or an unverified replacement.
 
-The Nabra build project documents its bundled eSpeak NG WebAssembly phonemizer as GPL-3.0-or-later, ONNX Runtime Web as MIT, and its model as Apache-2.0. The Nabra source/runtime is fetched and run during GitHub Actions to generate audio files; the Nabra JavaScript/WebAssembly runtime is **not included in the learner-facing site bundle**. The generated output files are WAV audio, not program code. Retain this source/licence record for the build process and review the upstream notices if the generation method changes.
+- Official model repository and license details: https://github.com/SILMA-AI/silma-tts
+- Official model card: https://huggingface.co/silma-ai/silma-tts
+- Exact reference recording: https://huggingface.co/spaces/silma-ai/silma-tts-v1-demo/blob/main/silma-ref-voice-commercial.wav
 
-Pinned Nabra source commit used by GitHub Actions: `16b5281ce61993df3526740990cf845a3f3036f4`.
+The reference file is used only as a voice/style prompt during generation; it is not shipped to learners. The generated files are AI-generated speech. ALIFLY should identify them as AI-generated and must not describe them as teacher-approved until a qualified Arabic teacher has reviewed every letter.
+
+### Build and validation
+
+The build script loads the open model on CPU, uses the pinned reference recording, and creates each letter clip independently. It checks that the manifest has exactly 28 unique letters and filenames, that every WAV is non-empty, and that all outputs are mono, 24 kHz, 16-bit PCM with a plausible duration. The workflow then verifies that exactly 28 WAV files reached the production build and uploads a short-lived artifact for listening review.
+
+Technical checks do not establish correct makharij, tajwīd, or pedagogical quality. A qualified Arabic teacher should review the 28 files before publication.
 
 ## Whole alphabet reference (human recording)
 
