@@ -1,0 +1,11 @@
+[
+  { "character": "بَ", "slug": "ba-fatha", "text": "بَ" },
+  { "character": "تَ", "slug": "ta-fatha", "text": "تَ" },
+  { "character": "مَ", "slug": "mim-fatha", "text": "مَ" },
+  { "character": "بِ", "slug": "ba-kasra", "text": "بِ" },
+  { "character": "تِ", "slug": "ta-kasra", "text": "تِ" },
+  { "character": "مِ", "slug": "mim-kasra", "text": "مِ" },
+  { "character": "بُ", "slug": "ba-damma", "text": "بُ" },
+  { "character": "تُ", "slug": "ta-damma", "text": "تُ" },
+  { "character": "مُ", "slug": "mim-damma", "text": "مُ" }
+]
