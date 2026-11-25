@@ -59,3 +59,10 @@ jobs:
           grep -q "Уроки арабского языка" dist/lessons/index.html
           grep -q "Арабская буква Алиф" dist/lessons/alif/index.html
           grep -q "assets/" dist/lessons/alif/index.html
+      - name: Upload generated letter audio for manual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: alifly-male-arabic-letter-audio
+          path: public/audio/letters/*.wav
+          if-no-files-found: error
+          retention-days: 7
