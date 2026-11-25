@@ -67,4 +67,13 @@ for (const route of routePages) {
   await writeFile(destination, html, "utf8");
 }
 
-console.log("ALIFLY: generated 404.html and static HTML entry points for public routes.");
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://iamaldamov.github.io/alifly/</loc></url>
+  <url><loc>https://iamaldamov.github.io/alifly/lessons</loc></url>
+  <url><loc>https://iamaldamov.github.io/alifly/lessons/alif</loc></url>
+</urlset>
+`;
+await writeFile(resolve(outputDir, "sitemap.xml"), sitemap, "utf8");
+
+console.log("ALIFLY: generated 404.html, sitemap.xml and static HTML entry points.");
