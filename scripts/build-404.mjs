@@ -18,8 +18,8 @@ const routePages = [
   },
   {
     path: "lessons/alif",
-    title: "Алиф — первая буква арабского алфавита | ALIFLY",
-    description: "Изучи арабскую букву алиф: форма, название, произношение и первое упражнение в интерактивном уроке ALIFLY.",
+    title: "Арабская буква Алиф — первая буква арабского алфавита | ALIFLY",
+    description: "Арабская буква Алиф: форма, название, произношение и первое упражнение в интерактивном уроке ALIFLY.",
     canonical: "https://iamaldamov.github.io/alifly/lessons/alif",
   },
   {
