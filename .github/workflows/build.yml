@@ -31,8 +31,8 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install JavaScript dependencies
-        run: npm ci
-      - name: Install SILMA TTS v1 (CPU)
+        run: npm install
+      - name: Install SILMA TTS v1 with CPU PyTorch
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "silma-tts==1.0.5"
@@ -42,7 +42,7 @@ jobs:
             https://huggingface.co/spaces/silma-ai/silma-tts-v1-demo/resolve/ef964ebeb35684e7a02a44b9aa8f26c42c1a3bb2/silma-ref-voice-commercial.wav \
             --output /tmp/silma-ref-voice-commercial.wav
           echo "1c2e349fe42bf562932c00a51001e94970d3c210128e6a1ade89bb18148bd6ec  /tmp/silma-ref-voice-commercial.wav" | sha256sum --check
-      - name: Generate and validate 28 male Arabic letter clips
+      - name: Generate and validate 28 Arabic letter clips
         env:
           OMP_NUM_THREADS: "4"
           MKL_NUM_THREADS: "4"
@@ -66,7 +66,7 @@ jobs:
       - name: Upload generated letter audio for manual review
         uses: actions/upload-artifact@v4
         with:
-          name: alifly-silma-male-arabic-letter-audio
+          name: alifly-silma-arabic-letter-audio
           path: public/audio/letters/*.wav
           if-no-files-found: error
           retention-days: 7
