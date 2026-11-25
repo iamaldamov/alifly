@@ -1,6 +1,6 @@
 import { mkdir, readFile, rm, stat } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const modelPath = resolve(
   process.argv[2] ?? "/tmp/alifly-piper/ar_JO-kareem-medium.onnx",
