@@ -92,7 +92,7 @@ test("a learner cannot add trial or subscription fields to their profile", async
   }));
 });
 
-test("legacy avatar data is preserved but cannot be created or changed by clients", async () => {
+test("legacy avatar profile documents are rejected by the strict profile update allowlist", async () => {
   const alice = testEnv.authenticatedContext("alice", { email: "alice@example.com" });
   const profileRef = doc(alice.firestore(), "users/alice");
 
@@ -105,8 +105,9 @@ test("legacy avatar data is preserved but cannot be created or changed by client
     });
   });
 
-  // A timestamp-only update must keep the old field intact for compatibility.
-  await assertSucceeds(updateDoc(profileRef, { updatedAt: serverTimestamp() }));
+  // The strict production schema no longer permits avatarId, even when unchanged.
+  // Such legacy documents need a trusted migration before normal profile updates resume.
+  await assertFails(updateDoc(profileRef, { updatedAt: serverTimestamp() }));
   await assertFails(updateDoc(profileRef, {
     avatarId: "person",
     updatedAt: serverTimestamp(),
