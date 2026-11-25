@@ -18,6 +18,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -25,20 +26,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
-        run: npm install
-      - name: Generate permanent Arabic letter audio
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ffmpeg for SILMA audio preprocessing
         run: |
-          git clone https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
-          git -C /tmp/nabra-tts checkout 16b5281ce61993df3526740990cf845a3f3036f4
-          npm --prefix /tmp/nabra-tts ci
-          npm --prefix /tmp/nabra-tts run build
-          node scripts/generate-arabic-audio.mjs /tmp/nabra-tts
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ffmpeg
+      - name: Install JavaScript dependencies
+        run: npm install
+      - name: Install SILMA TTS v1 with CPU PyTorch
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "silma-tts==1.0.5"
+      - name: Download pinned commercial reference voice
+        run: |
+          curl --fail --location --retry 3 \
+            https://huggingface.co/spaces/silma-ai/silma-tts-v1-demo/resolve/ef964ebeb35684e7a02a44b9aa8f26c42c1a3bb2/silma-ref-voice-commercial.wav \
+            --output /tmp/silma-ref-voice-commercial.wav
+          echo "1c2e349fe42bf562932c00a51001e94970d3c210128e6a1ade89bb18148bd6ec  /tmp/silma-ref-voice-commercial.wav" | sha256sum --check
+      - name: Generate and validate 28 letter names and 9 harakat syllables
+        env:
+          OMP_NUM_THREADS: "4"
+          MKL_NUM_THREADS: "4"
+        run: python scripts/generate-silma-arabic-audio.py
       - name: Run unit tests
         run: npm test
       - name: Build project
         run: npm run build
-      - name: Verify GitHub Pages routes and SEO files
+      - name: Verify GitHub Pages routes, SEO files and audio
         run: |
           test -f dist/index.html
           test -f dist/404.html
@@ -49,3 +66,14 @@ jobs:
           grep -q "Уроки арабского языка" dist/lessons/index.html
           grep -q "Арабская буква Алиф" dist/lessons/alif/index.html
           grep -q "assets/" dist/lessons/alif/index.html
+          test "$(find dist/audio/letters -maxdepth 1 -type f -name '*.wav' | wc -l)" -eq 28
+          test "$(find dist/audio/syllables -maxdepth 1 -type f -name '*.wav' | wc -l)" -eq 9
+      - name: Upload generated Arabic audio for manual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: alifly-silma-arabic-audio-review
+          path: |
+            public/audio/letters/*.wav
+            public/audio/syllables/*.wav
+          if-no-files-found: error
+          retention-days: 7
