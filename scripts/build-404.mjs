@@ -56,6 +56,8 @@ for (const route of routePages) {
   html = replaceTag(html, /<meta\s+name="description"[\s\S]*?\/>/, '<meta name="description" content="' + description + '" />');
   html = replaceTag(html, /<meta\s+name="robots"[^>]*\/>/, '<meta name="robots" content="' + robots + '" />');
   html = replaceTag(html, /<link\s+rel="canonical"[^>]*\/>/, '<link rel="canonical" href="' + canonical + '" />');
+  html = replaceTag(html, /<link\s+rel="alternate"\s+hreflang="ru"[^>]*\/>/, '<link rel="alternate" hreflang="ru" href="' + canonical + '" />');
+  html = replaceTag(html, /<link\s+rel="alternate"\s+hreflang="x-default"[^>]*\/>/, '<link rel="alternate" hreflang="x-default" href="' + canonical + '" />');
   html = replaceTag(html, /<meta\s+property="og:title"[^>]*\/>/, '<meta property="og:title" content="' + title + '" />');
   html = replaceTag(html, /<meta\s+property="og:description"[\s\S]*?\/>/, '<meta property="og:description" content="' + description + '" />');
   html = replaceTag(html, /<meta\s+property="og:url"[^>]*\/>/, '<meta property="og:url" content="' + canonical + '" />');
