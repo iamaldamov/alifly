@@ -1,9 +1,10 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { mkdir, readFile, rm, stat } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { dirname, resolve } from "node:path";
 
-const ttsRoot = resolve(process.argv[2] ?? "/tmp/nabra-tts");
+const modelPath = resolve(
+  process.argv[2] ?? "/tmp/alifly-piper/ar_JO-kareem-medium.onnx",
+);
 const manifestPath = resolve("src/data/arabic-letter-names.json");
 const outputDir = resolve("public/audio/letters");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -18,40 +19,62 @@ if (uniqueCharacters.size !== 28 || uniqueSlugs.size !== 28) {
   throw new Error("Arabic audio manifest contains duplicate letters or file names.");
 }
 
-const require = createRequire(pathToFileURL(join(ttsRoot, "package.json")));
-const ortDirectory = dirname(require.resolve("onnxruntime-web")) + "/";
-const { NabraTTS } = await import(pathToFileURL(join(ttsRoot, "dist/index.js")).href);
+try {
+  await stat(modelPath);
+  await stat(`${modelPath}.json`);
+} catch {
+  throw new Error(
+    `Piper model or matching JSON config is missing: ${modelPath}`,
+  );
+}
 
-const tts = await NabraTTS.load({
-  worker: false,
-  dtype: "fp16",
-  device: "wasm",
-  cache: false,
-  modelUrl: "https://huggingface.co/oddadmix/Nabra-7M-Distill-ONNX/resolve/main/onnx/model_fp16.onnx",
-  voiceUrl: "https://huggingface.co/oddadmix/Nabra-7M-Distill-ONNX/resolve/main/voices/af_msa.bin",
-  wasmPaths: pathToFileURL(ortDirectory).href,
-});
-
+await rm(outputDir, { recursive: true, force: true });
 await mkdir(outputDir, { recursive: true });
 let totalBytes = 0;
 
-try {
-  for (const item of manifest) {
-    const { audio, sampleRate } = await tts.generate(item.name, { speed: 0.92 });
-    if (sampleRate !== 24000 || audio.length === 0 || !audio.every(Number.isFinite)) {
-      throw new Error(`Invalid generated audio for ${item.character} (${item.name}).`);
-    }
+for (const item of manifest) {
+  const destination = resolve(outputDir, `${item.slug}.wav`);
+  const result = spawnSync(
+    "python",
+    [
+      "-m",
+      "piper",
+      "-m",
+      modelPath,
+      "-f",
+      destination,
+      "--length-scale",
+      "1.08",
+      "--",
+      item.name,
+    ],
+    { encoding: "utf8", maxBuffer: 1024 * 1024 },
+  );
 
-    const wav = Buffer.from(await tts.toWav(audio).arrayBuffer());
-    const destination = join(outputDir, `${item.slug}.wav`);
-    await writeFile(destination, wav);
-    totalBytes += wav.byteLength;
-
-    const seconds = (audio.length / sampleRate).toFixed(2);
-    console.log(`Generated ${item.character} ${item.name}: ${seconds}s, ${wav.byteLength} bytes`);
+  if (result.status !== 0) {
+    throw new Error(
+      `Piper failed for ${item.character} (${item.name}):\n${result.stderr || result.stdout}`,
+    );
   }
-} finally {
-  await tts.dispose();
+
+  const wav = await readFile(destination);
+  if (
+    wav.length <= 44 ||
+    wav.toString("ascii", 0, 4) !== "RIFF" ||
+    wav.toString("ascii", 8, 12) !== "WAVE" ||
+    wav.readUInt32LE(24) !== 22050 ||
+    wav.readUInt16LE(22) !== 1 ||
+    wav.readUInt16LE(34) !== 16
+  ) {
+    throw new Error(`Invalid WAV output for ${item.character} (${item.name}).`);
+  }
+
+  totalBytes += wav.length;
+  console.log(
+    `Generated ${item.character} ${item.name}: ${(wav.length / 1024).toFixed(1)} KB`,
+  );
 }
 
-console.log(`Generated ${manifest.length} letter clips (${(totalBytes / 1024).toFixed(1)} KB total).`);
+console.log(
+  `Generated and validated ${manifest.length} male Arabic letter clips (${(totalBytes / 1024).toFixed(1)} KB total).`,
+);
