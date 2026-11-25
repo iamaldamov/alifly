@@ -6,7 +6,9 @@ import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlac
 import WordGame, { type Word } from "./WordGame";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
-import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
+import ArabicSyllables from "./data/arabic-syllables.json";
+import { fullAlphabetAudioAttribution, fullAlphabetAudioUrl, generatedArabicAudioDisclosure } from "./data/arabic-audio-sources";
+import { buildArabicAudioMap, resolveArabicAudioSample } from "./data/arabic-audio-map";
 import { auth, db } from "./lib/firebase";
 import { addDoc, collection, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { signInAnonymously } from "firebase/auth";
@@ -20,12 +22,8 @@ const arabicLetterNames = Object.fromEntries(
   ArabicLetterNames.map(({ character, name }) => [character, name]),
 ) as Record<string, string>;
 
-const arabicLetterAudio = Object.fromEntries(
-  ArabicLetterNames.map(({ character, slug }) => [
-    character,
-    `${import.meta.env.BASE_URL}audio/letters/${slug}.wav`,
-  ]),
-) as Record<string, string>;
+const arabicLetterAudio = buildArabicAudioMap(ArabicLetterNames, import.meta.env.BASE_URL, "letters");
+const arabicSyllableAudio = buildArabicAudioMap(ArabicSyllables, import.meta.env.BASE_URL, "syllables");
 
 // The diagram groups each Arabic letter by its traditional articulation area.
 // It is a teaching aid, not a substitute for listening to a qualified teacher.
@@ -1184,7 +1182,8 @@ export default function App() {
   const letterAudioRef = useRef<HTMLAudioElement | null>(null);
   const audioRequestIdRef = useRef(0);
   const [letterAudioStatus, setLetterAudioStatus] = useState<"idle" | "loading" | "playing" | "error">("idle");
-  const [letterAudioType, setLetterAudioType] = useState<"letter" | "alphabet">("letter");
+  const [letterAudioType, setLetterAudioType] = useState<"letter" | "syllable" | "alphabet">("letter");
+  const [letterAudioErrorMessage, setLetterAudioErrorMessage] = useState<string | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [typedAnswer, setTypedAnswer] = useState("");
@@ -1229,13 +1228,14 @@ export default function App() {
     setLetterAudioStatus("idle");
   };
 
-  const playAudioSample = (url: string, type: "letter" | "alphabet") => {
+  const playAudioSample = (url: string, type: "letter" | "syllable" | "alphabet") => {
     if (letterAudioStatus === "playing" && letterAudioType === type) {
       stopLetterAudio();
       return;
     }
 
     stopLetterAudio();
+    setLetterAudioErrorMessage(null);
     const requestId = audioRequestIdRef.current;
     const audio = new Audio(url);
     audio.preload = "none";
@@ -1249,13 +1249,19 @@ export default function App() {
       }
     };
     audio.onerror = () => {
-      if (requestId === audioRequestIdRef.current) setLetterAudioStatus("error");
+      if (requestId === audioRequestIdRef.current) {
+        setLetterAudioErrorMessage("Не удалось загрузить аудио. Проверь подключение и попробуй ещё раз.");
+        setLetterAudioStatus("error");
+      }
     };
     letterAudioRef.current = audio;
     setLetterAudioType(type);
     setLetterAudioStatus("loading");
     void audio.play().catch(() => {
-      if (requestId === audioRequestIdRef.current) setLetterAudioStatus("error");
+      if (requestId === audioRequestIdRef.current) {
+        setLetterAudioErrorMessage("Браузер не смог воспроизвести аудио. Попробуй ещё раз.");
+        setLetterAudioStatus("error");
+      }
     });
   };
 
@@ -2258,13 +2264,35 @@ export default function App() {
                     {(() => {
                       const letter = selectedLesson.letters[activeLetterIndex];
                       if (!letter) return null;
+                      const audioSample = resolveArabicAudioSample(
+                        letter.character,
+                        arabicLetterAudio,
+                        arabicSyllableAudio,
+                      );
+                      const audioLabel = audioSample?.type === "syllable" ? "слога" : "названия буквы";
+                      const audioStatusText =
+                        letterAudioStatus === "loading"
+                          ? letterAudioType === "alphabet"
+                            ? "Загружается запись всего алфавита…"
+                            : letterAudioType === "syllable"
+                              ? "Загружается синтетическое произношение слога…"
+                              : "Загружается синтетическое произношение названия буквы…"
+                          : letterAudioStatus === "playing"
+                            ? letterAudioType === "alphabet"
+                              ? "Воспроизводится человеческая запись алфавита"
+                              : letterAudioType === "syllable"
+                                ? "Воспроизводится синтетическое произношение слога"
+                                : "Воспроизводится синтетическое произношение названия буквы"
+                            : letterAudioStatus === "error"
+                              ? letterAudioErrorMessage ?? "Не удалось воспроизвести аудио. Попробуй ещё раз."
+                              : generatedArabicAudioDisclosure;
                       const speakLetter = () => {
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (!audioUrl) {
+                        if (!audioSample) {
+                          setLetterAudioErrorMessage("Для этого сочетания отдельная запись пока не подготовлена.");
                           setLetterAudioStatus("error");
                           return;
                         }
-                        playAudioSample(audioUrl, "letter");
+                        playAudioSample(audioSample.url, audioSample.type);
                       };
                       const moveLetter = (direction: -1 | 1) => {
                         stopLetterAudio();
@@ -2275,8 +2303,8 @@ export default function App() {
                           <div className="letter-learning-hint">
                             <span className="letter-hint-icon">ا</span>
                             <p><strong>Изучай по одной букве</strong><small>Посмотри на форму, послушай название и повтори его вслух. Листай карточки в своём темпе.</small></p>
-                            <button className="letter-alphabet-audio-button" type="button" onClick={() => playAudioSample(fullAlphabetAudioUrl, "alphabet")}>Слушать весь алфавит · голос носителя</button>
-                            <small className="letter-alphabet-audio-credit">Запись M. Abuhelwa · общественное достояние</small>
+                            <button className="letter-alphabet-audio-button" type="button" onClick={() => playAudioSample(fullAlphabetAudioUrl, "alphabet")}>Слушать весь алфавит · человеческая запись</button>
+                            <small className="letter-alphabet-audio-credit">{fullAlphabetAudioAttribution}</small>
                           </div>
                           <div
                             className="letter-flashcard"
@@ -2295,10 +2323,10 @@ export default function App() {
                             <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
-                            <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} data-touch-hint="Прослушай арабское название буквы" title="Прослушать название">
+                            <button className={letterAudioStatus === "playing" && letterAudioType === audioSample?.type ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Прослушать ${audioLabel} ${letter.character}`} data-touch-hint={`Прослушай произношение ${letter.character}`} title={`Повторить произношение ${letter.character}`}>
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                             </button>
-                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · MSA"}</small>
+                            <small className="letter-audio-status" role="status">{audioStatusText}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
