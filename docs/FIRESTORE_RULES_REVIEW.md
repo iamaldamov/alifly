@@ -17,7 +17,8 @@ The root profile document has an explicit field allowlist. The current `AuthPane
 - `email` is optional; when present it must match the authenticated token.
 - `createdAt` is optional for legacy/minimal profile creation and immutable after creation.
 - `updatedAt` must equal the server request time.
-- `avatarId` is legacy-only. Existing documents may still contain it, but clients cannot create, change, or remove it. The current interface uses a neutral person icon.
+- `avatarId` is not an allowed field. New and updated profile documents must use only the neutral person-icon interface and the approved profile fields.
+- Legacy profile documents that still contain `avatarId` will fail client timestamp updates under this strict allowlist. They must be migrated by a trusted administrative process before normal profile updates can resume.
 
 Clients cannot add or edit trial, subscription, entitlement, payment, role, or other unlisted fields.
 
