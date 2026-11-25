@@ -2269,7 +2269,7 @@ export default function App() {
                         arabicLetterAudio,
                         arabicSyllableAudio,
                       );
-                      const audioLabel = audioSample?.type === "syllable" ? "слога" : "названия буквы";
+                      const audioLabel = audioSample?.type === "syllable" || /[\u064B-\u065F\u0670]/u.test(letter.character) ? "произношение слога" : "название буквы";
                       const audioStatusText =
                         letterAudioStatus === "loading"
                           ? letterAudioType === "alphabet"
