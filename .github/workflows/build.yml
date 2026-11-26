@@ -25,15 +25,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: Install dependencies
         run: npm install
-      - name: Generate permanent Arabic letter audio
+      - name: Install free Piper speech engine
+        run: python -m pip install --disable-pip-version-check piper-tts
+      - name: Download licensed male Arabic voice
         run: |
-          git clone https://github.com/Oddadmix/nabra-tts.git /tmp/nabra-tts
-          git -C /tmp/nabra-tts checkout 16b5281ce61993df3526740990cf845a3f3036f4
-          npm --prefix /tmp/nabra-tts ci
-          npm --prefix /tmp/nabra-tts run build
-          node scripts/generate-arabic-audio.mjs /tmp/nabra-tts
+          mkdir -p /tmp/alifly-piper
+          curl --fail --location --retry 3 \
+            https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx \
+            --output /tmp/alifly-piper/ar_JO-kareem-medium.onnx
+          curl --fail --location --retry 3 \
+            https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx.json \
+            --output /tmp/alifly-piper/ar_JO-kareem-medium.onnx.json
+      - name: Generate permanent Arabic letter audio
+        run: node scripts/generate-arabic-audio.mjs /tmp/alifly-piper/ar_JO-kareem-medium.onnx
       - name: Run unit tests
         run: npm test
       - name: Build project
@@ -49,3 +59,10 @@ jobs:
           grep -q "Уроки арабского языка" dist/lessons/index.html
           grep -q "Арабская буква Алиф" dist/lessons/alif/index.html
           grep -q "assets/" dist/lessons/alif/index.html
+      - name: Upload generated letter audio for manual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: alifly-male-arabic-letter-audio
+          path: public/audio/letters/*.wav
+          if-no-files-found: error
+          retention-days: 7
