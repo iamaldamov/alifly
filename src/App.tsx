@@ -1052,7 +1052,8 @@ export default function App() {
       letterAudioRef.current.onended = null;
       letterAudioRef.current.onerror = null;
       letterAudioRef.current.onplaying = null;
-      letterAudioRef.current = null;
+      // Keep the same media element: iOS Safari is more reliable after the
+      // first user gesture when subsequent letter clips reuse it.
     }
     setLetterAudioStatus("idle");
   };
@@ -1065,15 +1066,17 @@ export default function App() {
 
     stopLetterAudio();
     const requestId = audioRequestIdRef.current;
-    const audio = new Audio(url);
-    audio.preload = "none";
+    const audio = letterAudioRef.current ?? new Audio();
+    audio.pause();
+    audio.preload = "auto";
+    audio.src = url;
+    audio.load();
     audio.onplaying = () => {
       if (requestId === audioRequestIdRef.current) setLetterAudioStatus("playing");
     };
     audio.onended = () => {
       if (requestId === audioRequestIdRef.current) {
         setLetterAudioStatus("idle");
-        letterAudioRef.current = null;
       }
     };
     audio.onerror = () => {
@@ -2137,7 +2140,7 @@ export default function App() {
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
                             <div className="letter-audio-actions">
                               <button className={autoLetterAudio ? "letter-auto-audio is-enabled" : "letter-auto-audio"} type="button" onClick={enableAutoAudio} aria-pressed={autoLetterAudio}>
-                                {autoLetterAudio ? "Автозвук включён" : "Включить автозвук"}
+                                {autoLetterAudio ? (letterAudioStatus === "error" ? "Разрешить звук" : "Автозвук включён") : "Включить автозвук"}
                               </button>
                               <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Повторить произношение буквы ${letter.character}`} data-touch-hint="Повторить звук" title="Повторить звук">
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
