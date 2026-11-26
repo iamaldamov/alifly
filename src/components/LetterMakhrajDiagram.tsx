@@ -36,7 +36,7 @@ const letters: Record<string, LetterInfo> = {
   "ف": { point: "fa", title: "Нижняя губа и верхние зубы", instruction: "Легко коснись верхними передними зубами внутренней стороны нижней губы и выпусти воздух." },
   "ق": { point: "qaf", title: "Самая задняя часть языка у мягкого нёба", instruction: "Подними заднюю часть языка к мягкому нёбу в самой глубине рта." },
   "ك": { point: "kaf", title: "Задняя часть языка у нёба", instruction: "Подними заднюю часть языка к нёбу немного ближе ко рту, чем для ق." },
-  "ل": { point: "lam", title: "Боковой край языка у верхних дёсен", instruction: "Коснись верхних дёсен краем языка за передними зубами." },
+  "ل": { point: "lam", title: "Край языка у верхних дёсен возле коренных зубов", instruction: "Прижми передний боковой край языка к верхним дёснам в области боковых зубов." },
   "م": { point: "lips", title: "Две сомкнутые губы", instruction: "Мягко сомкни обе губы и пропусти голос через нос.", nasal: true },
   "ن": { point: "nun", title: "Кончик языка у верхних дёсен", instruction: "Коснись кончиком языка верхних дёсен за передними зубами; звук имеет носовой резонанс.", nasal: true },
   "ه": { point: "aqsa-halq", title: "Самая глубокая часть горла", instruction: "Сделай лёгкий выдох через голосовую щель в глубине горла, не напрягая её." },
@@ -70,6 +70,8 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
   const backTongue = ["qaf", "kaf", "wasat-lisan", "daad"].includes(info.point);
   const throat = ["aqsa-halq", "wasat-halq", "adna-halq"].includes(info.point);
   const lipSound = info.point === "lips" || info.point === "fa";
+  const bilabial = info.point === "lips" && letter !== "و";
+  const roundedLip = letter === "و";
   const sideTongue = info.point === "daad";
 
   return (
@@ -108,10 +110,11 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
         <g className={throat ? "pv-throat pv-throat--active" : "pv-throat"}>
           <path d="M432 174 Q446 199 429 228" fill="none" stroke="#C6F432" strokeOpacity=".72" strokeWidth="5" strokeLinecap="round"/>
         </g>
-        <g className={lipSound ? "pv-lips pv-lips--active" : "pv-lips"}>
+        <g className={bilabial ? "pv-lips pv-lips--active" : roundedLip ? "pv-lips pv-lips--rounded" : "pv-lips"}>
           <path d="M26 179 Q48 166 75 179" fill="none" stroke="#D9B7AF" strokeWidth="8" strokeLinecap="round"/>
-          <path d="M26 195 Q49 210 75 195" fill="none" stroke="#D9B7AF" strokeWidth="8" strokeLinecap="round"/>
+          <path className={info.point === "fa" ? "pv-lip-lower pv-lip-lower--active" : "pv-lip-lower"} d="M26 195 Q49 210 75 195" fill="none" stroke="#D9B7AF" strokeWidth="8" strokeLinecap="round"/>
         </g>
+        {info.emphatic && <path className="pv-emphasis pv-emphasis--active" d="M300 244 Q346 218 388 235" fill="none" stroke="#C6F432" strokeOpacity=".8" strokeWidth="5" strokeLinecap="round"/>}
         {/* Airflow is shown only for sounds with an open passage. */}
         <path className="pv-airflow" d="M45 186 C112 177 180 179 245 184 C315 189 370 184 421 197" fill="none" stroke="url(#pv-air)" strokeWidth="3" strokeDasharray="7 9" strokeLinecap="round"/>
         {/* Articulation focus. */}
