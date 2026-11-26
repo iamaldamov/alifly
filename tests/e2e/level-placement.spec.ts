@@ -9,6 +9,11 @@ test("a learner can skip the alphabet and start with simple words", async ({ pag
 
   await expect(page.getByRole("heading", { name: "Книга и ручка" })).toBeVisible();
   await expect(page.locator(".study-phrase-arabic").first()).toHaveText("كِتَاب");
+
+  await page.getByRole("button", { name: "Закрыть" }).click();
+  await page.getByRole("button", { name: /Слова и первые предложения/ }).click();
+  await expect(page.getByRole("button", { name: /Что это\? — вопрос и ответ/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Вопросы с ответом «да» и «нет»/ })).toBeDisabled();
 });
 
 test("the diagnostic recommends a level and opens the matching route", async ({ page }) => {
