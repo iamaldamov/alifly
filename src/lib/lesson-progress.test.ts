@@ -9,6 +9,11 @@ describe("lesson progress normalization", () => {
     expect(normalizeDailyLessonIds([9, 11, 13])).toEqual([9, 11, 13]);
   });
 
+  it("preserves the new level 3 sentence lesson IDs 38–39", () => {
+    expect(normalizeCompletedLessonIds([35, 36, 37, 38, 39])).toEqual([35, 36, 37, 38, 39]);
+    expect(normalizeDailyLessonIds([38, 39])).toEqual([38, 39]);
+  });
+
   it("keeps the legacy alphabet progress migration", () => {
     expect(normalizeCompletedLessonIds([1, 2, 3, 4, 5])).toEqual([
       20, 21, 22, 23, 24, 25, 26, 27, 28,
