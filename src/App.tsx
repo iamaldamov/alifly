@@ -1055,6 +1055,15 @@ export default function App() {
     setLetterAudioStatus("idle");
   };
 
+  const playLetterAudio = (character: string) => {
+    const url = arabicLetterAudio[character];
+    if (!url) {
+      setLetterAudioStatus("error");
+      return;
+    }
+    playAudioSample(url, "letter");
+  };
+
   const playAudioSample = (url: string, type: "letter" | "alphabet") => {
     if (letterAudioStatus === "playing" && letterAudioType === type) {
       stopLetterAudio();
@@ -1363,6 +1372,7 @@ export default function App() {
   const startLesson = (lesson: Lesson) => {
     savedMemoryAssessmentRef.current = null;
     setSelectedLesson({ ...lesson, questions: buildLessonQuestions(lesson) });
+    if (lesson.letters[0]) playLetterAudio(lesson.letters[0].character);
     setLessonPhase("study");
     setShowAlphabetTips(false);
     setActiveLetterIndex(0);
@@ -2084,17 +2094,13 @@ export default function App() {
                     {(() => {
                       const letter = selectedLesson.letters[activeLetterIndex];
                       if (!letter) return null;
-                      const speakLetter = () => {
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (!audioUrl) {
-                          setLetterAudioStatus("error");
-                          return;
-                        }
-                        playAudioSample(audioUrl, "letter");
-                      };
+                      const speakLetter = () => playLetterAudio(letter.character);
                       const moveLetter = (direction: -1 | 1) => {
-                        stopLetterAudio();
-                        setActiveLetterIndex((current) => Math.max(0, Math.min(selectedLesson.letters.length - 1, current + direction)));
+                        const nextIndex = Math.max(0, Math.min(selectedLesson.letters.length - 1, activeLetterIndex + direction));
+                        const nextLetter = selectedLesson.letters[nextIndex];
+                        if (!nextLetter || nextIndex === activeLetterIndex) return;
+                        setActiveLetterIndex(nextIndex);
+                        playLetterAudio(nextLetter.character);
                       };
                       return (
                         <div className="alphabet-flashcards">
@@ -2136,7 +2142,7 @@ export default function App() {
                                 data-touch-hint={`Перейти к букве ${index + 1}`}
                                 aria-label={`Перейти к букве ${index + 1}`}
                                 aria-current={index === activeLetterIndex ? "step" : undefined}
-                                onClick={() => { stopLetterAudio(); setActiveLetterIndex(index); }}
+                                onClick={() => { setActiveLetterIndex(index); playLetterAudio(item.character); }}
                               />
                             ))}
                           </div>
@@ -2163,7 +2169,7 @@ export default function App() {
                   </>
                 )}
                 {!selectedLesson.studyCards && activeLetterIndex < selectedLesson.letters.length - 1 ? (
-                  <button className="primary-button modal-button study-start" type="button" onClick={() => setActiveLetterIndex((current) => Math.min(selectedLesson.letters.length - 1, current + 1))}>
+                  <button className="primary-button modal-button study-start" type="button" onClick={() => moveLetter(1)}>
                     Следующая буква →
                   </button>
                 ) : (
