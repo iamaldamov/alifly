@@ -318,7 +318,7 @@ const stageThreeLessons: Lesson[] = [
         arabic: "بَيْت",
         transliteration: "байт",
         translation: "дом",
-        note: "Сочетание بَيْ читается как bay.",
+        note: "Сочетание بَيْ читается как «бай».",
         acceptedTransliterations: ["bayt", "бейт"],
       },
     ],
