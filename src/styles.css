@@ -2564,3 +2564,15 @@ html, body {
 .letter-auto-audio { min-height:40px; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:color-mix(in srgb,var(--surface) 66%,transparent); color:var(--text); font-size:12px; font-weight:700; }
 .letter-auto-audio.is-enabled { border-color:color-mix(in srgb,#C6F432 42%,var(--border)); color:var(--text); }
 @media (max-width:480px) { .letter-audio-actions { gap:8px; } }
+
+/* Lip positions are deliberately distinct: closure, rounding, and lip-to-teeth. */
+.pv-lips--rounded { transform-box:fill-box; transform-origin:center; animation:pv-round 2.4s ease-in-out infinite; }
+.pv-lip-lower--active { transform-box:fill-box; transform-origin:50% 0%; animation:pv-lower-lip 2.4s ease-in-out infinite; }
+.pv-emphasis { opacity:0; transform-box:fill-box; transform-origin:90% 50%; }
+.pv-emphasis--active { opacity:.9; animation:pv-emphatic-root 2.8s ease-in-out infinite; }
+@keyframes pv-round { 0%,100% { transform:translateX(0) scaleX(1); } 45%,60% { transform:translateX(5px) scaleX(.82); } }
+@keyframes pv-lower-lip { 0%,100% { transform:translateY(0); } 45%,60% { transform:translateY(-5px); } }
+@keyframes pv-emphatic-root { 0%,100% { transform:translateY(1px); opacity:.5; } 45%,60% { transform:translateY(-5px); opacity:1; } }
+@media (prefers-reduced-motion:reduce) {
+ .pv-lips--rounded,.pv-lip-lower--active,.pv-emphasis--active { animation:none; }
+}
