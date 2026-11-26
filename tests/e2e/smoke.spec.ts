@@ -41,3 +41,21 @@ test("direct sign-in URL opens the sign-in dialog", async ({ page }) => {
 
   expect(pageErrors).toEqual([]);
 });
+
+
+test("first alphabet lesson shows the new articulation diagram and updates it per letter", async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  await page.goto("./lessons/alif/");
+  await expect(page.getByRole("heading", { name: "Алиф, ба, та и са" })).toBeVisible();
+  await expect(page.locator(".pronunciation-visual")).toBeVisible();
+  await expect(page.locator(".pronunciation-visual__svg")).toHaveAttribute("aria-label", /Схема речевого аппарата/);
+  await expect(page.locator(".pronunciation-visual__caption strong")).toHaveText("Полость рта и горла");
+
+  await page.getByRole("button", { name: "Следующая →" }).click();
+  await expect(page.locator(".letter-flashcard-character")).toHaveText("ب");
+  await expect(page.locator(".pronunciation-visual__caption strong")).toHaveText("Две сомкнутые губы");
+
+  expect(pageErrors).toEqual([]);
+});
