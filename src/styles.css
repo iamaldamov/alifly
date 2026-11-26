@@ -2140,6 +2140,7 @@ html, body {
 .letter-makhraj-copy strong { display: block; color: #193B2A; font-size: 15px; line-height: 1.4; }
 .letter-makhraj-copy p { margin: 6px 0 0; color: #4E5F53; font-size: 14px; line-height: 1.65; }
 .letter-makhraj-disclaimer { display: block; margin-top: 9px; color: #788579; font-size: 11px; line-height: 1.5; }
+:root[data-theme="dark"] .letter-speak-button { border-color: var(--border); background: var(--surface); color: var(--text); }
 :root[data-theme="dark"] .letter-makhraj { border-color: rgba(255,255,255,.14); background: linear-gradient(160deg, #202B24, #17211B); }
 :root[data-theme="dark"] .letter-makhraj-heading strong { color: #E3F0E4; }
 :root[data-theme="dark"] .letter-makhraj-heading small,
