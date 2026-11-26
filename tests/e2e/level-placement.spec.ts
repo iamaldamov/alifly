@@ -11,6 +11,18 @@ test("a learner can skip the alphabet and start with simple words", async ({ pag
   await expect(page.locator(".study-phrase-arabic").first()).toHaveText("كِتَاب");
 });
 
+test("level 3 keeps sentence lessons in sequence and preserves their progress", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("alifly-starting-level:guest", "3");
+    localStorage.setItem("alifly-completed-lessons", JSON.stringify([35, 36, 37, 38]));
+  });
+  await page.goto("./");
+
+  await page.getByRole("button", { name: /Слова и первые предложения/ }).click();
+  await expect(page.getByRole("button", { name: /Что это\? — вопрос и ответ/ })).toHaveText(/Пройден/);
+  await expect(page.getByRole("button", { name: /Вопросы с ответом «да» и «нет»/ })).toBeEnabled();
+});
+
 test("the diagnostic recommends a level and opens the matching route", async ({ page }) => {
   await page.goto("./");
 
