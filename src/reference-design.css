@@ -1,0 +1,247 @@
+/* ALIFLY — reference-led visual refinement.
+   Inspired by editorial education layouts, restrained brand typography and clear navigation.
+   Presentation only: no lesson content, auth, progress, Firebase or routing changes. */
+
+:root {
+  --alifly-ink: #0B0B0C;
+  --alifly-lime: #C6F432;
+  --alifly-display: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --alifly-arabic: "Noto Naskh Arabic", "Geeza Pro", "Times New Roman", serif;
+}
+
+html { scroll-padding-top: 88px; }
+body { font-family: var(--alifly-display); }
+button, input, textarea, select { font-family: inherit; }
+
+/* A compact, legible navigation bar — inspired by premium product headers. */
+.topbar {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  min-height: 72px;
+  height: auto;
+  margin-inline: calc(-1 * clamp(17px, 3.1vw, 36px));
+  padding: 10px clamp(17px, 3.1vw, 36px);
+  border-bottom: 1px solid var(--border, rgba(255,255,255,.12));
+  background: rgba(11, 11, 12, .78);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  backdrop-filter: blur(22px) saturate(145%);
+}
+.logo { gap: 12px; font-size: 15px; letter-spacing: .2em; font-weight: 850; }
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  font-family: var(--alifly-arabic);
+  font-size: 27px;
+}
+.topbar-right { gap: 10px; }
+.streak, .xp-counter, .language {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 13px;
+}
+
+/* Editorial hero: clear hierarchy, generous but controlled spacing. */
+.hero {
+  min-height: clamp(470px, 48vw, 610px);
+  margin-top: 24px;
+  padding: clamp(38px, 5.6vw, 76px) clamp(28px, 6vw, 82px);
+  border-radius: 30px;
+}
+.hero-content { max-width: 620px; }
+.hero-overline { gap: 11px; font-size: 10px; letter-spacing: .17em; }
+.hero h1 {
+  max-width: 10ch;
+  margin-block: clamp(28px, 4vw, 48px) 22px;
+  font-size: clamp(58px, 6.5vw, 88px);
+  line-height: .99;
+  letter-spacing: -.067em;
+  text-wrap: balance;
+}
+.hero-content > p {
+  max-width: 42ch;
+  font-size: clamp(16px, 1.35vw, 19px);
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+.hero-actions { gap: 13px 20px; }
+.hero .primary-button {
+  min-height: 58px;
+  padding-inline: 27px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+.hero-action-note { max-width: 190px; line-height: 1.5; }
+.hero-bottomline {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: clamp(38px, 5vw, 62px);
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+.hero-bottomline i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .55;
+}
+.hero-index-art { min-height: 330px; }
+.hero-index-number {
+  font-size: clamp(190px, 22vw, 300px);
+  letter-spacing: -.1em;
+}
+
+/* More consistent rhythm and a calmer learning dashboard. */
+.progress-section {
+  gap: clamp(24px, 4vw, 54px);
+  padding: clamp(52px, 7vw, 84px) 3.5% clamp(38px, 5vw, 60px);
+}
+.progress-section h2, .section-heading h2, .reading-heading h2 {
+  font-size: clamp(27px, 3vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -.05em;
+}
+.progress-card {
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: 24px;
+}
+.progress-info { gap: 16px; line-height: 1.5; }
+.progress-track { height: 7px; }
+.memory-insights { gap: 12px; }
+.memory-insight { min-width: 0; }
+.learning-section { padding: 20px 3.5% clamp(58px, 7vw, 88px); }
+.section-heading { margin-bottom: 24px; }
+.stage-list { gap: 14px; }
+.stage-card {
+  min-height: 132px;
+  padding: clamp(17px, 2vw, 24px);
+  border-radius: 22px;
+}
+.stage-icon { flex-basis: 54px; width: 54px; height: 54px; border-radius: 17px; }
+.stage-info { gap: 6px; }
+.stage-info strong { font-size: 15px; line-height: 1.35; }
+.stage-description { font-size: 12px; line-height: 1.5; }
+.stage-count { border-radius: 12px; padding: 9px 12px; }
+
+/* Keep Arabic letterforms readable and correctly shaped in learning surfaces. */
+[lang="ar"], [dir="rtl"], .letter-intro strong, .answer-option,
+.reading-glyph, .study-phrase-arabic, .letter-flashcard-character {
+  font-family: var(--alifly-arabic);
+  font-weight: 500;
+}
+[dir="rtl"] { line-height: 1.8; }
+
+/* Clearer interaction states without decorative clutter. */
+.primary-button, .review-button, .theme-toggle, .account-button,
+.stage-card, .lesson-pick, .answer-option, .reading-option {
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible, a:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible {
+  outline: 3px solid var(--alifly-lime);
+  outline-offset: 3px;
+}
+.stage-card:not(:disabled):not(.stage-locked):hover {
+  transform: translateY(-3px);
+}
+.modal-backdrop { padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); }
+.stage-modal { border-radius: 26px; }
+
+/* Theme-specific surfaces preserve Lime Noir in both modes. */
+:root[data-theme="dark"] .topbar {
+  border-bottom-color: rgba(255,255,255,.1);
+  background: rgba(11,11,12,.82);
+}
+:root[data-theme="dark"] .hero {
+  border-color: rgba(198,244,50,.2);
+  background:
+    radial-gradient(ellipse at 78% 24%, rgba(198,244,50,.13), transparent 23rem),
+    linear-gradient(135deg, #171719 0%, #0B0B0C 76%);
+}
+:root[data-theme="dark"] .progress-card,
+:root[data-theme="dark"] .stage-card {
+  background: linear-gradient(145deg, rgba(27,27,30,.96), rgba(17,17,19,.98));
+}
+:root[data-theme="dark"] .stage-card:not(:disabled):not(.stage-locked):hover {
+  border-color: rgba(198,244,50,.48);
+}
+:root[data-theme="light"] .topbar {
+  border-bottom-color: rgba(11,11,12,.1);
+  background: rgba(255,255,255,.84);
+}
+:root[data-theme="light"] .hero {
+  border-color: rgba(11,11,12,.1);
+  background:
+    radial-gradient(ellipse at 82% 24%, rgba(198,244,50,.23), transparent 22rem),
+    linear-gradient(125deg, #FFFFFF 0%, #F8FAF1 72%);
+}
+:root[data-theme="light"] .hero h1,
+:root[data-theme="light"] .progress-section h2,
+:root[data-theme="light"] .section-heading h2,
+:root[data-theme="light"] .reading-heading h2 { color: #0B0B0C; }
+:root[data-theme="light"] .hero-content > p { color: #55555A; }
+:root[data-theme="light"] .progress-card,
+:root[data-theme="light"] .stage-card {
+  background: rgba(255,255,255,.94);
+  border-color: rgba(11,11,12,.1);
+}
+
+/* Mobile-first corrections: avoid oversized hero text and cramped header controls. */
+@media (max-width: 760px) {
+  .topbar {
+    position: sticky;
+    min-height: 64px;
+    margin-inline: 0;
+    padding: 8px 15px;
+  }
+  .logo { gap: 9px; font-size: 14px; }
+  .logo-mark { width: 34px; height: 34px; font-size: 24px; }
+  .topbar-right { gap: 6px; }
+  .streak, .xp-counter, .language { min-height: 36px; padding: 7px 9px; }
+  .hero {
+    min-height: min(740px, calc(100svh - 64px));
+    margin-top: 0;
+    padding: 42px 7vw 30px;
+    border-radius: 0;
+  }
+  .hero h1 {
+    max-width: 10ch;
+    margin-block: 34px 19px;
+    font-size: clamp(52px, 12.7vw, 76px);
+    line-height: 1;
+  }
+  .hero-content > p { max-width: 37ch; font-size: 16px; line-height: 1.7; }
+  .hero .primary-button { min-height: 56px; padding-inline: 22px; }
+  .hero-bottomline { margin-top: 42px; gap: 10px; font-size: 9px; }
+  .progress-section {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 46px 18px 34px;
+  }
+  .progress-section h2, .section-heading h2, .reading-heading h2 { font-size: clamp(27px, 7vw, 34px); }
+  .learning-section { padding: 18px 18px 54px; }
+  .stage-list { grid-template-columns: 1fr; gap: 11px; }
+  .stage-card { min-height: 112px; padding: 17px; border-radius: 19px; }
+}
+@media (max-width: 390px) {
+  .topbar-right { gap: 5px; }
+  .streak, .xp-counter, .language { padding-inline: 7px; font-size: 10px; }
+  .hero { padding-inline: 6vw; }
+  .hero h1 { font-size: clamp(48px, 12.5vw, 58px); }
+  .hero-action-note { max-width: 135px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-card, .primary-button, .review-button, .theme-toggle,
+  .account-button, .hero-content, .hero-index-art, .hero-index-number {
+    animation: none !important;
+    transition: none !important;
+  }
+}
