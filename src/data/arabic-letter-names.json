@@ -2,141 +2,169 @@
   {
     "character": "ا",
     "slug": "alif",
-    "name": "أَلِف"
+    "name": "أَلِف",
+    "sample": "أَلِف"
   },
   {
     "character": "ب",
     "slug": "ba",
-    "name": "بَاء"
+    "name": "بَاء",
+    "sample": "بَ"
   },
   {
     "character": "ت",
     "slug": "ta",
-    "name": "تَاء"
+    "name": "تَاء",
+    "sample": "تَ"
   },
   {
     "character": "ث",
     "slug": "tha",
-    "name": "ثَاء"
+    "name": "ثَاء",
+    "sample": "ثَ"
   },
   {
     "character": "ج",
     "slug": "jim",
-    "name": "جِيم"
+    "name": "جِيم",
+    "sample": "جَ"
   },
   {
     "character": "ح",
     "slug": "ha",
-    "name": "حَاء"
+    "name": "حَاء",
+    "sample": "حَ"
   },
   {
     "character": "خ",
     "slug": "kha",
-    "name": "خَاء"
+    "name": "خَاء",
+    "sample": "خَ"
   },
   {
     "character": "د",
     "slug": "dal",
-    "name": "دَال"
+    "name": "دَال",
+    "sample": "دَ"
   },
   {
     "character": "ذ",
     "slug": "dhal",
-    "name": "ذَال"
+    "name": "ذَال",
+    "sample": "ذَ"
   },
   {
     "character": "ر",
     "slug": "ra",
-    "name": "رَاء"
+    "name": "رَاء",
+    "sample": "رَ"
   },
   {
     "character": "ز",
     "slug": "zay",
-    "name": "زَاي"
+    "name": "زَاي",
+    "sample": "زَ"
   },
   {
     "character": "س",
     "slug": "sin",
-    "name": "سِين"
+    "name": "سِين",
+    "sample": "سَ"
   },
   {
     "character": "ش",
     "slug": "shin",
-    "name": "شِين"
+    "name": "شِين",
+    "sample": "شَ"
   },
   {
     "character": "ص",
     "slug": "sad",
-    "name": "صَاد"
+    "name": "صَاد",
+    "sample": "صَ"
   },
   {
     "character": "ض",
     "slug": "dad",
-    "name": "ضَاد"
+    "name": "ضَاد",
+    "sample": "ضَ"
   },
   {
     "character": "ط",
     "slug": "ta-emphatic",
-    "name": "طَاء"
+    "name": "طَاء",
+    "sample": "طَ"
   },
   {
     "character": "ظ",
     "slug": "za-emphatic",
-    "name": "ظَاء"
+    "name": "ظَاء",
+    "sample": "ظَ"
   },
   {
     "character": "ع",
     "slug": "ayn",
-    "name": "عَيْن"
+    "name": "عَيْن",
+    "sample": "عَ"
   },
   {
     "character": "غ",
     "slug": "ghayn",
-    "name": "غَيْن"
+    "name": "غَيْن",
+    "sample": "غَ"
   },
   {
     "character": "ف",
     "slug": "fa",
-    "name": "فَاء"
+    "name": "فَاء",
+    "sample": "فَ"
   },
   {
     "character": "ق",
     "slug": "qaf",
-    "name": "قَاف"
+    "name": "قَاف",
+    "sample": "قَ"
   },
   {
     "character": "ك",
     "slug": "kaf",
-    "name": "كَاف"
+    "name": "كَاف",
+    "sample": "كَ"
   },
   {
     "character": "ل",
     "slug": "lam",
-    "name": "لَام"
+    "name": "لَام",
+    "sample": "لَ"
   },
   {
     "character": "م",
     "slug": "mim",
-    "name": "مِيم"
+    "name": "مِيم",
+    "sample": "مَ"
   },
   {
     "character": "ن",
     "slug": "nun",
-    "name": "نُون"
+    "name": "نُون",
+    "sample": "نَ"
   },
   {
     "character": "ه",
     "slug": "ha-final",
-    "name": "هَاء"
+    "name": "هَاء",
+    "sample": "هَ"
   },
   {
     "character": "و",
     "slug": "waw",
-    "name": "وَاو"
+    "name": "وَاو",
+    "sample": "وَ"
   },
   {
     "character": "ي",
     "slug": "ya",
-    "name": "يَاء"
+    "name": "يَاء",
+    "sample": "يَ"
   }
 ]

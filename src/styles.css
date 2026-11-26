@@ -1686,15 +1686,6 @@ html, body {
 }
 
 
-/* Compact audio control and per-letter articulation diagram */
-.letter-speak-button {
-  display:grid; place-items:center; width:44px; min-width:44px; height:44px; min-height:44px;
-  margin:0 auto 12px; padding:0; border:1px solid #d5e2d4; border-radius:12px;
-  background:#fffefa; color:#285b45; cursor:pointer; box-shadow:0 3px 9px #20372e0a;
-}
-.letter-speak-button svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.letter-speak-button:focus-visible { outline:3px solid #8bb99a; outline-offset:3px; }
-
 /* ALIFLY practice redesign: one-screen tap, match and word-bank exercises */
 .practice-card { max-width: 720px; padding: clamp(18px, 4vw, 30px); }
 .practice-task-head { margin: 22px 0 14px; text-align: center; }
@@ -1874,8 +1865,6 @@ html, body {
   .practice-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .practice-choice { min-height: 54px; }
   .practice-card { padding: 16px 13px; }
-  .letter-mouth-diagram { max-height: 240px; }
-  .letter-makhraj-legend { font-size: 9px; }
 }
 
 :root[data-theme="light"] .practice-choice.is-correct,
@@ -2105,87 +2094,6 @@ html, body {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
-}
-
-
-/* Clear, readable articulation guide — tuned for phone screens */
-.letter-makhraj {
-  width: 100%;
-  max-width: 560px;
-  margin: 12px auto 0;
-  padding: 16px 14px;
-  overflow: hidden;
-  border: 1px solid #D8E1D6;
-  border-radius: 22px;
-  background: linear-gradient(160deg, #F9FBF5, #EDF3E9);
-  text-align: center;
-}
-.letter-makhraj-heading { display: grid; gap: 5px; margin: 2px 0 4px; text-align: left; }
-.letter-makhraj-heading strong { color: #193B2A; font-size: 16px; line-height: 1.4; }
-.letter-makhraj-heading small { color: #68786D; font-size: 12px; line-height: 1.4; }
-.letter-makhraj-marker-note { margin: 0 0 6px; color: #526B57; font-size: 12px; line-height: 1.45; text-align: left; }
-.letter-mouth-diagram { display: block; width: 100%; height: auto; max-height: none; margin: 5px auto 8px; }
-.letter-makhraj-target {
-  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px;
-  min-height: 44px; margin: 2px 0 8px; padding: 10px 12px;
-  border: 1px solid #CFE0C3; border-radius: 13px;
-  background: #EAF3DF; color: #234C32; font-size: 14px; font-weight: 850; line-height: 1.4;
-}
-.letter-makhraj-target span { color: #79A93F; font-size: 17px; }
-.letter-makhraj-secondary {
-  margin: 0 0 10px; padding: 8px 11px; border-radius: 11px;
-  background: #F1EBD7; color: #66512B; font-size: 12px; font-weight: 750; line-height: 1.45;
-}
-.letter-makhraj-copy { padding: 14px; border-radius: 14px; background: #FFFFFF; text-align: left; }
-.letter-makhraj-copy strong { display: block; color: #193B2A; font-size: 15px; line-height: 1.4; }
-.letter-makhraj-copy p { margin: 6px 0 0; color: #4E5F53; font-size: 14px; line-height: 1.65; }
-.letter-makhraj-disclaimer { display: block; margin-top: 9px; color: #788579; font-size: 11px; line-height: 1.5; }
-:root[data-theme="dark"] .letter-speak-button { border-color: var(--border); background: var(--surface); color: var(--text); }
-:root[data-theme="dark"] .letter-makhraj { border-color: rgba(255,255,255,.14); background: linear-gradient(160deg, #202B24, #17211B); }
-:root[data-theme="dark"] .letter-makhraj-heading strong { color: #E3F0E4; }
-:root[data-theme="dark"] .letter-makhraj-heading small,
-:root[data-theme="dark"] .letter-makhraj-marker-note { color: #B7C7BA; }
-:root[data-theme="dark"] .letter-makhraj-target { border-color: #496548; background: #2B4030; color: #DDF2C3; }
-:root[data-theme="dark"] .letter-makhraj-secondary { background: #3B3525; color: #F1DCA6; }
-:root[data-theme="dark"] .letter-makhraj-copy { background: #26382D; }
-:root[data-theme="dark"] .letter-makhraj-copy strong { color: #E3F0E4; }
-:root[data-theme="dark"] .letter-makhraj-copy p { color: #D0DDD1; }
-:root[data-theme="dark"] .letter-makhraj-disclaimer { color: #AABBAE; }
-@media (max-width: 480px) {
-  .letter-makhraj { padding: 12px 10px; border-radius: 18px; }
-  .letter-makhraj-heading strong { font-size: 15px; }
-  .letter-makhraj-marker-note { font-size: 11px; }
-  .letter-makhraj-target { font-size: 13px; }
-  .letter-makhraj-copy { padding: 12px; }
-  .letter-makhraj-copy p { font-size: 13px; }
-  .letter-makhraj-disclaimer { font-size: 10px; }
-}
-
-/* Clear audio state and articulation diagrams */
-.letter-audio-status {
-  display: block;
-  min-height: 16px;
-  margin: 7px 0 12px;
-  color: var(--text-muted, #647267);
-  font-size: 11px;
-  line-height: 1.4;
-  text-align: center;
-}
-.letter-speak-button.is-playing {
-  border-color: #83A82B;
-  background: #EAF5D3;
-  color: #24452D;
-  box-shadow: 0 0 0 4px rgba(198,244,50,.16);
-}
-:root[data-theme="dark"] .letter-audio-status { color: #C5D0C7; }
-:root[data-theme="dark"] .letter-speak-button.is-playing {
-  border-color: #C6F432;
-  background: rgba(198,244,50,.16);
-  color: #E7FFAA;
-}
-@media (max-width: 480px) {
-  .letter-audio-status { font-size: 10px; }
-  .letter-mouth-diagram { max-height: 225px; }
 }
 
 
@@ -2507,3 +2415,23 @@ html, body {
 .lesson-report-error { margin:0; color:#C45B52; font-size:14px; }
 :root[data-theme="dark"] .lesson-report-panel { background:#202923; border-color:rgba(255,255,255,.14); }
 :root[data-theme="dark"] .lesson-report-panel select,:root[data-theme="dark"] .lesson-report-panel textarea { background:#151B17; color:#F4F7F1; border-color:rgba(255,255,255,.2); }
+
+
+/* Minimal transparent pronunciation cutaway — animated SVG assets */
+.pronunciation-visual{width:100%;max-width:560px;margin:10px auto 0;padding:10px 12px 12px;border:1px solid rgba(198,244,50,.17);border-radius:20px;background:rgba(255,255,255,.035);box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 12px 34px rgba(0,0,0,.08);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.pronunciation-visual-art{width:100%;overflow:hidden;border-radius:14px}
+.pronunciation-visual-art img{display:block;width:100%;height:auto;aspect-ratio:760/460;object-fit:contain}
+.pronunciation-visual-caption{margin:2px 2px 0;text-align:left}
+.pronunciation-visual-caption strong{display:block;margin-top:5px;color:#DDF5C9;font-size:14px;line-height:1.35;font-weight:780}
+.pronunciation-visual-caption p{margin:4px 0 0;color:rgba(239,245,237,.82);font-size:13px;line-height:1.5}
+.pronunciation-visual-caption small{display:block;margin-top:5px;color:#C5DC9D;font-size:11px;line-height:1.45}
+.letter-auto-hint{margin:0 auto 9px;color:var(--text-muted,#AAB5AC);font-size:11px;line-height:1.4;text-align:center}
+.letter-audio-status{display:block;min-height:15px;margin:5px 0 0;color:var(--text-muted,#AAB5AC);font-size:10px;line-height:1.4;text-align:center}
+.letter-audio-unlock{display:block;margin:7px auto 0;padding:7px 11px;border:1px solid rgba(198,244,50,.35);border-radius:999px;background:rgba(198,244,50,.09);color:var(--text,#EAF0E9);font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+:root[data-theme="light"] .pronunciation-visual{border-color:rgba(58,103,61,.18);background:rgba(255,255,255,.32);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 34px rgba(30,52,34,.05)}
+:root[data-theme="light"] .pronunciation-visual-caption strong{color:#234B32}
+:root[data-theme="light"] .pronunciation-visual-caption p{color:#425347}
+:root[data-theme="light"] .pronunciation-visual-caption small{color:#527A3F}
+:root[data-theme="light"] .letter-audio-status,:root[data-theme="light"] .letter-auto-hint{color:#647267}
+:root[data-theme="light"] .letter-audio-unlock{color:#234B32}
+@media(max-width:480px){.pronunciation-visual{padding:7px 8px 9px;border-radius:17px}.pronunciation-visual-art{border-radius:11px}.pronunciation-visual-caption strong{font-size:13px}.pronunciation-visual-caption p{font-size:12px;line-height:1.48}}
