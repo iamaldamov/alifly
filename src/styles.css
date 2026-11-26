@@ -2509,55 +2509,70 @@ html, body {
 :root[data-theme="dark"] .lesson-report-panel select,:root[data-theme="dark"] .lesson-report-panel textarea { background:#151B17; color:#F4F7F1; border-color:rgba(255,255,255,.2); }
 
 
-/* Minimal transparent pronunciation lesson: one quiet anatomy illustration, one moving focus. */
+
+/* ALIFLY articulation diagram: restrained rest-contact-release motion. */
 .pronunciation-visual {
-  width: 100%;
-  margin: 18px auto 0;
-  padding: 12px 14px 14px;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--border) 76%, #A7C8B0);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--surface) 56%, transparent);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  width:100%; margin:18px auto 0; padding:12px 14px 14px; overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--border) 76%,#A7C8B0);
+  border-radius:22px; background:color-mix(in srgb,var(--surface) 56%,transparent);
+  -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px);
 }
-.pronunciation-visual__svg { display:block; width:100%; height:auto; max-height:250px; color:var(--text); }
-.pronunciation-visual__tongue { transform-box:fill-box; transform-origin:50% 100%; animation: pronunciation-tongue 2.6s ease-in-out infinite; }
-.pronunciation-visual__halo { fill:#C6F432; opacity:.2; transform-box:fill-box; transform-origin:center; animation: pronunciation-pulse 1.6s ease-in-out infinite; }
-.pronunciation-visual__point { fill:#C6F432; stroke:#294532; stroke-width:3; }
-.pronunciation-visual__lips { transform-box:fill-box; transform-origin:center; animation: pronunciation-lips 2.6s ease-in-out infinite; }
+.pronunciation-visual__meta { display:flex; justify-content:space-between; gap:12px; margin:0 2px 3px; color:var(--muted); font-size:9px; font-weight:800; letter-spacing:.12em; }
+.pronunciation-visual__svg { display:block; width:100%; height:auto; max-height:285px; color:var(--text); overflow:visible; }
 .pronunciation-visual__caption { display:grid; gap:5px; max-width:560px; margin:3px auto 0; text-align:left; }
 .pronunciation-visual__caption strong { color:var(--text); font-size:15px; font-weight:750; line-height:1.35; }
 .pronunciation-visual__caption span { color:var(--muted); font-size:13px; line-height:1.55; }
 .pronunciation-visual__caption small { color:var(--text); font-size:12px; line-height:1.5; opacity:.82; }
-.letter-audio-actions { display:flex; align-items:center; justify-content:center; gap:10px; margin:12px auto 5px; }
-.letter-auto-audio { min-height:40px; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:color-mix(in srgb,var(--surface) 66%,transparent); color:var(--text); font-size:12px; font-weight:700; }
-.letter-auto-audio.is-enabled { border-color:color-mix(in srgb,#C6F432 42%,var(--border)); color:var(--text); }
-@keyframes pronunciation-pulse { 0%,100% { transform:scale(.8); opacity:.12; } 50% { transform:scale(1.2); opacity:.38; } }
-@keyframes pronunciation-tongue { 0%,100% { transform:translateY(2px) scaleY(.98); } 48% { transform:translateY(-5px) scaleY(1.015); } }
-@keyframes pronunciation-lips { 0%,100% { transform:scaleX(1); } 50% { transform:scaleX(.92); } }
-@media (prefers-reduced-motion: reduce) {
- .pronunciation-visual__tongue,.pronunciation-visual__halo,.pronunciation-visual__lips { animation:none; }
+.pronunciation-visual__disclaimer { display:block; margin-top:9px; color:var(--muted); font-size:10px; line-height:1.45; opacity:.78; }
+.pronunciation-visual__halo { fill:#C6F432; opacity:.18; transform-box:fill-box; transform-origin:center; animation:pv-focus 1.8s ease-in-out infinite; }
+.pronunciation-visual__point { fill:#C6F432; stroke:#294532; stroke-width:3; }
+.pv-moving { transform-box:fill-box; transform-origin:center; animation:pv-middle 2.4s ease-in-out infinite; }
+.pv-moving--front { transform-origin:15% 50%; animation-name:pv-front; }
+.pv-moving--back { transform-origin:90% 50%; animation-name:pv-back; }
+.pv-lips { transform-box:fill-box; transform-origin:center; }
+.pv-lips--active { animation:pv-lips 2.2s ease-in-out infinite; }
+.pv-throat { transform-box:fill-box; transform-origin:center; }
+.pv-throat--active { animation:pv-throat 2.4s ease-in-out infinite; }
+.pv-airflow { stroke-dasharray:6 10; animation:pv-air 1.4s linear infinite; }
+.pv-nasal-focus circle:first-child { fill:#C6F432; fill-opacity:.16; stroke:#C6F432; stroke-opacity:.7; stroke-width:2; animation:pv-focus 1.8s ease-in-out infinite; }
+.pv-nasal-focus circle:last-child { fill:#C6F432; }
+.pv-inset rect { fill:color-mix(in srgb,var(--surface) 85%,#21392B); stroke:#A7C8B0; stroke-opacity:.6; stroke-width:1.2; }
+.pv-inset text { fill:var(--muted); font-size:9px; font-weight:800; letter-spacing:.08em; }
+.pv-inset path { fill:#DCE8DF; fill-opacity:.65; stroke:#9EB4A5; stroke-width:1.3; }
+.pv-inset path:nth-of-type(2) { fill:#82A98C; fill-opacity:.8; stroke:#D9E8DC; }
+.pv-inset circle { fill:#C6F432; stroke:#294532; stroke-width:2; }
+.pronunciation-visual--emphatic .pv-moving { animation-duration:2.8s; }
+@keyframes pv-focus { 0%,100% { transform:scale(.82); opacity:.12; } 50% { transform:scale(1.16); opacity:.4; } }
+@keyframes pv-front { 0%,100% { transform:translate(0,2px); } 45%,60% { transform:translate(3px,-6px); } }
+@keyframes pv-back { 0%,100% { transform:translate(0,2px); } 45%,60% { transform:translate(-3px,-5px); } }
+@keyframes pv-middle { 0%,100% { transform:translateY(2px); } 45%,60% { transform:translateY(-5px); } }
+@keyframes pv-lips { 0%,100% { transform:scaleY(1); } 45%,60% { transform:scaleY(.65); } }
+@keyframes pv-throat { 0%,100% { transform:scaleX(1); } 45%,60% { transform:scaleX(.82); } }
+@keyframes pv-air { to { stroke-dashoffset:-32; } }
+@media (prefers-reduced-motion:reduce) {
+ .pronunciation-visual__halo,.pv-moving,.pv-lips--active,.pv-throat--active,.pv-airflow,.pv-nasal-focus circle:first-child { animation:none; }
 }
 @media (max-width:480px) {
  .pronunciation-visual { margin-top:14px; padding:9px 10px 12px; border-radius:17px; }
- .pronunciation-visual__svg { max-height:205px; }
+ .pronunciation-visual__svg { max-height:225px; }
  .pronunciation-visual__caption strong { font-size:14px; }
  .pronunciation-visual__caption span { font-size:12px; }
- .letter-audio-actions { gap:8px; }
+ .pronunciation-visual__meta { font-size:8px; }
 }
 
-/* Distinct, restrained motion by articulation family. */
-.pronunciation-visual--teeth .pronunciation-visual__tongue,
-.pronunciation-visual--between .pronunciation-visual__tongue,
-.pronunciation-visual--alveolar .pronunciation-visual__tongue { animation-name: pronunciation-front-contact; }
-.pronunciation-visual--palate .pronunciation-visual__tongue,
-.pronunciation-visual--velum .pronunciation-visual__tongue { animation-name: pronunciation-back-lift; }
-.pronunciation-visual--side .pronunciation-visual__tongue { animation-name: pronunciation-side-contact; }
-.pronunciation-visual--sibilant .pronunciation-visual__tongue { animation-name: pronunciation-air-channel; }
-.pronunciation-visual--lips .pronunciation-visual__lips,
-.pronunciation-visual--lip-teeth .pronunciation-visual__lips { animation-name: pronunciation-lips; }
-@keyframes pronunciation-front-contact { 0%,100% { transform:translate(-1px,2px) scaleY(.98); } 48% { transform:translate(-5px,-5px) scaleY(1.02); } }
-@keyframes pronunciation-back-lift { 0%,100% { transform:translate(2px,2px) rotate(0deg); } 50% { transform:translate(8px,-6px) rotate(-2deg); } }
-@keyframes pronunciation-side-contact { 0%,100% { transform:translate(0,2px) skewY(0deg); } 50% { transform:translate(3px,-4px) skewY(-2deg); } }
-@keyframes pronunciation-air-channel { 0%,100% { transform:translateY(1px) scaleY(.99); } 50% { transform:translateY(-2px) scaleY(1.01); } }
+.letter-audio-actions { display:flex; align-items:center; justify-content:center; gap:10px; margin:12px auto 5px; }
+.letter-auto-audio { min-height:40px; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:color-mix(in srgb,var(--surface) 66%,transparent); color:var(--text); font-size:12px; font-weight:700; }
+.letter-auto-audio.is-enabled { border-color:color-mix(in srgb,#C6F432 42%,var(--border)); color:var(--text); }
+@media (max-width:480px) { .letter-audio-actions { gap:8px; } }
+
+/* Lip positions are deliberately distinct: closure, rounding, and lip-to-teeth. */
+.pv-lips--rounded { transform-box:fill-box; transform-origin:center; animation:pv-round 2.4s ease-in-out infinite; }
+.pv-lip-lower--active { transform-box:fill-box; transform-origin:50% 0%; animation:pv-lower-lip 2.4s ease-in-out infinite; }
+.pv-emphasis { opacity:0; transform-box:fill-box; transform-origin:90% 50%; }
+.pv-emphasis--active { opacity:.9; animation:pv-emphatic-root 2.8s ease-in-out infinite; }
+@keyframes pv-round { 0%,100% { transform:translateX(0) scaleX(1); } 45%,60% { transform:translateX(5px) scaleX(.82); } }
+@keyframes pv-lower-lip { 0%,100% { transform:translateY(0); } 45%,60% { transform:translateY(-5px); } }
+@keyframes pv-emphatic-root { 0%,100% { transform:translateY(1px); opacity:.5; } 45%,60% { transform:translateY(-5px); opacity:1; } }
+@media (prefers-reduced-motion:reduce) {
+ .pv-lips--rounded,.pv-lip-lower--active,.pv-emphasis--active { animation:none; }
+}

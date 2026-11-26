@@ -35,5 +35,6 @@ This recording is offered as a full-alphabet listening reference. It is not an i
 ## Pedagogical limitations
 
 - Letter-name audio is not the same as isolated consonant phonemes paired with fatḥa, kasra, and ḍamma.
-- The simplified SVG diagrams show broad articulation areas and tongue posture. They are study aids, not precise anatomical or phonetic measurements.
-- A qualified Arabic / tajwīd teacher should review the pronunciations and articulation descriptions before the material is described as teacher-approved.
+- The current articulation diagram is an original, simplified vector teaching aid based on a traditional 17-point makhārij model. It highlights the active point and uses a restrained looping animation; it is not a recorded video or a medical/anatomical measurement.
+- The diagram model, letter mapping, limitations, and source references are documented in `docs/ALIFLY_MAKHARIJ_VISUALS.md`.
+- A qualified Arabic / tajwīd teacher should review the visual positions, instructions, and letter sounds before the material is described as teacher-approved.
