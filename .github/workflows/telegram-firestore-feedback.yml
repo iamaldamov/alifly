@@ -1,0 +1,46 @@
+name: Telegram notifications for website feedback
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firestore-telegram-feedback
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install google-auth requests
+
+      - name: Send new website reports to Telegram
+        env:
+          FIREBASE_PROJECT_ID: alifly
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          key = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
+          Path(os.environ["RUNNER_TEMP"], "firebase-service-account.json").write_text(key)
+          os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(Path(os.environ["RUNNER_TEMP"], "firebase-service-account.json"))
+          import runpy
+          runpy.run_path("scripts/notify_firestore_reports.py", run_name="__main__")
+          PY
