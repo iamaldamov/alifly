@@ -1055,12 +1055,13 @@ export default function App() {
     setLetterAudioStatus("idle");
   };
 
-  const playLetterAudio = (character: string) => {
+  const playLetterAudio = (character: string, toggle = false) => {
     const url = arabicLetterAudio[character];
     if (!url) {
       setLetterAudioStatus("error");
       return;
     }
+    if (!toggle) stopLetterAudio();
     playAudioSample(url, "letter");
   };
 
@@ -2094,7 +2095,7 @@ export default function App() {
                     {(() => {
                       const letter = selectedLesson.letters[activeLetterIndex];
                       if (!letter) return null;
-                      const speakLetter = () => playLetterAudio(letter.character);
+                      const speakLetter = () => playLetterAudio(letter.character, true);
                       const moveLetter = (direction: -1 | 1) => {
                         const nextIndex = Math.max(0, Math.min(selectedLesson.letters.length - 1, activeLetterIndex + direction));
                         const nextLetter = selectedLesson.letters[nextIndex];
