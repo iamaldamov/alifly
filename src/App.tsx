@@ -5,6 +5,7 @@ import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
 import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlacement";
 import WordGame, { type Word } from "./WordGame";
+import { arabicSentenceLessons } from "./data/arabic-sentence-lessons";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
 import { auth, db } from "./lib/firebase";
@@ -67,7 +68,7 @@ type Lesson = {
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
   { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
-  { id: 3, title: "Читаем первые слова", description: "Короткие слова с огласовками и чтение без подсказок", icon: "ك", lessons: 3, status: "locked" },
+  { id: 3, title: "Слова и первые предложения", description: "Читай знакомые слова, короткие фразы и простые предложения", icon: "ك", lessons: 5, status: "locked" },
   { id: 4, title: "Первые диалоги", description: "Приветствия и простые разговоры на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
 ];
 
@@ -353,6 +354,7 @@ const stageThreeLessons: Lesson[] = [
       },
     ],
   ),
+  ...arabicSentenceLessons,
 ];
 
 type IntroCard = StudyCard & {
@@ -2006,7 +2008,7 @@ export default function App() {
                   </div>
                 ) : selectedStage.id === 3 && stageThreeUnlocked ? (
                   <div className="lesson-picker">
-                    <p className="modal-note">Короткий словарь современного литературного арабского. Сначала изучи слово и его значение, затем введи чтение без подсказки.</p>
+                    <p className="modal-note">Слова и первые предложения на современном литературном арабском. Изучи смысл, затем проверь чтение и понимание коротких фраз.</p>
                     {stageThreeLessons.map((lesson, index) => {
                       const previousLesson = index > 0 ? stageThreeLessons[index - 1] : undefined;
                       const isOpen = index === 0 || (previousLesson !== undefined && completedLessonIds.includes(previousLesson.id));
@@ -2016,7 +2018,7 @@ export default function App() {
                           <span className="lesson-pick-number">{isCompleted ? "✓" : String(index + 1).padStart(2, "0")}</span>
                           <span className="lesson-pick-text">
                             <strong>{lesson.title}</strong>
-                            <small>{lesson.studyCards?.length ?? 0} слова · {lesson.questions.length} задания</small>
+                            <small>{lesson.studyCards?.length ?? 0} карточек · {lesson.questions.length} заданий</small>
                           </span>
                           <span className="lesson-pick-state">{isCompleted ? "Пройден" : isOpen ? "Начать →" : "🔒"}</span>
                         </button>
