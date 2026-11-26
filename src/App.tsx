@@ -2119,12 +2119,6 @@ export default function App() {
                       };
                       return (
                         <div className="alphabet-flashcards">
-                          <div className="letter-learning-hint">
-                            <span className="letter-hint-icon">ا</span>
-                            <p><strong>Изучай по одной букве</strong><small>Посмотри на форму, послушай название и повтори его вслух. Листай карточки в своём темпе.</small></p>
-                            <button className="letter-alphabet-audio-button" type="button" onClick={() => playAudioSample(fullAlphabetAudioUrl, "alphabet")}>Слушать весь алфавит · голос носителя</button>
-                            <small className="letter-alphabet-audio-credit">Запись M. Abuhelwa · общественное достояние</small>
-                          </div>
                           <div
                             className="letter-flashcard"
                             onTouchStart={(event) => { letterTouchStartX.current = event.touches[0]?.clientX ?? null; }}
