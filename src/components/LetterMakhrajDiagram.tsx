@@ -1,108 +1,52 @@
 import type { ReactElement } from "react";
 
-type Group =
-  | "jawf" | "lips" | "rounded-lips" | "lip-teeth" | "tip-roots"
-  | "interdental" | "tip-sibilants" | "tip-gums" | "middle-tongue"
-  | "side-tongue" | "lam" | "back-qaf" | "back-kaf"
-  | "throat-deep" | "throat-middle" | "throat-near";
-
-type Info = { group: Group; title: string; instruction: string; view?: "top"; secondary?: string };
-
-const articulation: Record<string, Info> = {
-  "ا": { group: "jawf", title: "Открытая полость рта", instruction: "Рот открыт. Язык не касается нёба: воздух проходит свободно, а гласный звук тянется." },
-  "ب": { group: "lips", title: "Обе губы", instruction: "Мягко сомкни верхнюю и нижнюю губы, затем коротко раскрой их." },
-  "ت": { group: "tip-roots", title: "Кончик языка у верхних зубов", instruction: "Кончик языка касается основания верхних передних зубов и сразу отходит." },
-  "ث": { group: "interdental", title: "Язык между зубами", instruction: "Слегка покажи кончик языка между верхними и нижними передними зубами. Выпусти воздух без голоса." },
-  "ج": { group: "middle-tongue", title: "Середина языка и нёбо", instruction: "Подними середину языка к твёрдому нёбу, оставив небольшой проход." },
-  "ح": { group: "throat-middle", title: "Средняя часть горла", instruction: "Сузь среднюю часть глотки и выпусти ровный глухой звук без резкого русского «х»." },
-  "خ": { group: "throat-near", title: "Верхняя часть горла", instruction: "Создай трение в верхней части горла, ближе ко рту." },
-  "د": { group: "tip-roots", title: "Кончик языка у верхних зубов", instruction: "Коснись кончиком языка основания верхних передних зубов и отведи его со звонким звуком." },
-  "ذ": { group: "interdental", title: "Язык между зубами", instruction: "Слегка покажи кончик языка между зубами и произнеси звук с голосом." },
-  "ر": { group: "tip-gums", title: "Кончик языка у дёсен", instruction: "Коснись области за верхними передними зубами. Не раскатывай звук слишком долго." },
-  "ز": { group: "tip-sibilants", title: "Узкий проход у передних зубов", instruction: "Оставь узкий проход для воздуха у передних зубов; голосовые связки работают." },
-  "س": { group: "tip-sibilants", title: "Узкий проход у передних зубов", instruction: "Оставь узкий проход для воздуха у передних зубов; голосовые связки не работают." },
-  "ش": { group: "middle-tongue", title: "Середина языка и нёбо", instruction: "Приподними середину языка к нёбу, оставив широкий проход для воздуха." },
-  "ص": { group: "tip-sibilants", title: "Передняя часть языка у зубов", instruction: "Сформируй узкий проход у передних зубов.", secondary: "Задняя часть языка приподнята — звук твёрдый." },
-  "ض": { group: "side-tongue", title: "Бок языка у коренных зубов", instruction: "Прижми боковую сторону языка к верхним коренным зубам. Схема показывает область контакта сверху.", view: "top", secondary: "Задняя часть языка приподнята — звук твёрдый." },
-  "ط": { group: "tip-roots", title: "Кончик языка у верхних зубов", instruction: "Коснись основания верхних передних зубов.", secondary: "Задняя часть языка приподнята — звук твёрдый." },
-  "ظ": { group: "interdental", title: "Язык у края верхних зубов", instruction: "Покажи кончик языка у края верхних зубов и произнеси звук с голосом.", secondary: "Задняя часть языка приподнята — звук твёрдый." },
-  "ع": { group: "throat-middle", title: "Средняя часть горла", instruction: "Сформируй звук сужением средней части глотки. Не заменяй его обычным гласным." },
-  "غ": { group: "throat-near", title: "Верхняя часть горла", instruction: "Создай трение в верхней части горла и добавь голос." },
-  "ف": { group: "lip-teeth", title: "Верхние зубы и нижняя губа", instruction: "Коснись внутренней стороны нижней губы краем верхних передних зубов." },
-  "ق": { group: "back-qaf", title: "Самая задняя часть языка", instruction: "Подними заднюю часть языка к мягкому нёбу, ближе к горлу." },
-  "ك": { group: "back-kaf", title: "Задняя часть языка", instruction: "Подними заднюю часть языка к нёбу, но немного ближе ко рту, чем для ق." },
-  "ل": { group: "lam", title: "Кончик и края языка у дёсен", instruction: "Передняя часть языка касается области верхних дёсен за передними зубами." },
-  "م": { group: "lips", title: "Обе сомкнутые губы", instruction: "Мягко сомкни губы; звук сопровождается носовым резонансом." },
-  "ن": { group: "tip-gums", title: "Кончик языка у верхних дёсен", instruction: "Коснись кончиком языка области за верхними передними зубами; звук имеет носовой резонанс." },
-  "ه": { group: "throat-deep", title: "Глубина горла", instruction: "Выпусти лёгкий выдох из глубины горла, без сильного трения." },
-  "و": { group: "rounded-lips", title: "Округлённые губы", instruction: "Округли губы и слегка выдвини их вперёд, не смыкая." },
-  "ي": { group: "middle-tongue", title: "Середина языка и нёбо", instruction: "Подними середину языка к твёрдому нёбу." },
+type Place="open"|"lips"|"lip-teeth"|"teeth"|"between"|"alveolar"|"sibilant"|"palate"|"side"|"velum"|"pharynx"|"glottis";
+type Info={place:Place;title:string;instruction:string;emphatic?:boolean};
+const data:Record<string,Info>={
+"ا":{place:"open",title:"Открытая полость рта",instruction:"Рот открыт, язык не перекрывает проход воздуха. Долгий гласный звучит ровно."},
+"ب":{place:"lips",title:"Губы",instruction:"Полностью сомкни верхнюю и нижнюю губы, затем мягко раскрой их со звуком «б»."},
+"ت":{place:"teeth",title:"Кончик языка у верхних зубов",instruction:"Коснись кончиком языка основания верхних передних зубов и сразу отпусти."},
+"ث":{place:"between",title:"Между передними зубами",instruction:"Слегка помести кончик языка между зубами и выпусти воздух без голоса."},
+"ج":{place:"palate",title:"Середина языка у нёба",instruction:"Подними середину языка к твёрдому нёбу, оставив небольшой проход."},
+"ح":{place:"pharynx",title:"Средняя часть глотки",instruction:"Создай мягкое сужение в средней части глотки и выдохни без голоса."},
+"خ":{place:"velum",title:"Задняя часть языка у мягкого нёба",instruction:"Подними заднюю часть языка к мягкому нёбу и создай глухое трение."},
+"د":{place:"teeth",title:"Кончик языка у верхних зубов",instruction:"Коснись кончиком языка основания верхних передних зубов и отпусти со звонким звуком."},
+"ذ":{place:"between",title:"Между передними зубами",instruction:"Слегка покажи кончик языка между зубами и произнеси звук с голосом."},
+"ر":{place:"alveolar",title:"Область за верхними зубами",instruction:"Коснись кончиком языка бугорка за верхними передними зубами; сделай короткий лёгкий удар."},
+"ز":{place:"sibilant",title:"Узкий проход у передних зубов",instruction:"Оставь узкий проход для воздуха за передними зубами; голос включён."},
+"س":{place:"sibilant",title:"Узкий проход у передних зубов",instruction:"Оставь узкий проход для воздуха за передними зубами; голос не включай."},
+"ش":{place:"palate",title:"Середина языка у нёба",instruction:"Приподними середину языка к нёбу и направь воздух через широкий проход."},
+"ص":{place:"sibilant",title:"Передняя часть языка",instruction:"Сформируй узкий проход у передних зубов.",emphatic:true},
+"ض":{place:"side",title:"Бок языка у коренных зубов",instruction:"Прижми боковую сторону языка к верхним коренным зубам; не заменяй звук обычным «д».",emphatic:true},
+"ط":{place:"teeth",title:"Кончик языка у верхних зубов",instruction:"Коснись основания верхних передних зубов и произнеси твёрдый звук.",emphatic:true},
+"ظ":{place:"between",title:"Край языка у верхних зубов",instruction:"Покажи кончик языка у края верхних зубов и произнеси звонкий твёрдый звук.",emphatic:true},
+"ع":{place:"pharynx",title:"Средняя часть глотки",instruction:"Сформируй звук сужением средней части глотки; не заменяй его обычным гласным."},
+"غ":{place:"velum",title:"Задняя часть языка у мягкого нёба",instruction:"Подними заднюю часть языка к мягкому нёбу и добавь голос к трению."},
+"ف":{place:"lip-teeth",title:"Верхние зубы и нижняя губа",instruction:"Легко коснись верхними передними зубами внутренней стороны нижней губы."},
+"ق":{place:"velum",title:"Самая задняя часть языка",instruction:"Подними заднюю часть языка к мягкому нёбу ближе к горлу."},
+"ك":{place:"velum",title:"Задняя часть языка у нёба",instruction:"Подними заднюю часть языка к мягкому нёбу, немного ближе ко рту, чем для ق."},
+"ل":{place:"alveolar",title:"Передняя часть языка у дёсен",instruction:"Коснись кончиком языка верхних дёсен за передними зубами."},
+"م":{place:"lips",title:"Сомкнутые губы",instruction:"Мягко сомкни губы и пропусти голос через нос."},
+"ن":{place:"alveolar",title:"Кончик языка у верхних дёсен",instruction:"Коснись кончиком языка области за верхними передними зубами; звук имеет носовой резонанс."},
+"ه":{place:"glottis",title:"Голосовая щель",instruction:"Сделай лёгкий ровный выдох через открытую голосовую щель."},
+"و":{place:"lips",title:"Округлённые губы",instruction:"Округли губы и слегка выдвини их вперёд, не смыкая."},
+"ي":{place:"palate",title:"Середина языка у нёба",instruction:"Подними середину языка к твёрдому нёбу, оставив узкий проход."}
 };
-
-const contact: Record<Group, { x: number; y: number }> = {
-  jawf: { x: 250, y: 168 }, lips: { x: 77, y: 174 }, "rounded-lips": { x: 77, y: 174 },
-  "lip-teeth": { x: 102, y: 174 }, "tip-roots": { x: 148, y: 132 }, interdental: { x: 130, y: 158 },
-  "tip-sibilants": { x: 165, y: 153 }, "tip-gums": { x: 174, y: 128 }, "middle-tongue": { x: 282, y: 119 },
-  "side-tongue": { x: 275, y: 175 }, lam: { x: 175, y: 129 }, "back-qaf": { x: 395, y: 124 },
-  "back-kaf": { x: 355, y: 128 }, "throat-deep": { x: 458, y: 166 }, "throat-middle": { x: 426, y: 166 },
-  "throat-near": { x: 395, y: 166 },
-};
-
-export default function LetterMakhrajDiagram({ letter }: { letter: string }): ReactElement {
-  const info: Info = articulation[letter] ?? { group: "middle-tongue", title: "Место образования звука", instruction: "Посмотри на выделенную область." };
-  const point = contact[info.group];
-  const topView = info.view === "top";
-  return (
-    <section className="letter-makhraj" aria-label={`Как произносить букву ${letter}`}>
-      <div className="letter-makhraj-heading">
-        <strong>Где образуется звук?</strong>
-        <small>{topView ? "Вид сверху · показана верхняя челюсть" : "Вид сбоку · губы слева, горло справа"}</small>
-      </div>
-      <p className="letter-makhraj-marker-note">Зелёная отметка показывает основную зону образования звука</p>
-      {topView ? (
-        <svg className="letter-mouth-diagram" viewBox="0 0 560 300" role="img" aria-label="Вид сверху: боковая часть языка касается верхних коренных зубов.">
-          <path d="M105 48 Q280 -4 455 48 Q520 150 455 252 Q280 304 105 252 Q40 150 105 48Z" fill="#F0DCC8" stroke="#9C806B" strokeWidth="5"/>
-          <path d="M130 76 Q280 20 430 76 Q480 150 430 224 Q280 280 130 224 Q80 150 130 76Z" fill="#FFFDF8" stroke="#B6A18E" strokeWidth="4"/>
-          <path d="M168 91 Q280 48 392 91 Q432 150 392 209 Q280 250 168 209 Q128 150 168 91Z" fill="#D9898D" stroke="#9F5965" strokeWidth="4"/>
-          <g fill="#fff" stroke="#9C806B" strokeWidth="3">
-            <rect x="98" y="85" width="43" height="34" rx="9"/><rect x="78" y="132" width="43" height="34" rx="9"/><rect x="98" y="180" width="43" height="34" rx="9"/>
-            <rect x="419" y="85" width="43" height="34" rx="9"/><rect x="439" y="132" width="43" height="34" rx="9"/><rect x="419" y="180" width="43" height="34" rx="9"/>
-          </g>
-          <path d="M155 102 Q130 150 155 198" fill="none" stroke="#C6F432" strokeWidth="19" strokeLinecap="round"/>
-          <circle cx="150" cy="150" r="19" fill="#C6F432" stroke="#315A39" strokeWidth="5"/>
-          <path d="M170 150 L228 150" stroke="#315A39" strokeWidth="4" strokeDasharray="7 7"/>
-          <text x="280" y="287" textAnchor="middle" fontSize="18" fontWeight="800" fill="#315A39">БОК ЯЗЫКА ПРИЖАТ К ЗУБАМ</text>
-        </svg>
-      ) : (
-        <svg className="letter-mouth-diagram" viewBox="0 0 560 300" role="img" aria-label={`Схема сбоку: губы, зубы, нёбо, язык и горло. Зелёным выделена область для буквы ${letter}.`}>
-          <defs>
-            <linearGradient id="alifly-new-head" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F6E8D8"/><stop offset="1" stopColor="#D7BFA8"/></linearGradient>
-            <linearGradient id="alifly-new-tongue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#E9A2A0"/><stop offset="1" stopColor="#B96970"/></linearGradient>
-          </defs>
-          <path d="M35 155 Q55 68 170 34 Q315 -2 420 62 Q474 96 516 151 L536 168 L503 184 L520 204 Q470 264 365 270 L170 270 Q70 255 48 205 L24 181Z" fill="url(#alifly-new-head)" stroke="#927A67" strokeWidth="4"/>
-          <path d="M55 154 Q145 105 260 105 Q365 103 438 146 Q472 166 455 196 Q390 222 300 212 Q175 202 57 184Z" fill="#FFFDF8" stroke="#A8B2A3" strokeWidth="3"/>
-          <path d="M78 140 Q190 86 325 103 Q395 111 439 146" fill="none" stroke="#A88F7B" strokeWidth="18" strokeLinecap="round"/>
-          <path d="M439 146 Q475 174 449 220" fill="none" stroke="#A88F7B" strokeWidth="17" strokeLinecap="round"/>
-          <path d="M76 188 Q145 194 213 204 Q306 222 394 194 Q360 253 260 252 Q145 251 76 188Z" fill="url(#alifly-new-tongue)" stroke="#9F5965" strokeWidth="4"/>
-          <path d="M53 150 Q35 165 57 183" fill="none" stroke="#A85E66" strokeWidth="10" strokeLinecap="round"/>
-          <path d="M63 143 L104 132 L124 160 L65 166Z M64 174 L111 176 L126 199 L66 192Z" fill="#fff" stroke="#9C806B" strokeWidth="3"/>
-          <path d="M105 124 Q170 107 239 111" fill="none" stroke="#C8B5A4" strokeWidth="3"/>
-          <path d="M105 191 Q180 205 256 211" fill="none" stroke="#C6F432" strokeWidth="12" opacity=".45" strokeLinecap="round"/>
-          <circle cx={point.x} cy={point.y} r="25" fill="#C6F432" opacity=".24"/>
-          <circle cx={point.x} cy={point.y} r="13" fill="#C6F432" stroke="#315A39" strokeWidth="5"/>
-          <path d={`M${point.x} ${point.y} L${Math.max(50,Math.min(500,point.x+36))} ${Math.max(28,point.y-44)}`} stroke="#315A39" strokeWidth="3" strokeDasharray="6 5" fill="none"/>
-          <g fill="#315A39" fontSize="22" fontWeight="900">
-            <text x="50" y="292">ГУБЫ</text><text x="150" y="80">ЗУБЫ</text><text x="290" y="68">НЁБО</text><text x="310" y="248">ЯЗЫК</text><text x="515" y="292" textAnchor="end">ГОРЛО</text>
-          </g>
-        </svg>
-      )}
-      <div className="letter-makhraj-target"><span aria-hidden="true">●</span> {info.title}</div>
-      {info.secondary && <div className="letter-makhraj-secondary">{info.secondary}</div>}
-      <div className="letter-makhraj-copy">
-        <strong>Что делать языком и губами</strong>
-        <p>{info.instruction}</p>
-        <small className="letter-makhraj-disclaimer">Схема учебная и упрощённая. Она показывает основную область артикуляции, а не заменяет образец произношения и проверку преподавателя.</small>
-      </div>
-    </section>
-  );
+const points:Record<Place,[number,number]>={open:[260,175],lips:[77,180],"lip-teeth":[108,180],teeth:[150,137],between:[132,159],alveolar:[179,131],sibilant:[181,154],palate:[290,119],side:[248,191],velum:[378,136],pharynx:[430,168],glottis:[473,169]};
+export default function LetterMakhrajDiagram({letter}:{letter:string}):ReactElement{
+ const info=data[letter]??data["ا"];const [x,y]=points[info.place];const lips=info.place==="lips"||info.place==="lip-teeth";
+ return <section className={`pronunciation-visual pronunciation-visual--${info.place}`} aria-label={`Произношение буквы ${letter}`}>
+ <svg className="pronunciation-visual__svg" viewBox="0 0 560 310" role="img" aria-label={`Анатомический разрез речевого аппарата. Выделено место: ${info.title}`}>
+ <defs><linearGradient id="pv-tissue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#DDE8DF" stopOpacity=".2"/><stop offset="1" stopColor="#AFC8B5" stopOpacity=".06"/></linearGradient><linearGradient id="pv-tongue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#B7D8C0"/><stop offset="1" stopColor="#719B80"/></linearGradient></defs>
+ <path d="M34 166 C42 90 107 37 206 31 C307 24 390 61 432 112 C455 139 481 143 523 155 L523 210 C481 226 454 253 414 267 C320 301 174 290 92 251 C50 231 30 201 34 166Z" fill="url(#pv-tissue)" stroke="currentColor" strokeOpacity=".22" strokeWidth="2"/>
+ <path d="M55 158 C103 108 175 87 256 91 C337 93 392 117 430 155 C447 173 440 204 418 220 C348 244 252 245 170 224 C112 209 77 191 55 176Z" fill="#16231C" fillOpacity=".4" stroke="#B8CDBD" strokeOpacity=".5" strokeWidth="2"/>
+ <path d="M77 151 C147 102 243 91 329 111 C370 120 400 138 423 161" fill="none" stroke="#C8D8CD" strokeOpacity=".8" strokeWidth="14" strokeLinecap="round"/><path d="M423 161 C445 182 438 213 416 235" fill="none" stroke="#C8D8CD" strokeOpacity=".7" strokeWidth="13" strokeLinecap="round"/>
+ <g fill="#E6EEE8" fillOpacity=".9" stroke="#9FB4A5" strokeWidth="2"><path d="M75 149 L113 135 L132 163 L82 171Z"/><path d="M79 178 L128 180 L143 207 L88 196Z"/><path d="M139 124 L164 119 L178 144 L145 151Z"/><path d="M146 193 L180 194 L193 219 L156 213Z"/></g>
+ <g className="pronunciation-visual__tongue"><path d="M91 195 C151 198 195 190 239 180 C293 167 341 174 397 191 C375 240 311 257 236 251 C168 246 119 225 91 195Z" fill="url(#pv-tongue)" fillOpacity=".9" stroke="#D4E7D9" strokeOpacity=".75" strokeWidth="3"/><path d="M130 211 C206 222 284 221 353 204" fill="none" stroke="#E4F0E7" strokeOpacity=".35" strokeWidth="3" strokeLinecap="round"/></g>
+ {lips&&<g className="pronunciation-visual__lips"><path d="M36 158 Q62 145 87 159" fill="none" stroke="#D8AFA7" strokeWidth="9" strokeLinecap="round"/><path d="M36 187 Q62 201 87 185" fill="none" stroke="#D8AFA7" strokeWidth="9" strokeLinecap="round"/></g>}
+ <path d="M437 156 C463 151 483 159 501 174" fill="none" stroke="#B7D0BE" strokeOpacity=".45" strokeWidth="5" strokeLinecap="round"/>
+ <circle className="pronunciation-visual__halo" cx={x} cy={y} r="25"/><circle className="pronunciation-visual__point" cx={x} cy={y} r="8"/><path d={`M${x} ${y} l${x<180?34:-34} -28`} fill="none" stroke="#C6F432" strokeOpacity=".75" strokeWidth="2"/>
+ </svg>
+ <div className="pronunciation-visual__caption"><strong>{info.title}</strong><span>{info.instruction}</span>{info.emphatic&&<small>Также приподними заднюю часть языка: это придаёт звуку твёрдость.</small>}</div>
+ </section>;
 }
