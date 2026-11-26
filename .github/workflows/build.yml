@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Install Piper speech engine
         run: python -m pip install --disable-pip-version-check piper-tts
       - name: Download male Arabic Piper voice model
