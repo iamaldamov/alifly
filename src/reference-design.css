@@ -132,7 +132,7 @@ button, input, textarea, select { font-family: inherit; }
 .stage-count { border-radius: 12px; padding: 9px 12px; }
 
 /* Keep Arabic letterforms readable and correctly shaped in learning surfaces. */
-[lang="ar"], [dir="rtl"], .letter-intro strong, .answer-option,
+[lang="ar"], [dir="rtl"], .letter-intro strong,
 .reading-glyph, .study-phrase-arabic, .letter-flashcard-character {
   font-family: var(--alifly-arabic);
   font-weight: 500;
