@@ -2559,3 +2559,8 @@ html, body {
  .pronunciation-visual__caption span { font-size:12px; }
  .pronunciation-visual__meta { font-size:8px; }
 }
+
+.letter-audio-actions { display:flex; align-items:center; justify-content:center; gap:10px; margin:12px auto 5px; }
+.letter-auto-audio { min-height:40px; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:color-mix(in srgb,var(--surface) 66%,transparent); color:var(--text); font-size:12px; font-weight:700; }
+.letter-auto-audio.is-enabled { border-color:color-mix(in srgb,#C6F432 42%,var(--border)); color:var(--text); }
+@media (max-width:480px) { .letter-audio-actions { gap:8px; } }
