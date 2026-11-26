@@ -1062,11 +1062,11 @@ export default function App() {
       return;
     }
     if (!toggle) stopLetterAudio();
-    playAudioSample(url, "letter");
+    playAudioSample(url, "letter", toggle);
   };
 
-  const playAudioSample = (url: string, type: "letter" | "alphabet") => {
-    if (letterAudioStatus === "playing" && letterAudioType === type) {
+  const playAudioSample = (url: string, type: "letter" | "alphabet", allowToggle = true) => {
+    if (allowToggle && letterAudioStatus === "playing" && letterAudioType === type) {
       stopLetterAudio();
       return;
     }
