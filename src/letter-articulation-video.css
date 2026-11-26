@@ -6,3 +6,12 @@
 @keyframes av-tongue-motion{from{translate:0 2px;filter:brightness(.94)}to{translate:0 -4px;filter:brightness(1.12)}}
 @keyframes av-upper-lip{from{translate:0 1px;opacity:.82}to{translate:0 -2px;opacity:1}}
 @keyframes av-lower-lip{from{translate:0 -1px;opacity:.82}to{translate:0 2px;opacity:1}}
+
+/* Expanded phonetic analysis shown directly in each letter card. */
+.articulation-video__analysis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.articulation-video__analysis>div{display:grid;align-content:start;gap:5px;min-width:0;padding:10px 11px;border:1px solid rgba(185,232,92,.15);border-radius:12px;background:rgba(255,255,255,.045)}
+.articulation-video__analysis span,.articulation-video__practice>span{font-size:9px;line-height:1.35;letter-spacing:.1em;font-weight:800;color:#b9e85c}
+.articulation-video__analysis b{font-size:12px;line-height:1.45;font-weight:550;color:#f0f0e7;overflow-wrap:anywhere}
+.articulation-video__practice{margin-top:4px;padding:12px 13px;border-radius:13px;background:rgba(185,232,92,.09);border:1px solid rgba(185,232,92,.22)}
+.articulation-video__practice p{margin:5px 0 0;font-size:13px;line-height:1.55;color:#f5f6ec}
+@media(max-width:390px){.articulation-video__analysis{grid-template-columns:1fr}.articulation-video__analysis b{font-size:12px}}
