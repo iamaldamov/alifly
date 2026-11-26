@@ -7,6 +7,8 @@ import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlac
 import WordGame, { type Word } from "./WordGame";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
+import { arabicReadingLessons } from "./data/arabic-reading-lessons";
+import { normalizeCompletedLessonIds, normalizeDailyLessonIds } from "./lib/lesson-progress";
 import { auth, db } from "./lib/firebase";
 import { addDoc, collection, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { signInAnonymously } from "firebase/auth";
@@ -66,7 +68,7 @@ type Lesson = {
 
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
-  { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
+  { id: 2, title: "Огласовки и чтение", description: "Краткие и долгие гласные, соединение букв и базовые знаки чтения", icon: "َ", lessons: 8, status: "locked" },
   { id: 3, title: "Читаем первые слова", description: "Короткие слова с огласовками и чтение без подсказок", icon: "ك", lessons: 3, status: "locked" },
   { id: 4, title: "Первые диалоги", description: "Приветствия и простые разговоры на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
 ];
@@ -239,6 +241,7 @@ const stageTwoLessons: Lesson[] = [
       { prompt: "Какое соответствие верное?", options: [], correct: "Дамма — «у»", explanation: "Запомни: фатха — короткое «а», кясра — короткое «и», дамма — короткое «у».", mode: "recall" },
     ],
   },
+  ...arabicReadingLessons,
 ];
 
 
@@ -761,34 +764,6 @@ function buildExamRecallQuestions(): Question[] {
   }));
 }
 
-
-const legacyAlphabetProgress: Record<number, number[]> = {
-  1: [20],
-  2: [21, 22],
-  3: [23],
-  4: [24, 25],
-  5: [26, 27, 28],
-};
-
-function normalizeCompletedLessonIds(value: unknown): number[] {
-  if (!Array.isArray(value)) return [];
-  const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37));
-  const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37) || (id >= 6 && id <= 8))
-    : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
-  return [...new Set(normalized)];
-}
-
-function normalizeDailyLessonIds(value: unknown): number[] {
-  if (!Array.isArray(value)) return [];
-  const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37));
-  const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37) || (id >= 6 && id <= 8))
-    : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
-  return [...new Set(normalized)];
-}
 
 function readCompletedLessons(): number[] {
   try {
@@ -1742,7 +1717,7 @@ export default function App() {
     : stageThreeUnlocked
       ? { title: "чтения слов", stageTitle: "Читаем первые слова", lessons: stageThreeLessons }
       : stageTwoUnlocked
-        ? { title: "огласовок", stageTitle: "Огласовки", lessons: stageTwoLessons }
+        ? { title: "огласовок", stageTitle: "Огласовки и чтение", lessons: stageTwoLessons }
         : { title: "алфавита", stageTitle: "Арабский алфавит", lessons };
   const activeRouteCompletedCount = activeRoute.lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
   const activeRoutePercent = Math.round((activeRouteCompletedCount / activeRoute.lessons.length) * 100);
@@ -1955,7 +1930,7 @@ export default function App() {
                     {stage.id === 1
                       ? firstStageCompletedCount + "/" + lessons.length + " уроков алфавита"
                       : stage.id === 2
-                        ? unlocked ? (examPassed ? "Открыт после экзамена" : "Открыт по выбранному уровню") : stage.lessons + " урока"
+                        ? unlocked ? (examPassed ? "Открыт после экзамена" : "Открыт по выбранному уровню") : stage.lessons + " уроков"
                         : stage.id === 3
                           ? stageThreeLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length + "/" + stageThreeLessons.length + " урока чтения"
                           : stageFourLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length + "/" + stageFourLessons.length + " уроков диалогов"}
@@ -1990,7 +1965,7 @@ export default function App() {
                 <p>{selectedStage.description}</p>
                 {selectedStage.id === 2 && stageTwoUnlocked ? (
                   <div className="lesson-picker">
-                    <p className="modal-note">Отличная работа! Теперь изучи три основные огласовки. Уроки открываются по порядку.</p>
+                    <p className="modal-note">Сначала три краткие огласовки, затем соединение букв, сукун, долгие гласные, танвин и шадда. Уроки открываются по порядку.</p>
                     {stageTwoLessons.map((lesson) => {
                       const isOpen = lesson.id === 6 || completedLessonIds.includes(lesson.id - 1);
                       const isCompleted = completedLessonIds.includes(lesson.id);
