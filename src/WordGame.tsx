@@ -7,18 +7,18 @@ export type Word = {
 };
 
 const WORDS: Word[] = [
-  { arabic: "كِتَاب", transliteration: "kitāb", translation: "книга" },
-  { arabic: "بَيْت", transliteration: "bayt", translation: "дом" },
-  { arabic: "بَاب", transliteration: "bāb", translation: "дверь" },
-  { arabic: "مَاء", transliteration: "māʾ", translation: "вода" },
-  { arabic: "قَلَم", transliteration: "qalam", translation: "ручка" },
-  { arabic: "شَمْس", transliteration: "shams", translation: "солнце" },
-  { arabic: "قَمَر", transliteration: "qamar", translation: "луна" },
-  { arabic: "مَدْرَسَة", transliteration: "madrasa", translation: "школа" },
-  { arabic: "وَلَد", transliteration: "walad", translation: "мальчик" },
-  { arabic: "بِنْت", transliteration: "bint", translation: "девочка" },
-  { arabic: "كُرْسِيّ", transliteration: "kursiyy", translation: "стул" },
-  { arabic: "خُبْز", transliteration: "khubz", translation: "хлеб" },
+  { arabic: "كِتَاب", transliteration: "китааб", translation: "книга" },
+  { arabic: "بَيْت", transliteration: "байт", translation: "дом" },
+  { arabic: "بَاب", transliteration: "бааб", translation: "дверь" },
+  { arabic: "مَاء", transliteration: "маа", translation: "вода" },
+  { arabic: "قَلَم", transliteration: "къалам", translation: "ручка" },
+  { arabic: "شَمْس", transliteration: "шамс", translation: "солнце" },
+  { arabic: "قَمَر", transliteration: "къамар", translation: "луна" },
+  { arabic: "مَدْرَسَة", transliteration: "мадраса", translation: "школа" },
+  { arabic: "وَلَد", transliteration: "валад", translation: "мальчик" },
+  { arabic: "بِنْت", transliteration: "бинт", translation: "девочка" },
+  { arabic: "كُرْسِيّ", transliteration: "курсий", translation: "стул" },
+  { arabic: "خُبْز", transliteration: "хубз", translation: "хлеб" },
 ];
 
 const ROUND_SIZE = 8;

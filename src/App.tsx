@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import LetterMakhrajDiagram from "./components/LetterMakhrajDiagram";
 import { useLocation, useNavigate } from "react-router-dom";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
@@ -26,182 +27,6 @@ const arabicLetterAudio = Object.fromEntries(
     `${import.meta.env.BASE_URL}audio/letters/${slug}.wav`,
   ]),
 ) as Record<string, string>;
-
-// The diagram groups each Arabic letter by its traditional articulation area.
-// It is a teaching aid, not a substitute for listening to a qualified teacher.
-type MakhrajGroup =
-  | "jawf" | "lips" | "rounded-lips" | "lip-teeth"
-  | "tip-roots" | "interdental" | "tip-sibilants"
-  | "tip-gums" | "middle-tongue" | "side-tongue"
-  | "lam" | "back-qaf" | "back-kaf"
-  | "throat-deep" | "throat-middle" | "throat-near";
-
-type MakhrajInfo = { group: MakhrajGroup; title: string; description: string };
-
-const makhrajByLetter: Record<string, MakhrajInfo> = {
-  "ا": { group: "jawf", title: "Полость рта", description: "Долгий звук «а» проходит через открытую полость рта. Язык не прижимается к нёбу; важна правильная длительность гласного." },
-  "ب": { group: "lips", title: "Две губы", description: "Мягко сомкни обе губы, затем раскрой их. Не добавляй после буквы лишний гласный звук." },
-  "ت": { group: "tip-roots", title: "Корни верхних передних зубов", description: "Кончик языка касается корней верхних резцов и быстро отходит." },
-  "ث": { group: "interdental", title: "Край верхних передних зубов", description: "Кончик языка слегка выходит между передними зубами. Воздух проходит без голоса." },
-  "ج": { group: "middle-tongue", title: "Середина языка и твёрдое нёбо", description: "Середина языка поднимается к твёрдому нёбу. Не заменяй арабский звук привычным русским «дж»." },
-  "ح": { group: "throat-middle", title: "Средняя часть горла", description: "Звук выходит из средней части глотки. Это не обычный русский «х» и не лёгкий выдох." },
-  "خ": { group: "throat-near", title: "Верхняя часть горла", description: "Звук формируется в верхней части горла, ближе ко рту, с характерным трением." },
-  "د": { group: "tip-roots", title: "Корни верхних передних зубов", description: "Кончик языка касается корней верхних резцов и отходит со звонким звуком." },
-  "ذ": { group: "interdental", title: "Край верхних передних зубов", description: "Кончик языка слегка выходит между передними зубами. Звук произносится с голосом." },
-  "ر": { group: "tip-gums", title: "Кончик языка у дёсен", description: "Кончик языка касается дёсен за верхними передними зубами. Не делай долгую раскатистую вибрацию." },
-  "ز": { group: "tip-sibilants", title: "Передняя часть языка у передних резцов", description: "Кончик языка располагается у передних резцов, оставляя узкий канал для воздуха; звук произносится с голосом." },
-  "س": { group: "tip-sibilants", title: "Передняя часть языка у передних резцов", description: "Передняя часть языка остаётся близко к передним резцам, формируя узкий канал для воздуха без голоса." },
-  "ش": { group: "middle-tongue", title: "Середина языка и твёрдое нёбо", description: "Середина языка поднимается к нёбу, оставляя проход для воздуха." },
-  "ص": { group: "tip-sibilants", title: "Передняя часть языка и подъём задней части", description: "Передняя часть языка формирует узкий проход у передних резцов, а задняя часть языка приподнимается: звук получается твёрдым и глубоким." },
-  "ض": { group: "side-tongue", title: "Боковая сторона языка и верхние коренные зубы", description: "Боковая сторона языка прижимается к верхним коренным зубам. Это особая артикуляция; на схеме показан вид сверху." },
-  "ط": { group: "tip-roots", title: "Корни верхних передних зубов", description: "Кончик языка касается корней верхних резцов, а задняя часть языка приподнята. Звук твёрдый." },
-  "ظ": { group: "interdental", title: "Край верхних передних зубов", description: "Кончик языка касается края верхних передних зубов и слегка выходит между ними. Звук твёрдый и звонкий." },
-  "ع": { group: "throat-middle", title: "Средняя часть горла", description: "Звук формируется в средней части глотки. Не заменяй его обычным русским «а»." },
-  "غ": { group: "throat-near", title: "Верхняя часть горла", description: "Звук образуется в верхней части горла, ближе ко рту, с голосом." },
-  "ف": { group: "lip-teeth", title: "Нижняя губа и верхние резцы", description: "Край верхних передних зубов мягко касается внутренней стороны нижней губы." },
-  "ق": { group: "back-qaf", title: "Самая задняя часть языка", description: "Самая задняя часть языка поднимается к мягкому нёбу, ближе к горлу." },
-  "ك": { group: "back-kaf", title: "Задняя часть языка", description: "Задняя часть языка касается нёба немного ближе ко рту, чем при ق." },
-  "ل": { group: "lam", title: "Боковые края языка у верхних дёсен", description: "Передняя часть и боковые края языка соприкасаются с областью верхних дёсен за зубами." },
-  "م": { group: "lips", title: "Две сомкнутые губы", description: "Губы мягко смыкаются; звук сопровождается носовым резонансом." },
-  "ن": { group: "tip-gums", title: "Кончик языка у верхних дёсен", description: "Кончик языка касается дёсен за верхними передними зубами; звук имеет носовой резонанс." },
-  "ه": { group: "throat-deep", title: "Самая глубокая часть горла", description: "Лёгкий звук выходит из глубины горла, без сильного трения." },
-  "و": { group: "rounded-lips", title: "Округлённые губы", description: "При согласном звуке губы округляются вперёд, но не смыкаются. Долгий гласный و имеет свободный проход воздуха." },
-  "ي": { group: "middle-tongue", title: "Середина языка и твёрдое нёбо", description: "При согласном ي середина языка поднимается к твёрдому нёбу; долгий гласный ي произносится с более свободным проходом воздуха." },
-};
-
-const tongueShapes: Record<MakhrajGroup, string> = {
-  jawf: "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  lips: "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  "rounded-lips": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  "lip-teeth": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  "tip-roots": "M48 145 C61 137 69 119 83 112 C106 112 129 141 169 158 C214 176 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
-  interdental: "M31 140 C40 129 43 111 56 108 C75 107 86 132 111 148 C151 173 206 176 259 165 C285 160 305 164 321 180 L304 205 C245 205 196 197 153 181 C105 167 62 157 31 140Z",
-  "tip-sibilants": "M48 145 C64 151 74 151 87 148 C111 149 135 161 169 171 C214 184 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
-  "tip-gums": "M48 145 C62 139 73 124 91 119 C111 119 134 145 169 160 C214 177 265 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
-  "middle-tongue": "M48 145 C93 164 124 157 157 128 C181 108 218 106 244 125 C267 143 291 161 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
-  "side-tongue": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  lam: "M48 145 C61 137 74 120 97 117 C118 117 140 145 173 160 C215 177 266 166 321 180 L304 205 C245 205 196 197 153 181 C110 167 76 158 48 145Z",
-  "back-qaf": "M48 145 C99 165 151 180 198 173 C244 166 269 125 301 111 C321 110 338 142 354 171 L337 197 C289 196 247 193 204 187 C140 178 83 163 48 145Z",
-  "back-kaf": "M48 145 C99 165 151 180 198 173 C238 167 258 137 282 119 C303 117 328 145 354 171 L337 197 C289 196 247 193 204 187 C140 178 83 163 48 145Z",
-  "throat-deep": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  "throat-middle": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-  "throat-near": "M54 145 C100 164 143 181 185 176 C231 170 274 165 321 180 C296 207 249 220 193 214 C129 207 80 181 54 145Z",
-};
-
-const articulationPoints: Record<MakhrajGroup, { x: number; y: number; label: string }> = {
-  jawf: { x: 214, y: 139, label: "ПОЛОСТЬ РТА" },
-  lips: { x: 43, y: 143, label: "ДВЕ ГУБЫ" },
-  "rounded-lips": { x: 45, y: 142, label: "ОКРУГЛЁННЫЕ ГУБЫ" },
-  "lip-teeth": { x: 59, y: 145, label: "НИЖНЯЯ ГУБА + ЗУБЫ" },
-  "tip-roots": { x: 82, y: 113, label: "КОРНИ ВЕРХНИХ РЕЗЦОВ" },
-  interdental: { x: 54, y: 109, label: "КРАЙ ВЕРХНИХ РЕЗЦОВ" },
-  "tip-sibilants": { x: 83, y: 149, label: "ОБЛАСТЬ ПЕРЕДНИХ РЕЗЦОВ" },
-  "tip-gums": { x: 99, y: 118, label: "ВЕРХНИЕ ДЁСНЫ" },
-  "middle-tongue": { x: 203, y: 111, label: "СЕРЕДИНА НЁБА" },
-  "side-tongue": { x: 160, y: 132, label: "БОК ЯЗЫКА У КОРЕННЫХ ЗУБОВ" },
-  lam: { x: 116, y: 119, label: "БОК ЯЗЫКА У ДЁСЕН" },
-  "back-qaf": { x: 302, y: 112, label: "ЗАДНЯЯ ЧАСТЬ ЯЗЫКА" },
-  "back-kaf": { x: 282, y: 119, label: "ЗАДНЯЯ ЧАСТЬ ЯЗЫКА" },
-  "throat-deep": { x: 411, y: 150, label: "ГЛУБИНА ГОРЛА" },
-  "throat-middle": { x: 382, y: 150, label: "СЕРЕДИНА ГОРЛА" },
-  "throat-near": { x: 352, y: 150, label: "ВЕРХ ГОРЛА" },
-};
-
-function LetterMakhrajDiagram({ letter }: { letter: string }) {
-  const info = makhrajByLetter[letter] ?? {
-    group: "middle-tongue" as MakhrajGroup,
-    title: "Место образования звука",
-    description: "Посмотри на выделенную область и сопоставь её с подсказкой.",
-  };
-  const point = articulationPoints[info.group];
-  const tonguePath = tongueShapes[info.group];
-  const isSideViewNeeded = info.group !== "side-tongue";
-  const isOpenCavity = info.group === "jawf";
-  const isLipGroup = info.group === "lips" || info.group === "rounded-lips" || info.group === "lip-teeth";
-
-  return (
-    <section className="letter-makhraj" aria-label={`Место образования звука буквы ${letter}`}>
-      <div className="letter-makhraj-heading">
-        <strong>Как расположить язык</strong>
-        <small>{isSideViewNeeded ? "Вид сбоку · губы слева · горло справа" : "Вид сверху · бок языка и верхние коренные зубы"}</small>
-      </div>
-      {isSideViewNeeded ? (
-        <svg className="letter-mouth-diagram" viewBox="0 0 440 250" role="img" aria-label={`Схема артикуляции буквы ${letter}: ${info.title}.`}>
-          <defs>
-            <linearGradient id="alifly-mouth-skin" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#F5E8D8" />
-              <stop offset="1" stopColor="#D7C1AB" />
-            </linearGradient>
-            <linearGradient id="alifly-tongue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#E7A39A" />
-              <stop offset="1" stopColor="#B96970" />
-            </linearGradient>
-            <filter id="alifly-point-glow" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="5" />
-            </filter>
-          </defs>
-          <path d="M28 123 C42 75 78 42 133 29 C213 10 298 29 349 68 C372 85 390 108 414 125 L430 139 L406 151 L421 165 L389 181 C370 216 334 232 282 234 L117 234 C67 226 39 198 36 165 L18 151 L38 140Z"
-            fill="url(#alifly-mouth-skin)" stroke="#8C7867" strokeWidth="2.5" strokeLinejoin="round" />
-          <path d="M40 123 C108 89 201 82 285 99 C328 108 358 128 371 153 C349 176 307 183 259 178 C181 171 104 165 40 145Z"
-            fill="#F8FBF6" stroke="#9BA99A" strokeWidth="2" />
-          <path d="M54 113 C132 81 226 81 308 105 C331 113 347 128 354 141"
-            fill="none" stroke="#A88F7B" strokeWidth="12" strokeLinecap="round" />
-          <path d="M354 140 C369 154 367 177 350 195"
-            fill="none" stroke="#A88F7B" strokeWidth="13" strokeLinecap="round" />
-          <path d={tonguePath} fill="url(#alifly-tongue)" stroke="#A85E66" strokeWidth="2.5" strokeLinejoin="round" />
-          <path d="M47 118 L82 112 L98 136 L53 143Z M49 148 L86 151 L102 171 L56 164Z"
-            fill="#FFFFFF" stroke="#A99A8B" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M48 119 Q37 129 51 141 M50 148 Q37 159 51 169"
-            fill="none" stroke="#A85E66" strokeWidth="6" strokeLinecap="round" />
-          <path d="M112 100 Q171 88 236 99" fill="none" stroke="#CDB8A5" strokeWidth="2" strokeLinecap="round" />
-          {isOpenCavity ? (
-            <g>
-              <path d="M106 139 Q210 111 331 147" fill="none" stroke="#6EAA62" strokeWidth="17" strokeLinecap="round" opacity=".2" />
-              <path d="M106 139 Q210 111 331 147" fill="none" stroke="#477D42" strokeWidth="3.5" strokeDasharray="5 9" strokeLinecap="round" />
-              <path d="M214 119 L214 86 M204 97 L214 86 L224 97" fill="none" stroke="#477D42" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-              <text x="220" y="59" textAnchor="middle" fontSize="11" fontWeight="800" fill="#356B3D">СВОБОДНЫЙ ПРОХОД ВОЗДУХА</text>
-            </g>
-          ) : (
-            <g>
-              <circle cx={point.x} cy={point.y} r="23" fill="#B9E85C" opacity=".32" filter="url(#alifly-point-glow)" />
-              <circle cx={point.x} cy={point.y} r="12" fill="#C6F432" stroke="#356B43" strokeWidth="3" />
-              <circle cx={point.x} cy={point.y} r="3.5" fill="#173B2B" />
-              <path d={`M${point.x} ${point.y} L${Math.min(point.x + 22, 420)} ${Math.max(point.y - 34, 30)}`} stroke="#477D42" strokeWidth="2" strokeDasharray="4 4" fill="none" />
-            </g>
-          )}
-          {isLipGroup && <path d="M28 132 Q19 140 29 150" fill="none" stroke="#C6F432" strokeWidth="7" strokeLinecap="round" />}
-          <text x="20" y="244" fontSize="9" fill="#637465">ГУБЫ</text>
-          <text x="420" y="244" textAnchor="end" fontSize="9" fill="#637465">ГОРЛО</text>
-          <text x="207" y="235" textAnchor="middle" fontSize="10" fontWeight="700" fill="#68464A">ЯЗЫК</text>
-        </svg>
-      ) : (
-        <svg className="letter-mouth-diagram" viewBox="0 0 440 250" role="img" aria-label="Вид сверху: боковая сторона языка прижимается к верхним коренным зубам.">
-          <ellipse cx="220" cy="126" rx="154" ry="105" fill="#F1E0CE" stroke="#8C7867" strokeWidth="3" />
-          <path d="M93 82 Q220 24 347 82 Q366 126 347 170 Q220 228 93 170 Q74 126 93 82Z" fill="#F8FBF6" stroke="#9BA99A" strokeWidth="2" />
-          <path d="M125 90 Q220 45 315 90 Q330 126 315 161 Q220 207 125 161 Q110 126 125 90Z" fill="#E7A39A" stroke="#A85E66" strokeWidth="2.5" />
-          <g fill="#FFFFFF" stroke="#A99A8B" strokeWidth="2">
-            <rect x="95" y="83" width="27" height="22" rx="7" transform="rotate(-25 108 94)" />
-            <rect x="82" y="112" width="27" height="22" rx="7" />
-            <rect x="95" y="143" width="27" height="22" rx="7" transform="rotate(25 108 154)" />
-            <rect x="318" y="83" width="27" height="22" rx="7" transform="rotate(25 331 94)" />
-            <rect x="331" y="112" width="27" height="22" rx="7" />
-            <rect x="318" y="143" width="27" height="22" rx="7" transform="rotate(-25 331 154)" />
-          </g>
-          <path d="M129 91 Q111 120 132 159" fill="none" stroke="#C6F432" strokeWidth="12" strokeLinecap="round" />
-          <circle cx="128" cy="125" r="20" fill="#B9E85C" opacity=".35" />
-          <circle cx="128" cy="125" r="10" fill="#C6F432" stroke="#356B43" strokeWidth="3" />
-          <text x="220" y="240" textAnchor="middle" fontSize="11" fontWeight="800" fill="#356B43">БОК ЯЗЫКА ↔ ВЕРХНИЕ КОРЕННЫЕ ЗУБЫ</text>
-        </svg>
-      )}
-      <div className="letter-makhraj-target"><span aria-hidden="true">●</span> {point.label}</div>
-      <div className="letter-makhraj-copy">
-        <strong>{info.title}</strong>
-        <p>{info.description}</p>
-        <small className="letter-makhraj-disclaimer">Схема упрощённая: она показывает основную область и движение языка. Точную постановку звука проверяй по образцу и с преподавателем.</small>
-      </div>
-    </section>
-  );
-}
 
 type Stage = {
   id: number;
@@ -256,7 +81,7 @@ const legacyLessons: Lesson[] = [
       { character: "ا", name: "алиф", note: "Прямая вертикальная форма." },
       { character: "ب", name: "ба", note: "Одна точка снизу." },
       { character: "ت", name: "та", note: "Две точки сверху." },
-      { character: "ث", name: "са (thāʾ)", note: "Три точки сверху. Межзубный звук, близкий к th в английском think; это не обычный русский «с»." },
+      { character: "ث", name: "са (межзубная)", note: "Три точки сверху. Кончик языка слегка располагается между верхними и нижними зубами; звук произносится без голоса. Это не обычное русское «с»." },
     ],
     questions: [
       { prompt: "У какой буквы одна точка снизу?", options: ["ت", "ب", "ث"], correct: "ب", explanation: "Это ба — ب. У неё одна точка под буквой." },
@@ -270,10 +95,10 @@ const legacyLessons: Lesson[] = [
     goal: "Познакомься с джим, ха, ха, даль и заль.",
     letters: [
       { character: "ج", name: "джим", note: "Одна точка снизу." },
-      { character: "ح", name: "ḥāʾ (глубокая ха)", note: "Без точек. Глухой глоточный звук; обычная русская «х» не передаёт его точно." },
-      { character: "خ", name: "khāʾ (х)", note: "Одна точка сверху. Шумный звук, похожий на русское «х»." },
+      { character: "ح", name: "ха (глубокая)", note: "Без точек. Глухой глоточный звук; обычная русская «х» не передаёт его точно." },
+      { character: "خ", name: "ха (с трением)", note: "Одна точка сверху. Шумный звук, похожий на русское «х»." },
       { character: "د", name: "даль", note: "Без точек." },
-      { character: "ذ", name: "dhāl (межзубный звук)", note: "Одна точка сверху. Звонкий межзубный звук, близкий к th в английском this." },
+      { character: "ذ", name: "заль (межзубная)", note: "Одна точка сверху. Кончик языка слегка выходит между зубами; звук произносится с голосом." },
     ],
     questions: [
       { prompt: "Найди джим — букву с точкой снизу.", options: ["ح", "ج", "خ"], correct: "ج", explanation: "Это джим — ج. Её отличительный знак — точка снизу." },
@@ -305,7 +130,7 @@ const legacyLessons: Lesson[] = [
       { character: "ص", name: "сад", note: "Эмфатический звук, не обычное русское «с». При произнесении задняя часть языка отодвигается к верхней части глотки." },
       { character: "ض", name: "дад", note: "Эмфатический согласный, не обычное русское «д». Отличается от د дополнительным сужением в верхней части глотки." },
       { character: "ط", name: "та", note: "Эмфатический звук, не обычное русское «т». Отличается от ت дополнительным сужением в верхней части глотки." },
-      { character: "ظ", name: "ẓāʾ (эмфатическая за)", note: "Одна точка сверху. В литературном арабском это звонкий межзубный эмфатический звук; русская «з» — лишь приблизительная подсказка." },
+      { character: "ظ", name: "за (твёрдая межзубная)", note: "Одна точка сверху. В литературном арабском это звонкий межзубный эмфатический звук; русская «з» — лишь приблизительная подсказка." },
       { character: "ع", name: "айн", note: "Глубокий гортанный звук, без точного аналога в русском." },
       { character: "غ", name: "гайн", note: "Звонкий звук, образуется в глубине горла." },
     ],
@@ -321,12 +146,12 @@ const legacyLessons: Lesson[] = [
     goal: "Познакомься с оставшимися буквами и заверши первый блок.",
     letters: [
       { character: "ف", name: "фа" },
-      { character: "ق", name: "qāf (къаф)", note: "Глубокий заднеязычный звук; не обычное русское «к»." },
+      { character: "ق", name: "къаф", note: "Глубокий заднеязычный звук; не обычное русское «к»." },
       { character: "ك", name: "каф" },
       { character: "ل", name: "лям" },
       { character: "م", name: "мим" },
       { character: "ن", name: "нун" },
-      { character: "ه", name: "hāʾ (лёгкая h)", note: "Лёгкий выдох, не путай с ح и خ." },
+      { character: "ه", name: "ха (лёгкая)", note: "Лёгкий выдох, не путай с ح и خ." },
       { character: "و", name: "уау" },
       { character: "ي", name: "йа" },
     ],
@@ -463,14 +288,14 @@ const stageThreeLessons: Lesson[] = [
     [
       {
         arabic: "كِتَاب",
-        transliteration: "kitāb",
+        transliteration: "китааб",
         translation: "книга",
-        note: "Алиф после ت передаёт долгий гласный ā.",
+        note: "Алиф после ت передаёт долгий звук «а».",
         acceptedTransliterations: ["kitāb", "kitab", "китаб"],
       },
       {
         arabic: "قَلَم",
-        transliteration: "qalam",
+        transliteration: "къалам",
         translation: "ручка",
         note: "Буква ق произносится глубже, чем ك.",
         acceptedTransliterations: ["qalam", "калам", "къалам"],
@@ -484,14 +309,14 @@ const stageThreeLessons: Lesson[] = [
     [
       {
         arabic: "بَاب",
-        transliteration: "bāb",
+        transliteration: "бааб",
         translation: "дверь",
-        note: "Алиф после ب обозначает долгий гласный ā.",
+        note: "Алиф после ب обозначает долгий звук «а».",
         acceptedTransliterations: ["bāb", "bab", "баб"],
       },
       {
         arabic: "بَيْت",
-        transliteration: "bayt",
+        transliteration: "байт",
         translation: "дом",
         note: "Сочетание بَيْ читается как bay.",
         acceptedTransliterations: ["bayt", "бейт"],
@@ -505,25 +330,25 @@ const stageThreeLessons: Lesson[] = [
     [
       {
         arabic: "كِتَاب",
-        transliteration: "kitāb",
+        transliteration: "китааб",
         translation: "книга",
         acceptedTransliterations: ["kitāb", "kitab", "китаб"],
       },
       {
         arabic: "قَلَم",
-        transliteration: "qalam",
+        transliteration: "къалам",
         translation: "ручка",
         acceptedTransliterations: ["qalam", "калам", "къалам"],
       },
       {
         arabic: "بَاب",
-        transliteration: "bāb",
+        transliteration: "бааб",
         translation: "дверь",
         acceptedTransliterations: ["bāb", "bab", "баб"],
       },
       {
         arabic: "بَيْت",
-        transliteration: "bayt",
+        transliteration: "байт",
         translation: "дом",
         acceptedTransliterations: ["bayt", "бейт"],
       },
@@ -585,28 +410,28 @@ const stageFourLessons: Lesson[] = [
     [
       {
         arabic: "السَّلَامُ عَلَيْكُمْ",
-        transliteration: "as-salāmu ʿalaykum",
+        transliteration: "ас-саляму алейкум",
         translation: "Мир вам",
         acceptedTransliterations: ["as-salamu alaykum", "assalamu alaykum", "ас-саляму алейкум", "ассаляму алейкум"],
         acceptedTranslations: ["мир вам", "мир вам всем"],
       },
       {
         arabic: "وَعَلَيْكُمُ السَّلَامُ",
-        transliteration: "wa-ʿalaykumu s-salām",
+        transliteration: "уа алейкуму-с-салям",
         translation: "И вам мир",
         acceptedTransliterations: ["wa alaykumu s-salam", "waalaykumu salam", "уа алейкуму салям", "уа алейкуму ссалям"],
         acceptedTranslations: ["и вам мир", "и вам мир тоже"],
       },
       {
         arabic: "مَرْحَبًا",
-        transliteration: "marḥaban",
+        transliteration: "мархабан",
         translation: "Здравствуйте",
         acceptedTransliterations: ["marhaban", "мархабан"],
         acceptedTranslations: ["здравствуйте", "привет", "добро пожаловать"],
       },
       {
         arabic: "أَهْلًا وَسَهْلًا",
-        transliteration: "ahlan wa-sahlan",
+        transliteration: "ахлян уа сахлян",
         translation: "Добро пожаловать",
         acceptedTransliterations: ["ahlan wa sahlan", "ахлан уа сахлан", "ахлан васахлан"],
         acceptedTranslations: ["добро пожаловать", "добро пожаловать к нам"],
@@ -620,7 +445,7 @@ const stageFourLessons: Lesson[] = [
     [
       {
         arabic: "مَا اسْمُكَ؟",
-        transliteration: "mā ismuka?",
+        transliteration: "маа исмука?",
         translation: "Как тебя зовут?",
         note: "Форма обращения к мужчине.",
         recallCue: "Как тебя зовут? (обращение к мужчине)",
@@ -629,7 +454,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "مَا اسْمُكِ؟",
-        transliteration: "mā ismuki?",
+        transliteration: "маа исмуки?",
         translation: "Как тебя зовут?",
         note: "Форма обращения к женщине.",
         recallCue: "Как тебя зовут? (обращение к женщине)",
@@ -638,14 +463,14 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "اسْمِي ...",
-        transliteration: "ismī ...",
+        transliteration: "исми ...",
         translation: "Меня зовут…",
         acceptedTransliterations: ["ismi", "исми"],
         acceptedTranslations: ["меня зовут", "мое имя"],
       },
       {
         arabic: "تَشَرَّفْنَا",
-        transliteration: "tasharrafnā",
+        transliteration: "ташаррафна",
         translation: "Рад(а) знакомству",
         acceptedTransliterations: ["tasharrafna", "ташаррафна"],
         acceptedTranslations: ["рад знакомству", "рада знакомству", "приятно познакомиться", "рад а знакомству"],
@@ -659,7 +484,7 @@ const stageFourLessons: Lesson[] = [
     [
       {
         arabic: "مِنْ أَيْنَ أَنْتَ؟",
-        transliteration: "min ayna anta?",
+        transliteration: "мин айна анта?",
         translation: "Откуда ты?",
         note: "Форма обращения к мужчине.",
         recallCue: "Откуда ты? (обращение к мужчине)",
@@ -668,7 +493,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "مِنْ أَيْنَ أَنْتِ؟",
-        transliteration: "min ayna anti?",
+        transliteration: "мин айна анти?",
         translation: "Откуда ты?",
         note: "Форма обращения к женщине.",
         recallCue: "Откуда ты? (обращение к женщине)",
@@ -677,14 +502,14 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "أَنَا مِنْ ...",
-        transliteration: "anā min ...",
+        transliteration: "ана мин ...",
         translation: "Я из…",
         acceptedTransliterations: ["ana min", "anaa min", "ана мин"],
         acceptedTranslations: ["я из", "я родом из"],
       },
       {
         arabic: "أَنَا مِنْ رُوسِيَا",
-        transliteration: "anā min rūsiyā",
+        transliteration: "ана мин русийа",
         translation: "Я из России",
         acceptedTransliterations: ["ana min rusiya", "anaa min rusiya", "ана мин русия"],
         acceptedTranslations: ["я из россии", "я родом из россии"],
@@ -698,7 +523,7 @@ const stageFourLessons: Lesson[] = [
     [
       {
         arabic: "كَيْفَ حَالُكَ؟",
-        transliteration: "kayfa ḥāluka?",
+        transliteration: "кайфа хаалюка?",
         translation: "Как ты?",
         note: "Форма обращения к мужчине.",
         recallCue: "Как ты? (обращение к мужчине)",
@@ -707,7 +532,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "كَيْفَ حَالُكِ؟",
-        transliteration: "kayfa ḥāluki?",
+        transliteration: "кайфа хаалюки?",
         translation: "Как ты?",
         note: "Форма обращения к женщине.",
         recallCue: "Как ты? (обращение к женщине)",
@@ -716,14 +541,14 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "أَنَا بِخَيْرٍ، شُكْرًا",
-        transliteration: "anā bikhayr, shukran",
+        transliteration: "ана бихайр, шукраан",
         translation: "У меня всё хорошо, спасибо",
         acceptedTransliterations: ["ana bikhayr shukran", "anaa bikhair shukran", "ана бихайр шукран"],
         acceptedTranslations: ["у меня все хорошо спасибо", "я в порядке спасибо", "все хорошо спасибо"],
       },
       {
         arabic: "وَأَنْتَ؟",
-        transliteration: "wa anta?",
+        transliteration: "уа анта?",
         translation: "А ты?",
         note: "При обращении к женщине: وَأَنْتِ؟ (wa anti?).",
         recallCue: "А ты? (обращение к мужчине)",
@@ -732,7 +557,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "الْحَمْدُ لِلَّهِ",
-        transliteration: "al-ḥamdu lillāh",
+        transliteration: "аль-хамду ли-Ллях",
         translation: "Хвала Аллаху",
         acceptedTransliterations: ["alhamdu lillah", "al hamdu lillah", "альхамду лиллях", "альхамдулиллях"],
         acceptedTranslations: ["хвала аллаху", "слава аллаху", "вся хвала аллаху"],
@@ -746,14 +571,14 @@ const stageFourLessons: Lesson[] = [
     [
       {
         arabic: "السَّلَامُ عَلَيْكُمْ\nوَعَلَيْكُمُ السَّلَامُ",
-        transliteration: "as-salāmu ʿalaykum\nwa-ʿalaykumu s-salām",
+        transliteration: "ас-саляму алейкум\nуа алейкуму-с-салям",
         translation: "— Мир вам. — И вам мир.",
         acceptedTransliterations: ["as salamu alaykum wa alaykumu salam", "as-salamu alaykum wa alaykumu s-salam", "ассаляму алейкум уа алейкуму салям"],
         acceptedTranslations: ["мир вам и вам мир", "мир вам и вам мир тоже"],
       },
       {
         arabic: "مَا اسْمُكِ؟\nاسْمِي سَارَةُ",
-        transliteration: "mā ismuki? ismī sāra",
+        transliteration: "маа исмуки? исми Саара",
         translation: "— Как тебя зовут? — Меня зовут Сара.",
         note: "Вопрос обращён к женщине.",
         recallCue: "Диалог: спроси у женщины имя и представься Сарой.",
@@ -762,7 +587,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "مِنْ أَيْنَ أَنْتِ؟\nأَنَا مِنْ رُوسِيَا",
-        transliteration: "min ayna anti? anā min rūsiyā",
+        transliteration: "мин айна анти? ана мин русийа",
         translation: "— Откуда ты? — Я из России.",
         note: "Форма обращения к женщине.",
         recallCue: "Диалог: спроси женщину, откуда она, и ответь, что ты из России.",
@@ -771,7 +596,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "كَيْفَ حَالُكِ؟\nأَنَا بِخَيْرٍ، شُكْرًا",
-        transliteration: "kayfa ḥāluki? anā bikhayr, shukran",
+        transliteration: "кайфа хаалюки? ана бихайр, шукраан",
         translation: "— Как дела? — Хорошо, спасибо.",
         note: "Форма обращения к женщине.",
         recallCue: "Диалог: спроси женщину, как у неё дела, и ответь, что у тебя всё хорошо.",
@@ -780,7 +605,7 @@ const stageFourLessons: Lesson[] = [
       },
       {
         arabic: "تَشَرَّفْنَا",
-        transliteration: "tasharrafnā",
+        transliteration: "ташаррафна",
         translation: "Рад(а) знакомству",
         acceptedTransliterations: ["tasharrafna", "ташаррафна"],
         acceptedTranslations: ["рад знакомству", "рада знакомству", "приятно познакомиться"],
@@ -2298,7 +2123,7 @@ export default function App() {
                             <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} data-touch-hint="Прослушай арабское название буквы" title="Прослушать название">
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                             </button>
-                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · MSA"}</small>
+                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · литературный арабский"}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
