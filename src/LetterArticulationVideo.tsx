@@ -89,7 +89,18 @@ return <section className="articulation-video" aria-label={`Артикуляци
 <path d="M431 145 Q492 98 612 145 L612 253 Q526 305 431 253Z" fill="#E9C9B6" stroke="#A98472" strokeWidth="2"/><path d="M440 161 Q520 129 600 160 L600 239 Q522 270 440 239Z" fill="url(#av-cavity)"/><path d="M445 159 Q520 138 595 159" fill="none" stroke="#FFF8EA" strokeWidth="16" strokeLinecap="round"/><path d="M445 239 Q521 274 595 239" fill="none" stroke="#E0C1AB" strokeWidth="13" strokeLinecap="round"/>
 <path d={tongue} transform="translate(330 0) scale(.66 .72)" className="articulation-video__tongue articulation-video__tongue--zoom" fill="url(#av-tongue)" stroke="#A94F60" strokeWidth="3"/>
 <path d="M440 155 L457 168 L455 185" fill="none" stroke="#B9E85C" strokeWidth="4" strokeLinecap="round" className="articulation-video__contact"/><circle cx="458" cy="176" r="13" fill="#B9E85C" opacity=".25" className="articulation-video__pulse"/>
-<text x="524" y="291" textAnchor="middle" className="articulation-video__zoom-caption">ЯЗЫК · НЁБО · ЗУБЫ · ГУБЫ</text>{throat&&<path d="M603 183 Q620 204 603 224" fill="none" stroke="#B9E85C" strokeWidth="5" strokeLinecap="round" className="articulation-video__contact"/>}{side&&<text x="524" y="315" textAnchor="middle" className="articulation-video__special">ДЛЯ ض НУЖЕН ВИД СВЕРХУ</text>}</g>
+<text x="524" y="291" textAnchor="middle" className="articulation-video__zoom-caption">ЯЗЫК · НЁБО · ЗУБЫ · ГУБЫ</text>{throat&&<path d="M603 183 Q620 204 603 224" fill="none" stroke="#B9E85C" strokeWidth="5" strokeLinecap="round" className="articulation-video__contact"/>}{side&&<g className="articulation-video__top-view">
+<rect x="416" y="96" width="216" height="184" rx="18" fill="#F6F4EA" stroke="#B9C9A8" strokeWidth="2"/>
+<text x="524" y="119" textAnchor="middle" className="articulation-video__zoom-title">ВИД СВЕРХУ · БОК ЯЗЫКА</text>
+<ellipse cx="524" cy="194" rx="84" ry="58" fill="#E9C9B6" stroke="#A98472" strokeWidth="2"/>
+<ellipse cx="524" cy="194" rx="63" ry="43" fill="#4A2530"/>
+<path d="M470 168 Q524 145 578 168" fill="none" stroke="#FFF8EA" strokeWidth="12" strokeLinecap="round"/>
+<path d="M470 220 Q524 243 578 220" fill="none" stroke="#E0C1AB" strokeWidth="12" strokeLinecap="round"/>
+<path d="M474 171 Q459 191 475 215" fill="none" stroke="#B9E85C" strokeWidth="12" strokeLinecap="round"/>
+<path d="M478 173 Q465 193 480 212" fill="none" stroke="#E69A9A" strokeWidth="10" strokeLinecap="round"/>
+<circle cx="475" cy="194" r="13" fill="#B9E85C" opacity=".3" className="articulation-video__pulse"/>
+<text x="524" y="263" textAnchor="middle" className="articulation-video__zoom-caption">БОК ЯЗЫКА К ВЕРХНИМ МОЛЯРАМ</text>
+</g>}</g>
 <text x="418" y="363" className="articulation-video__footer">Зелёный маркер — зона контакта / сужения</text>
 </svg></div>
 <div className="articulation-video__copy"><strong>{info.title}</strong><p>{info.description}</p><small>Учебная анатомическая анимация. Она показывает ориентир артикуляции, но не заменяет проверку произношения преподавателем арабского языка.</small></div>
