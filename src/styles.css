@@ -2176,17 +2176,6 @@ html, body {
   color: #24452D;
   box-shadow: 0 0 0 4px rgba(198,244,50,.16);
 }
-.letter-makhraj { overflow: hidden; }
-.letter-mouth-diagram {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 5px auto 8px;
-}
-.letter-makhraj-target {
-  flex-wrap: wrap;
-  text-align: center;
-}
 :root[data-theme="dark"] .letter-audio-status { color: #C5D0C7; }
 :root[data-theme="dark"] .letter-speak-button.is-playing {
   border-color: #C6F432;
