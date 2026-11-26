@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import LetterMakhrajDiagram from "./components/LetterMakhrajDiagram";
 import { useLocation, useNavigate } from "react-router-dom";
 import DailyQuest, { type DailyGoal } from "./DailyQuest";
 import AuthPanel from "./auth/AuthPanel";
@@ -26,8 +27,6 @@ const arabicLetterAudio = Object.fromEntries(
     `${import.meta.env.BASE_URL}audio/letters/${slug}.wav`,
   ]),
 ) as Record<string, string>;
-
-import LetterMakhrajDiagram from "./components/LetterMakhrajDiagram";
 
 type Stage = {
   id: number;
