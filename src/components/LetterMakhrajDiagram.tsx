@@ -49,7 +49,7 @@ const contact: Record<Group, { x: number; y: number }> = {
 };
 
 export default function LetterMakhrajDiagram({ letter }: { letter: string }): ReactElement {
-  const info = articulation[letter] ?? { group: "middle-tongue", title: "Место образования звука", instruction: "Посмотри на выделенную область." };
+  const info: Info = articulation[letter] ?? { group: "middle-tongue", title: "Место образования звука", instruction: "Посмотри на выделенную область." };
   const point = contact[info.group];
   const topView = info.view === "top";
   return (
