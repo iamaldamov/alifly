@@ -14,6 +14,7 @@ test("a learner can skip the alphabet and start with simple words", async ({ pag
 test("level 3 keeps sentence lessons in sequence and preserves their progress", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("alifly-starting-level:guest", "3");
+    localStorage.setItem("alifly-daily-goal:guest", "1");
     localStorage.setItem("alifly-completed-lessons", JSON.stringify([35, 36, 37, 38]));
   });
   await page.goto("./");
