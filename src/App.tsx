@@ -290,7 +290,7 @@ const stageThreeLessons: Lesson[] = [
         arabic: "كِتَاب",
         transliteration: "китааб",
         translation: "книга",
-        note: "Алиф после ت передаёт долгий гласный ā.",
+        note: "Алиф после ت передаёт долгий звук «а».",
         acceptedTransliterations: ["kitāb", "kitab", "китаб"],
       },
       {
@@ -311,7 +311,7 @@ const stageThreeLessons: Lesson[] = [
         arabic: "بَاب",
         transliteration: "бааб",
         translation: "дверь",
-        note: "Алиф после ب обозначает долгий гласный ā.",
+        note: "Алиф после ب обозначает долгий звук «а».",
         acceptedTransliterations: ["bāb", "bab", "баб"],
       },
       {
@@ -2123,7 +2123,7 @@ export default function App() {
                             <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} data-touch-hint="Прослушай арабское название буквы" title="Прослушать название">
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                             </button>
-                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · MSA"}</small>
+                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · литературный арабский"}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
