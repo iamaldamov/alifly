@@ -10,11 +10,11 @@ function normalizeLessonIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   const ids = value.filter((id): id is number => Number.isInteger(id));
   const alreadyMigrated = ids.some(
-    (id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37),
+    (id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 39),
   );
   const isCurrentLessonId = (id: number) =>
     (id >= 20 && id <= 28) ||
-    (id >= 30 && id <= 37) ||
+    (id >= 30 && id <= 39) ||
     (id >= 6 && id <= 13);
 
   const normalized = alreadyMigrated
