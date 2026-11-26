@@ -1008,6 +1008,10 @@ export default function App() {
   const letterTouchStartX = useRef<number | null>(null);
   const letterAudioRef = useRef<HTMLAudioElement | null>(null);
   const audioRequestIdRef = useRef(0);
+  const autoPlayedLetterRef = useRef<string | null>(null);
+  const [autoLetterAudio, setAutoLetterAudio] = useState<boolean>(() => {
+    try { return localStorage.getItem("alifly-auto-letter-audio") === "enabled"; } catch { return false; }
+  });
   const [letterAudioStatus, setLetterAudioStatus] = useState<"idle" | "loading" | "playing" | "error">("idle");
   const [letterAudioType, setLetterAudioType] = useState<"letter" | "alphabet">("letter");
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -1087,6 +1091,17 @@ export default function App() {
   useEffect(() => {
     if (!selectedLesson || !selectedStage) stopLetterAudio();
   }, [selectedLesson, selectedStage]);
+
+  useEffect(() => {
+    if (!selectedLesson || !selectedStage || lessonPhase !== "study" || selectedLesson.studyCards || !autoLetterAudio) return;
+    const current = selectedLesson.letters[activeLetterIndex];
+    if (!current) return;
+    const playbackKey = `${selectedLesson.id ?? "lesson"}:${activeLetterIndex}:${current.character}`;
+    if (autoPlayedLetterRef.current === playbackKey) return;
+    autoPlayedLetterRef.current = playbackKey;
+    const audioUrl = arabicLetterAudio[current.character];
+    if (audioUrl) playAudioSample(audioUrl, "letter");
+  }, [selectedLesson, selectedStage, activeLetterIndex, lessonPhase, autoLetterAudio]);
 
   useEffect(() => () => {
     if (letterAudioRef.current) {
@@ -2091,6 +2106,13 @@ export default function App() {
                         }
                         playAudioSample(audioUrl, "letter");
                       };
+                      const enableAutoAudio = () => {
+                        try { localStorage.setItem("alifly-auto-letter-audio", "enabled"); } catch { /* The current session can still use autoplay. */ }
+                        autoPlayedLetterRef.current = `${selectedLesson.id ?? "lesson"}:${activeLetterIndex}:${letter.character}`;
+                        setAutoLetterAudio(true);
+                        const audioUrl = arabicLetterAudio[letter.character];
+                        if (audioUrl) playAudioSample(audioUrl, "letter");
+                      };
                       const moveLetter = (direction: -1 | 1) => {
                         stopLetterAudio();
                         setActiveLetterIndex((current) => Math.max(0, Math.min(selectedLesson.letters.length - 1, current + direction)));
@@ -2120,9 +2142,14 @@ export default function App() {
                             <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
-                            <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Прослушать название буквы ${letter.character}`} data-touch-hint="Прослушай арабское название буквы" title="Прослушать название">
+                            <div className="letter-audio-actions">
+                              <button className={autoLetterAudio ? "letter-auto-audio is-enabled" : "letter-auto-audio"} type="button" onClick={enableAutoAudio} aria-pressed={autoLetterAudio}>
+                                {autoLetterAudio ? "Автозвук включён" : "Включить автозвук"}
+                              </button>
+                              <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Повторить произношение буквы ${letter.character}`} data-touch-hint="Повторить звук" title="Повторить звук">
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
-                            </button>
+                              </button>
+                            </div>
                             <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · литературный арабский"}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
