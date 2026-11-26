@@ -33,3 +33,11 @@ test("the diagnostic recommends a level and opens the matching route", async ({ 
   await page.getByRole("button", { name: "Начать обучение →" }).click();
   await expect(page.getByRole("heading", { name: "Приветствие и ответ" })).toBeVisible();
 });
+
+test("a learner who knows the letters starts at short vowels instead of the alphabet", async ({ page }) => {
+  await page.goto("./");
+
+  await page.getByRole("button", { name: /Знаю буквы/ }).click();
+
+  await expect(page.getByRole("heading", { name: "Фатха — короткий звук «а»" })).toBeVisible();
+});
