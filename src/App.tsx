@@ -1077,7 +1077,6 @@ export default function App() {
     audio.onended = () => {
       if (requestId === audioRequestIdRef.current) {
         setLetterAudioStatus("idle");
-        letterAudioRef.current = null;
       }
     };
     audio.onerror = () => {
