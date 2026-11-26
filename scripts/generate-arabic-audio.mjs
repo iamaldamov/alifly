@@ -37,7 +37,7 @@ let totalBytes = 0;
 
 try {
   for (const item of manifest) {
-    const { audio, sampleRate } = await tts.generate(item.name, { speed: 0.92 });
+    const { audio, sampleRate } = await tts.generate(item.sample ?? item.name, { speed: 0.92 });
     if (sampleRate !== 24000 || audio.length === 0 || !audio.every(Number.isFinite)) {
       throw new Error(`Invalid generated audio for ${item.character} (${item.name}).`);
     }
