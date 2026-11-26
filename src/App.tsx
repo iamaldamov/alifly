@@ -2075,20 +2075,18 @@ export default function App() {
                     {(() => {
                       const letter = selectedLesson.letters[activeLetterIndex];
                       if (!letter) return null;
+                      const audioUrl = arabicLetterAudio[letter.character];
+                      const hasAudio = Boolean(audioUrl);
                       const speakLetter = () => {
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (!audioUrl) {
-                          setLetterAudioStatus("error");
-                          return;
-                        }
+                        if (!audioUrl) return;
                         playAudioSample(audioUrl, "letter");
                       };
                       const enableAutoAudio = () => {
+                        if (!audioUrl) return;
                         try { localStorage.setItem("alifly-auto-letter-audio", "enabled"); } catch { /* The current session can still use autoplay. */ }
                         autoPlayedLetterRef.current = `${selectedLesson.id ?? "lesson"}:${activeLetterIndex}:${letter.character}`;
                         setAutoLetterAudio(true);
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (audioUrl) playAudioSample(audioUrl, "letter");
+                        playAudioSample(audioUrl, "letter");
                       };
                       const moveLetter = (direction: -1 | 1) => {
                         stopLetterAudio();
@@ -2107,21 +2105,21 @@ export default function App() {
                             }}
                           >
                             <div className="letter-flashcard-top">
-                              <span>БУКВА {String(activeLetterIndex + 1).padStart(2, "0")}</span>
+                              <span>ПРИМЕР {String(activeLetterIndex + 1).padStart(2, "0")}</span>
                               <span>{activeLetterIndex + 1} / {selectedLesson.letters.length}</span>
                             </div>
                             <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
                             <div className="letter-audio-actions">
-                              <button className={autoLetterAudio ? "letter-auto-audio is-enabled" : "letter-auto-audio"} type="button" onClick={enableAutoAudio} aria-pressed={autoLetterAudio}>
+                              <button className={autoLetterAudio && hasAudio ? "letter-auto-audio is-enabled" : "letter-auto-audio"} type="button" onClick={enableAutoAudio} disabled={!hasAudio} aria-pressed={hasAudio && autoLetterAudio} title={hasAudio ? "Включить автоматическое воспроизведение" : "Запись для этого примера пока не добавлена"}>
                                 {autoLetterAudio ? (letterAudioStatus === "error" ? "Разрешить звук" : "Автозвук включён") : "Включить автозвук"}
                               </button>
-                              <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Повторить произношение буквы ${letter.character}`} data-touch-hint="Повторить звук" title="Повторить звук">
+                              <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} disabled={!hasAudio} aria-label={`Повторить произношение: ${letter.name}`} data-touch-hint={hasAudio ? "Повторить звук" : "Аудио пока не добавлено"} title={hasAudio ? "Повторить звук" : "Запись для этого примера пока не добавлена"}>
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                               </button>
                             </div>
-                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · литературный арабский"}</small>
+                            <small className="letter-audio-status" role="status">{!hasAudio ? "Запись для этого сочетания пока не добавлена. Доступно аудио отдельных букв." : letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь подключение и попробуй снова." : "Синтетическое произношение · литературный арабский"}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
@@ -2130,8 +2128,8 @@ export default function App() {
                                 key={item.character}
                                 type="button"
                                 className={index === activeLetterIndex ? "letter-progress-dot is-active" : "letter-progress-dot"}
-                                data-touch-hint={`Перейти к букве ${index + 1}`}
-                                aria-label={`Перейти к букве ${index + 1}`}
+                                data-touch-hint={`Перейти к примеру ${index + 1}`}
+                                aria-label={`Перейти к примеру ${index + 1}`}
                                 aria-current={index === activeLetterIndex ? "step" : undefined}
                                 onClick={() => { stopLetterAudio(); setActiveLetterIndex(index); }}
                               />
