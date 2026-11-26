@@ -69,10 +69,10 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
   const frontTongue = ["lam", "nun", "ra", "ta", "sin", "tha"].includes(info.point);
   const backTongue = ["qaf", "kaf", "wasat-lisan", "daad"].includes(info.point);
   const throat = ["aqsa-halq", "wasat-halq", "adna-halq"].includes(info.point);
-  const lipSound = info.point === "lips" || info.point === "fa";
   const bilabial = info.point === "lips" && letter !== "و";
   const roundedLip = letter === "و";
   const sideTongue = info.point === "daad";
+  const showAirflow = ["jawf", "wasat-halq", "adna-halq", "wasat-lisan", "sin", "tha", "fa"].includes(info.point);
 
   return (
     <section className={`pronunciation-visual pronunciation-visual--${info.point}${info.emphatic ? " pronunciation-visual--emphatic" : ""}`} aria-label={`Место образования буквы ${letter}`}>
@@ -116,7 +116,7 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
         </g>
         {info.emphatic && <path className="pv-emphasis pv-emphasis--active" d="M300 244 Q346 218 388 235" fill="none" stroke="#C6F432" strokeOpacity=".8" strokeWidth="5" strokeLinecap="round"/>}
         {/* Airflow is shown only for sounds with an open passage. */}
-        <path className="pv-airflow" d="M45 186 C112 177 180 179 245 184 C315 189 370 184 421 197" fill="none" stroke="url(#pv-air)" strokeWidth="3" strokeDasharray="7 9" strokeLinecap="round"/>
+        {showAirflow && <path className="pv-airflow" d="M45 186 C112 177 180 179 245 184 C315 189 370 184 421 197" fill="none" stroke="url(#pv-air)" strokeWidth="3" strokeDasharray="7 9" strokeLinecap="round"/>}
         {/* Articulation focus. */}
         <circle className="pronunciation-visual__halo" cx={x} cy={y} r="23"/>
         <circle className="pronunciation-visual__point" cx={x} cy={y} r="7"/>
