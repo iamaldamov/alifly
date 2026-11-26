@@ -20,10 +20,10 @@ test("the diagnostic recommends a level and opens the matching route", async ({ 
   await page.getByRole("button", { name: "ب" }).click();
   await page.getByRole("button", { name: "Продолжить →" }).click();
 
-  await page.getByRole("button", { name: "ба" }).click();
+  await page.getByRole("button", { name: "ба", exact: true }).click();
   await page.getByRole("button", { name: "Продолжить →" }).click();
 
-  await page.getByRole("button", { name: "китаб" }).click();
+  await page.getByRole("button", { name: "китаб", exact: true }).click();
   await page.getByRole("button", { name: "Продолжить →" }).click();
 
   await page.getByRole("button", { name: "Как тебя зовут?" }).click();
