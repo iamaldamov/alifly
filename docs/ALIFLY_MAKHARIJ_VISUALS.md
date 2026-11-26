@@ -36,10 +36,9 @@ The illustration is an original, simplified vector teaching diagram. It is not a
 
 ## Sources consulted
 
-1. Aqab Brisbane, *Articulation Points of 17 Makharij* (educational tajweed chart and side-view / top-view articulation diagrams): https://www.aqabrisbane.org/wp-content/uploads/2020/12/MakharijTajweed-V2-Nov-2020.pdf
-2. Islamic Manual, *The articulation points of the letters (makharij)* (17-point descriptions and letter groupings): https://islamicmanual.com/guide/prayer/reciting-well/articulation-points-makharij
-3. Tilawa, *Makharij al-Huruf: the 17 Points of Articulation* (interactive grouping into five areas): https://tilawa.ai/en/tajweed-rules/group/makharij/
-4. American Speech-Language-Hearing Association, *Arabic Phonemic Inventory* (Modern Standard Arabic consonant inventory and note on dialectal variation): https://www.asha.org/siteassets/uploadedfiles/multicultural/arabicphonemicinventory.pdf
-5. Ouni et al., *Arabic visemes / place of articulation* (phonetic classification and distinction of emphatic consonants): https://www.isca-archive.org/interspeech_2007/ouni07_interspeech.pdf
+1. Islamic Manual, *The articulation points of the letters (makharij)* (17-point descriptions and letter groupings): https://islamicmanual.com/guide/prayer/reciting-well/articulation-points-makharij
+2. Tilawa, *Makharij al-Huruf: the 17 Points of Articulation* (interactive grouping into five areas): https://tilawa.ai/en/tajweed-rules/group/makharij/
+3. American Speech-Language-Hearing Association, *Arabic Phonemic Inventory* (Modern Standard Arabic consonant inventory and note on dialectal variation): https://www.asha.org/siteassets/uploadedfiles/multicultural/arabicphonemicinventory.pdf
+4. Ouni et al., *Arabic visemes / place of articulation* (phonetic classification and distinction of emphatic consonants): https://www.isca-archive.org/interspeech_2007/ouni07_interspeech.pdf
 
 The traditional tajweed makhraj model and modern phonetic descriptions are related but not identical classification systems. The lesson therefore labels this as an educational articulation guide, not a universal dialect-specific phonetic transcription. In particular, teachers should review local teaching conventions for ج and the emphatic consonants before the site claims teacher approval.
