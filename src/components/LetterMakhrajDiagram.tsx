@@ -6,7 +6,7 @@ type Group =
   | "side-tongue" | "lam" | "back-qaf" | "back-kaf"
   | "throat-deep" | "throat-middle" | "throat-near";
 
-type Info = { group: Group; title: string; instruction: string; view?: "top" };
+type Info = { group: Group; title: string; instruction: string; view?: "top"; secondary?: string };
 
 const articulation: Record<string, Info> = {
   "ا": { group: "jawf", title: "Открытая полость рта", instruction: "Рот открыт. Язык не касается нёба: воздух проходит свободно, а гласный звук тянется." },
@@ -22,10 +22,10 @@ const articulation: Record<string, Info> = {
   "ز": { group: "tip-sibilants", title: "Узкий проход у передних зубов", instruction: "Оставь узкий проход для воздуха у передних зубов; голосовые связки работают." },
   "س": { group: "tip-sibilants", title: "Узкий проход у передних зубов", instruction: "Оставь узкий проход для воздуха у передних зубов; голосовые связки не работают." },
   "ش": { group: "middle-tongue", title: "Середина языка и нёбо", instruction: "Приподними середину языка к нёбу, оставив широкий проход для воздуха." },
-  "ص": { group: "tip-sibilants", title: "Передняя часть языка и задний подъём", instruction: "Сформируй узкий проход у передних зубов и одновременно приподними заднюю часть языка." },
-  "ض": { group: "side-tongue", title: "Бок языка у коренных зубов", instruction: "Прижми боковую сторону языка к верхним коренным зубам. Схема показывает область контакта сверху.", view: "top" },
-  "ط": { group: "tip-roots", title: "Кончик языка у верхних зубов", instruction: "Коснись основания верхних передних зубов; задняя часть языка приподнята." },
-  "ظ": { group: "interdental", title: "Язык у края верхних зубов", instruction: "Покажи кончик языка у края верхних зубов; произнеси звук с голосом и подъёмом задней части языка." },
+  "ص": { group: "tip-sibilants", title: "Передняя часть языка у зубов", instruction: "Сформируй узкий проход у передних зубов.", secondary: "Задняя часть языка приподнята — звук твёрдый." },
+  "ض": { group: "side-tongue", title: "Бок языка у коренных зубов", instruction: "Прижми боковую сторону языка к верхним коренным зубам. Схема показывает область контакта сверху.", view: "top", secondary: "Задняя часть языка приподнята — звук твёрдый." },
+  "ط": { group: "tip-roots", title: "Кончик языка у верхних зубов", instruction: "Коснись основания верхних передних зубов.", secondary: "Задняя часть языка приподнята — звук твёрдый." },
+  "ظ": { group: "interdental", title: "Язык у края верхних зубов", instruction: "Покажи кончик языка у края верхних зубов и произнеси звук с голосом.", secondary: "Задняя часть языка приподнята — звук твёрдый." },
   "ع": { group: "throat-middle", title: "Средняя часть горла", instruction: "Сформируй звук сужением средней части глотки. Не заменяй его обычным гласным." },
   "غ": { group: "throat-near", title: "Верхняя часть горла", instruction: "Создай трение в верхней части горла и добавь голос." },
   "ف": { group: "lip-teeth", title: "Верхние зубы и нижняя губа", instruction: "Коснись внутренней стороны нижней губы краем верхних передних зубов." },
@@ -58,6 +58,7 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
         <strong>Где образуется звук?</strong>
         <small>{topView ? "Вид сверху · показана верхняя челюсть" : "Вид сбоку · губы слева, горло справа"}</small>
       </div>
+      <p className="letter-makhraj-marker-note">Зелёная отметка показывает основную зону образования звука</p>
       {topView ? (
         <svg className="letter-mouth-diagram" viewBox="0 0 560 300" role="img" aria-label="Вид сверху: боковая часть языка касается верхних коренных зубов.">
           <path d="M105 48 Q280 -4 455 48 Q520 150 455 252 Q280 304 105 252 Q40 150 105 48Z" fill="#F0DCC8" stroke="#9C806B" strokeWidth="5"/>
@@ -90,12 +91,13 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
           <circle cx={point.x} cy={point.y} r="25" fill="#C6F432" opacity=".24"/>
           <circle cx={point.x} cy={point.y} r="13" fill="#C6F432" stroke="#315A39" strokeWidth="5"/>
           <path d={`M${point.x} ${point.y} L${Math.max(50,Math.min(500,point.x+36))} ${Math.max(28,point.y-44)}`} stroke="#315A39" strokeWidth="3" strokeDasharray="6 5" fill="none"/>
-          <g fill="#315A39" fontSize="16" fontWeight="800">
+          <g fill="#315A39" fontSize="22" fontWeight="900">
             <text x="50" y="292">ГУБЫ</text><text x="150" y="80">ЗУБЫ</text><text x="290" y="68">НЁБО</text><text x="310" y="248">ЯЗЫК</text><text x="515" y="292" textAnchor="end">ГОРЛО</text>
           </g>
         </svg>
       )}
       <div className="letter-makhraj-target"><span aria-hidden="true">●</span> {info.title}</div>
+      {info.secondary && <div className="letter-makhraj-secondary">{info.secondary}</div>}
       <div className="letter-makhraj-copy">
         <strong>Что делать языком и губами</strong>
         <p>{info.instruction}</p>
