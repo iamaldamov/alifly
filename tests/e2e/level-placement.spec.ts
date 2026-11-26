@@ -15,6 +15,7 @@ test("level 3 keeps sentence lessons in sequence and preserves their progress", 
   await page.addInitScript(() => {
     localStorage.setItem("alifly-starting-level:guest", "3");
     localStorage.setItem("alifly-daily-goal:guest", "1");
+    localStorage.setItem("alifly-auth-prompt-dismissed", "1");
     localStorage.setItem("alifly-completed-lessons", JSON.stringify([35, 36, 37, 38]));
   });
   await page.goto("./");
