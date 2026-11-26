@@ -7,7 +7,6 @@ import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlac
 import WordGame, { type Word } from "./WordGame";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
-import { fullAlphabetAudioUrl } from "./data/arabic-audio-sources";
 import { auth, db } from "./lib/firebase";
 import { addDoc, collection, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { signInAnonymously } from "firebase/auth";
