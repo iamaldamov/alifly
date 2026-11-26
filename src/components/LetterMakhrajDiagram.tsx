@@ -73,7 +73,7 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
   const sideTongue = info.point === "daad";
 
   return (
-    <section className={`pronunciation-visual pronunciation-visual--${info.point}`} aria-label={`Место образования буквы ${letter}`}>
+    <section className={`pronunciation-visual pronunciation-visual--${info.point}${info.emphatic ? " pronunciation-visual--emphatic" : ""}`} aria-label={`Место образования буквы ${letter}`}>
       <div className="pronunciation-visual__meta"><span>ВИД СБОКУ</span><span>МЕСТО ЗВУКА</span></div>
       <svg className="pronunciation-visual__svg" viewBox="0 0 640 330" role="img" aria-label={`Схема речевого аппарата в разрезе. Выделено: ${info.title}`}>
         <defs>
