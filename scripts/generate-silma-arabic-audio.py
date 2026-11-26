@@ -12,6 +12,13 @@ from pathlib import Path
 import soundfile as sf
 import torch
 from silma_tts.api import SilmaTTS
+import silma_tts.infer.utils_infer as silma_infer
+
+# SILMA's normalize_last_word() rewrites the final Arabic vowel mark to sukun.
+# ALIFLY generates isolated letter names and isolated harakat syllables, where
+# that rewrite changes the lesson target (for example بَ becomes بْ).
+# Preserve the explicitly supplied, source-checked tashkeel for these clips.
+silma_infer.normalize_last_word = lambda text: text
 
 ROOT = Path(__file__).resolve().parents[1]
 LETTER_MANIFEST = ROOT / "src/data/arabic-letter-names.json"
