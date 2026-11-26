@@ -20,10 +20,10 @@ test("the diagnostic recommends a level and opens the matching route", async ({ 
   await page.getByRole("button", { name: "ب" }).click();
   await page.getByRole("button", { name: "Продолжить →" }).click();
 
-  await page.getByRole("button", { name: "ба" }).click();
+  await page.getByRole("button", { name: "ба", exact: true }).click();
   await page.getByRole("button", { name: "Продолжить →" }).click();
 
-  await page.getByRole("button", { name: "китаб" }).click();
+  await page.getByRole("button", { name: "китаб", exact: true }).click();
   await page.getByRole("button", { name: "Продолжить →" }).click();
 
   await page.getByRole("button", { name: "Как тебя зовут?" }).click();
@@ -32,4 +32,12 @@ test("the diagnostic recommends a level and opens the matching route", async ({ 
   await expect(page.getByRole("heading", { name: "Подходящий старт найден" })).toBeVisible();
   await page.getByRole("button", { name: "Начать обучение →" }).click();
   await expect(page.getByRole("heading", { name: "Приветствие и ответ" })).toBeVisible();
+});
+
+test("a learner who knows the letters starts at short vowels instead of the alphabet", async ({ page }) => {
+  await page.goto("./");
+
+  await page.getByRole("button", { name: /Знаю буквы/ }).click();
+
+  await expect(page.getByRole("heading", { name: "Фатха — короткий звук «а»" })).toBeVisible();
 });

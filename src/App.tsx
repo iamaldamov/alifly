@@ -7,6 +7,8 @@ import LevelPlacement, { isLearningLevel, type LearningLevel } from "./LevelPlac
 import WordGame, { type Word } from "./WordGame";
 import { useAuth } from "./auth/AuthContext";
 import ArabicLetterNames from "./data/arabic-letter-names.json";
+import { arabicReadingLessons } from "./data/arabic-reading-lessons";
+import { normalizeCompletedLessonIds, normalizeDailyLessonIds } from "./lib/lesson-progress";
 import { auth, db } from "./lib/firebase";
 import { addDoc, collection, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { signInAnonymously } from "firebase/auth";
@@ -66,7 +68,7 @@ type Lesson = {
 
 const stages: Stage[] = [
   { id: 1, title: "Арабский алфавит", description: "Знакомство с 28 буквами и их звучанием", icon: "ا", lessons: 9, status: "available" },
-  { id: 2, title: "Огласовки", description: "Фатха, кясра и дамма — три основные огласовки", icon: "َ", lessons: 3, status: "locked" },
+  { id: 2, title: "Огласовки и чтение", description: "Краткие и долгие гласные, соединение букв и базовые знаки чтения", icon: "َ", lessons: 8, status: "locked" },
   { id: 3, title: "Читаем первые слова", description: "Короткие слова с огласовками и чтение без подсказок", icon: "ك", lessons: 3, status: "locked" },
   { id: 4, title: "Первые диалоги", description: "Приветствия и простые разговоры на современном литературном арабском", icon: "م", lessons: 5, status: "locked" },
 ];
@@ -239,6 +241,7 @@ const stageTwoLessons: Lesson[] = [
       { prompt: "Какое соответствие верное?", options: [], correct: "Дамма — «у»", explanation: "Запомни: фатха — короткое «а», кясра — короткое «и», дамма — короткое «у».", mode: "recall" },
     ],
   },
+  ...arabicReadingLessons,
 ];
 
 
@@ -761,34 +764,6 @@ function buildExamRecallQuestions(): Question[] {
   }));
 }
 
-
-const legacyAlphabetProgress: Record<number, number[]> = {
-  1: [20],
-  2: [21, 22],
-  3: [23],
-  4: [24, 25],
-  5: [26, 27, 28],
-};
-
-function normalizeCompletedLessonIds(value: unknown): number[] {
-  if (!Array.isArray(value)) return [];
-  const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37));
-  const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37) || (id >= 6 && id <= 8))
-    : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
-  return [...new Set(normalized)];
-}
-
-function normalizeDailyLessonIds(value: unknown): number[] {
-  if (!Array.isArray(value)) return [];
-  const ids = value.filter((id): id is number => Number.isInteger(id));
-  const alreadyMigrated = ids.some((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37));
-  const normalized = alreadyMigrated
-    ? ids.filter((id) => (id >= 20 && id <= 28) || (id >= 30 && id <= 37) || (id >= 6 && id <= 8))
-    : ids.flatMap((id) => legacyAlphabetProgress[id] ?? ((id >= 6 && id <= 8) ? [id] : []));
-  return [...new Set(normalized)];
-}
 
 function readCompletedLessons(): number[] {
   try {
@@ -1742,7 +1717,7 @@ export default function App() {
     : stageThreeUnlocked
       ? { title: "чтения слов", stageTitle: "Читаем первые слова", lessons: stageThreeLessons }
       : stageTwoUnlocked
-        ? { title: "огласовок", stageTitle: "Огласовки", lessons: stageTwoLessons }
+        ? { title: "огласовок", stageTitle: "Огласовки и чтение", lessons: stageTwoLessons }
         : { title: "алфавита", stageTitle: "Арабский алфавит", lessons };
   const activeRouteCompletedCount = activeRoute.lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
   const activeRoutePercent = Math.round((activeRouteCompletedCount / activeRoute.lessons.length) * 100);
@@ -1955,7 +1930,7 @@ export default function App() {
                     {stage.id === 1
                       ? firstStageCompletedCount + "/" + lessons.length + " уроков алфавита"
                       : stage.id === 2
-                        ? unlocked ? (examPassed ? "Открыт после экзамена" : "Открыт по выбранному уровню") : stage.lessons + " урока"
+                        ? unlocked ? (examPassed ? "Открыт после экзамена" : "Открыт по выбранному уровню") : stage.lessons + " уроков"
                         : stage.id === 3
                           ? stageThreeLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length + "/" + stageThreeLessons.length + " урока чтения"
                           : stageFourLessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length + "/" + stageFourLessons.length + " уроков диалогов"}
@@ -1990,7 +1965,7 @@ export default function App() {
                 <p>{selectedStage.description}</p>
                 {selectedStage.id === 2 && stageTwoUnlocked ? (
                   <div className="lesson-picker">
-                    <p className="modal-note">Отличная работа! Теперь изучи три основные огласовки. Уроки открываются по порядку.</p>
+                    <p className="modal-note">Сначала три краткие огласовки, затем соединение букв, сукун, долгие гласные, танвин и шадда. Уроки открываются по порядку.</p>
                     {stageTwoLessons.map((lesson) => {
                       const isOpen = lesson.id === 6 || completedLessonIds.includes(lesson.id - 1);
                       const isCompleted = completedLessonIds.includes(lesson.id);
@@ -2100,20 +2075,18 @@ export default function App() {
                     {(() => {
                       const letter = selectedLesson.letters[activeLetterIndex];
                       if (!letter) return null;
+                      const audioUrl = arabicLetterAudio[letter.character];
+                      const hasAudio = Boolean(audioUrl);
                       const speakLetter = () => {
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (!audioUrl) {
-                          setLetterAudioStatus("error");
-                          return;
-                        }
+                        if (!audioUrl) return;
                         playAudioSample(audioUrl, "letter");
                       };
                       const enableAutoAudio = () => {
+                        if (!audioUrl) return;
                         try { localStorage.setItem("alifly-auto-letter-audio", "enabled"); } catch { /* The current session can still use autoplay. */ }
                         autoPlayedLetterRef.current = `${selectedLesson.id ?? "lesson"}:${activeLetterIndex}:${letter.character}`;
                         setAutoLetterAudio(true);
-                        const audioUrl = arabicLetterAudio[letter.character];
-                        if (audioUrl) playAudioSample(audioUrl, "letter");
+                        playAudioSample(audioUrl, "letter");
                       };
                       const moveLetter = (direction: -1 | 1) => {
                         stopLetterAudio();
@@ -2132,21 +2105,21 @@ export default function App() {
                             }}
                           >
                             <div className="letter-flashcard-top">
-                              <span>БУКВА {String(activeLetterIndex + 1).padStart(2, "0")}</span>
+                              <span>ПРИМЕР {String(activeLetterIndex + 1).padStart(2, "0")}</span>
                               <span>{activeLetterIndex + 1} / {selectedLesson.letters.length}</span>
                             </div>
                             <strong className="letter-flashcard-character" lang="ar" dir="rtl">{letter.character}</strong>
                             <span className="letter-flashcard-name">{letter.name.split(" (")[0]}</span>
                             <p className="letter-flashcard-note">{letter.note ?? "Внимательно рассмотри форму этой буквы."}</p>
                             <div className="letter-audio-actions">
-                              <button className={autoLetterAudio ? "letter-auto-audio is-enabled" : "letter-auto-audio"} type="button" onClick={enableAutoAudio} aria-pressed={autoLetterAudio}>
+                              <button className={autoLetterAudio && hasAudio ? "letter-auto-audio is-enabled" : "letter-auto-audio"} type="button" onClick={enableAutoAudio} disabled={!hasAudio} aria-pressed={hasAudio && autoLetterAudio} title={hasAudio ? "Включить автоматическое воспроизведение" : "Запись для этого примера пока не добавлена"}>
                                 {autoLetterAudio ? (letterAudioStatus === "error" ? "Разрешить звук" : "Автозвук включён") : "Включить автозвук"}
                               </button>
-                              <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} aria-label={`Повторить произношение буквы ${letter.character}`} data-touch-hint="Повторить звук" title="Повторить звук">
+                              <button className={letterAudioStatus === "playing" && letterAudioType === "letter" ? "letter-speak-button is-playing" : "letter-speak-button"} type="button" onClick={speakLetter} disabled={!hasAudio} aria-label={`Повторить произношение: ${letter.name}`} data-touch-hint={hasAudio ? "Повторить звук" : "Аудио пока не добавлено"} title={hasAudio ? "Повторить звук" : "Запись для этого примера пока не добавлена"}>
                               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" /></svg>
                               </button>
                             </div>
-                            <small className="letter-audio-status" role="status">{letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь интернет и попробуй снова." : "Арабская нейроозвучка · литературный арабский"}</small>
+                            <small className="letter-audio-status" role="status">{!hasAudio ? "Запись для этого сочетания пока не добавлена. Доступно аудио отдельных букв." : letterAudioStatus === "loading" ? (letterAudioType === "alphabet" ? "Загружаем запись алфавита…" : "Загружаем голосовой образец…") : letterAudioStatus === "playing" ? (letterAudioType === "alphabet" ? "Воспроизводится запись алфавита" : "Воспроизводится арабское произношение") : letterAudioStatus === "error" ? "Не удалось воспроизвести аудио. Проверь подключение и попробуй снова." : "Синтетическое произношение · литературный арабский"}</small>
                             <LetterMakhrajDiagram letter={letter.character} />
                           </div>
                           <div className="letter-flashcard-progress" aria-label={`Карточка ${activeLetterIndex + 1} из ${selectedLesson.letters.length}`}>
@@ -2155,8 +2128,8 @@ export default function App() {
                                 key={item.character}
                                 type="button"
                                 className={index === activeLetterIndex ? "letter-progress-dot is-active" : "letter-progress-dot"}
-                                data-touch-hint={`Перейти к букве ${index + 1}`}
-                                aria-label={`Перейти к букве ${index + 1}`}
+                                data-touch-hint={`Перейти к примеру ${index + 1}`}
+                                aria-label={`Перейти к примеру ${index + 1}`}
                                 aria-current={index === activeLetterIndex ? "step" : undefined}
                                 onClick={() => { stopLetterAudio(); setActiveLetterIndex(index); }}
                               />

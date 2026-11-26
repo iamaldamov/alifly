@@ -63,19 +63,29 @@ const locations: Record<Point, [number, number]> = {
   lips: [42, 205]
 };
 
-export default function LetterMakhrajDiagram({ letter }: { letter: string }): ReactElement {
-  const info = letters[letter] ?? letters["ا"];
+export function getMakhrajBaseLetter(value: string): string | null {
+  const matches = Array.from(value).filter((character) =>
+    Object.prototype.hasOwnProperty.call(letters, character),
+  );
+  return matches.length === 1 ? matches[0] : null;
+}
+
+export default function LetterMakhrajDiagram({ letter }: { letter: string }): ReactElement | null {
+  const baseLetter = getMakhrajBaseLetter(letter);
+  if (!baseLetter) return null;
+
+  const info = letters[baseLetter];
   const [x, y] = locations[info.point];
   const frontTongue = ["lam", "nun", "ra", "ta", "sin", "tha"].includes(info.point);
   const backTongue = ["qaf", "kaf", "wasat-lisan", "daad"].includes(info.point);
   const throat = ["aqsa-halq", "wasat-halq", "adna-halq"].includes(info.point);
-  const bilabial = info.point === "lips" && letter !== "و";
-  const roundedLip = letter === "و";
+  const bilabial = info.point === "lips" && baseLetter !== "و";
+  const roundedLip = baseLetter === "و";
   const sideTongue = info.point === "daad";
   const showAirflow = ["jawf", "wasat-halq", "adna-halq", "wasat-lisan", "sin", "tha", "fa"].includes(info.point);
 
   return (
-    <section className={`pronunciation-visual pronunciation-visual--${info.point}${info.emphatic ? " pronunciation-visual--emphatic" : ""}`} aria-label={`Место образования буквы ${letter}`}>
+    <section className={`pronunciation-visual pronunciation-visual--${info.point}${info.emphatic ? " pronunciation-visual--emphatic" : ""}`} aria-label={`Место образования буквы ${baseLetter}`}>
       <div className="pronunciation-visual__meta"><span>ВИД СБОКУ</span><span>МЕСТО ЗВУКА</span></div>
       <svg className="pronunciation-visual__svg" viewBox="0 0 640 330" role="img" aria-label={`Схема речевого аппарата в разрезе. Выделено: ${info.title}`}>
         <defs>
