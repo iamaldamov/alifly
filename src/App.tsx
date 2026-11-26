@@ -2170,7 +2170,14 @@ export default function App() {
                   </>
                 )}
                 {!selectedLesson.studyCards && activeLetterIndex < selectedLesson.letters.length - 1 ? (
-                  <button className="primary-button modal-button study-start" type="button" onClick={() => moveLetter(1)}>
+                  <button className="primary-button modal-button study-start" type="button" onClick={() => {
+                    const nextIndex = Math.min(selectedLesson.letters.length - 1, activeLetterIndex + 1);
+                    const nextLetter = selectedLesson.letters[nextIndex];
+                    if (nextLetter && nextIndex !== activeLetterIndex) {
+                      setActiveLetterIndex(nextIndex);
+                      playLetterAudio(nextLetter.character);
+                    }
+                  }}>
                     Следующая буква →
                   </button>
                 ) : (
