@@ -63,25 +63,6 @@ const locations: Record<Point, [number, number]> = {
   lips: [42, 205]
 };
 
-const pointLabels: Record<Point, string> = {
-  jawf: "Полость рта",
-  "aqsa-halq": "Глубина горла",
-  "wasat-halq": "Середина горла",
-  "adna-halq": "Верх горла",
-  qaf: "Задняя часть языка",
-  kaf: "Задняя часть языка",
-  "wasat-lisan": "Середина языка",
-  daad: "Бок языка",
-  lam: "Край языка",
-  nun: "Кончик языка",
-  ra: "Кончик языка",
-  ta: "Кончик языка",
-  sin: "Кончик языка",
-  tha: "Кончик языка",
-  fa: "Нижняя губа",
-  lips: "Губы"
-};
-
 export default function LetterMakhrajDiagram({ letter }: { letter: string }): ReactElement {
   const info = letters[letter] ?? letters["ا"];
   const [x, y] = locations[info.point];
@@ -122,7 +103,7 @@ export default function LetterMakhrajDiagram({ letter }: { letter: string }): Re
         <path d="M108 239 C170 250 222 226 267 207 C315 188 357 202 386 224" fill="none" stroke="#EFF6F0" strokeOpacity=".38" strokeWidth="3" strokeLinecap="round"/>
         {/* The highlighted articulator moves, not the whole illustration. */}
         <g className={frontTongue ? "pv-moving pv-moving--front" : backTongue ? "pv-moving pv-moving--back" : "pv-moving"}>
-          <path d="M92 237 C128 244 164 233 199 214" fill="none" stroke="#C6F432" strokeOpacity=".78" strokeWidth="5" strokeLinecap="round"/>
+          <path d={frontTongue ? "M92 237 C128 244 164 233 199 214" : backTongue ? "M292 205 C329 183 368 195 395 222" : "M184 226 C230 199 280 187 326 190"} fill="none" stroke="#C6F432" strokeOpacity=".78" strokeWidth="5" strokeLinecap="round"/>
         </g>
         <g className={throat ? "pv-throat pv-throat--active" : "pv-throat"}>
           <path d="M432 174 Q446 199 429 228" fill="none" stroke="#C6F432" strokeOpacity=".72" strokeWidth="5" strokeLinecap="round"/>
