@@ -2546,3 +2546,18 @@ html, body {
  .pronunciation-visual__caption span { font-size:12px; }
  .letter-audio-actions { gap:8px; }
 }
+
+/* Distinct, restrained motion by articulation family. */
+.pronunciation-visual--teeth .pronunciation-visual__tongue,
+.pronunciation-visual--between .pronunciation-visual__tongue,
+.pronunciation-visual--alveolar .pronunciation-visual__tongue { animation-name: pronunciation-front-contact; }
+.pronunciation-visual--palate .pronunciation-visual__tongue,
+.pronunciation-visual--velum .pronunciation-visual__tongue { animation-name: pronunciation-back-lift; }
+.pronunciation-visual--side .pronunciation-visual__tongue { animation-name: pronunciation-side-contact; }
+.pronunciation-visual--sibilant .pronunciation-visual__tongue { animation-name: pronunciation-air-channel; }
+.pronunciation-visual--lips .pronunciation-visual__lips,
+.pronunciation-visual--lip-teeth .pronunciation-visual__lips { animation-name: pronunciation-lips; }
+@keyframes pronunciation-front-contact { 0%,100% { transform:translate(-1px,2px) scaleY(.98); } 48% { transform:translate(-5px,-5px) scaleY(1.02); } }
+@keyframes pronunciation-back-lift { 0%,100% { transform:translate(2px,2px) rotate(0deg); } 50% { transform:translate(8px,-6px) rotate(-2deg); } }
+@keyframes pronunciation-side-contact { 0%,100% { transform:translate(0,2px) skewY(0deg); } 50% { transform:translate(3px,-4px) skewY(-2deg); } }
+@keyframes pronunciation-air-channel { 0%,100% { transform:translateY(1px) scaleY(.99); } 50% { transform:translateY(-2px) scaleY(1.01); } }
