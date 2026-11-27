@@ -377,3 +377,35 @@ button:disabled { opacity: .48; }
   }
   .hero { padding-inline: 0 !important; }
 }
+
+
+/* Dark-only mode: the light theme is intentionally disabled across the app. */
+:root,
+:root[data-theme="light"],
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #101010;
+  --surface: #191919;
+  --surface-strong: #202020;
+  --surface-soft: #242424;
+  --text: #ffffff;
+  --text-soft: #e5e5e5;
+  --text-muted: #a3a3a3;
+  --border: transparent;
+  --accent: #b7ed43;
+  --accent-strong: #c8f46a;
+  --accent-soft: #263019;
+  --green: #b7ed43;
+  --green-dark: #c8f46a;
+  --green-soft: #263019;
+  --cream: #101010;
+  --gold: #ffb13b;
+  --line: transparent;
+  --classic-page: #101010;
+  --classic-surface: #191919;
+  --classic-surface-muted: #242424;
+  --classic-text: #ffffff;
+  --classic-muted: #a3a3a3;
+  --classic-line: transparent;
+}
+html, body, #root { background: #101010 !important; color: #ffffff !important; }
