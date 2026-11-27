@@ -409,3 +409,33 @@ button:disabled { opacity: .48; }
   --classic-line: transparent;
 }
 html, body, #root { background: #101010 !important; color: #ffffff !important; }
+
+
+/* Single-theme product: permanently dark, with no theme-switch control. */
+.theme-toggle,
+button.theme-toggle,
+[ data-theme-toggle ],
+[data-theme-switcher] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+:root,
+:root[data-theme],
+:root[data-theme="light"],
+:root[data-theme="dark"] {
+  color-scheme: dark !important;
+  --page: #101010 !important;
+  --surface: #191919 !important;
+  --surface-strong: #202020 !important;
+  --surface-soft: #242424 !important;
+  --text: #ffffff !important;
+  --text-soft: #e5e5e5 !important;
+  --text-muted: #a3a3a3 !important;
+  --accent: #b7ed43 !important;
+  --accent-strong: #c8f46a !important;
+  --green: #b7ed43 !important;
+  --green-dark: #c8f46a !important;
+  --cream: #101010 !important;
+}
+html, body, #root { color-scheme: dark !important; background: #101010 !important; }
