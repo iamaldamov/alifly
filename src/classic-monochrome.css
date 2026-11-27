@@ -31,11 +31,11 @@
   --cream: #ffffff;
   --gold: var(--classic-orange);
   --line: var(--classic-line);
-  color-scheme: light;
+  color-scheme: dark !important;
 }
 
 :root[data-theme="light"] {
-  color-scheme: light;
+  color-scheme: dark !important;
   --page: #ffffff;
   --surface: #ffffff;
   --surface-strong: #ffffff;
@@ -439,3 +439,22 @@ button.theme-toggle,
   --cream: #101010 !important;
 }
 html, body, #root { color-scheme: dark !important; background: #101010 !important; }
+
+
+/* Enforce one dark theme even when an old light preference was saved. */
+:root, :root[data-theme="light"], :root[data-theme="dark"] {
+  color-scheme: dark !important;
+  --page: #101010 !important;
+  --surface: #191919 !important;
+  --surface-strong: #202020 !important;
+  --surface-soft: #242424 !important;
+  --text: #ffffff !important;
+  --text-soft: #e5e5e5 !important;
+  --text-muted: #a3a3a3 !important;
+  --border: transparent !important;
+  --accent: #b7ed43 !important;
+  --accent-strong: #c8f46a !important;
+  --cream: #101010 !important;
+}
+html, body, #root { color-scheme: dark !important; background: #101010 !important; color: #fff !important; }
+.theme-toggle, [data-theme-toggle], [data-theme-switcher] { display: none !important; }
