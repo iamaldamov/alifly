@@ -58,6 +58,44 @@ def load_manifest(path: Path, expected_count: int, text_key: str) -> list[dict[s
     return manifest
 
 
+def validate_audio_signal(audio, sample_rate: int, label: str) -> dict[str, float]:
+    """Reject technically broken clips; this does not assess phonetic correctness."""
+    peak = float(abs(audio).max())
+    rms = float((audio**2).mean() ** 0.5)
+    frame_samples = max(1, int(sample_rate * 0.01))
+    frame_rms = [
+        float((audio[start : start + frame_samples] ** 2).mean() ** 0.5)
+        for start in range(0, len(audio) - frame_samples + 1, frame_samples)
+    ]
+    active_frames = [index for index, value in enumerate(frame_rms) if value > 0.01]
+
+    if peak >= 0.98:
+        raise RuntimeError(f"Clipped audio for {label}: peak={peak:.3f}.")
+    if rms < 0.02:
+        raise RuntimeError(f"Audio is too quiet for {label}: RMS={rms:.3f}.")
+    if not active_frames:
+        raise RuntimeError(f"No active speech detected in audio for {label}.")
+
+    leading_silence = active_frames[0] * frame_samples / sample_rate
+    trailing_silence = (len(frame_rms) - 1 - active_frames[-1]) * frame_samples / sample_rate
+    active_ratio = len(active_frames) / max(1, len(frame_rms))
+
+    if leading_silence > 0.20 or trailing_silence > 0.35 or active_ratio < 0.35:
+        raise RuntimeError(
+            f"Suspicious silence in audio for {label}: "
+            f"leading={leading_silence:.2f}s, trailing={trailing_silence:.2f}s, "
+            f"active={active_ratio:.0%}."
+        )
+
+    return {
+        "peak": peak,
+        "rms": rms,
+        "leading_silence": leading_silence,
+        "trailing_silence": trailing_silence,
+        "active_ratio": active_ratio,
+    }
+
+
 def synthesize_manifest(
     tts: SilmaTTS,
     manifest: list[dict[str, str]],
@@ -108,9 +146,14 @@ def synthesize_manifest(
         if not (abs(audio).max() > 0.001):
             raise RuntimeError(f"Silent audio generated for {item['character']}.")
 
+        signal = validate_audio_signal(audio, sample_rate, item["character"])
         size = destination.stat().st_size
         total_bytes += size
-        print(f"Generated {item['character']} {text}: {info.duration:.2f}s, {size} bytes")
+        print(
+            f"Generated {item['character']} {text}: {info.duration:.2f}s, {size} bytes; "
+            f"peak={signal['peak']:.2f}, RMS={signal['rms']:.2f}, "
+            f"active={signal['active_ratio']:.0%}"
+        )
 
     generated = sorted(output_dir.glob("*.wav"))
     if len(generated) != len(manifest):
