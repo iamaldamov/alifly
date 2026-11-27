@@ -1037,14 +1037,6 @@ export default function App() {
   const [reportDescription, setReportDescription] = useState("");
   const [reportStatus, setReportStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    try {
-      return localStorage.getItem("alifly-theme") === "light" ? "light" : "dark";
-    } catch {
-      return "dark";
-    }
-  });
-
   const stopLetterAudio = () => {
     audioRequestIdRef.current += 1;
     if (letterAudioRef.current) {
@@ -1113,11 +1105,6 @@ export default function App() {
       letterAudioRef.current.onplaying = null;
     }
   }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    try { localStorage.setItem("alifly-theme", theme); } catch { /* Storage may be unavailable. */ }
-  }, [theme]);
 
   useEffect(() => {
     setDailyGoal(readDailyGoal(dailyUserId));
@@ -1774,18 +1761,6 @@ export default function App() {
             <span className="streak-count">{streak}</span>
           </span>
           <AuthPanel cloudStatus={cloudSaveStatus} onChangeLevel={() => setShowLevelSettings(true)} suppressInitialPrompt={shouldShowLevelPlacement || showLevelSettings || selectedLesson !== null || !hasDailyGoalChoice(dailyUserId)} openOnMount={isLoginRoute} onClose={() => { if (isLoginRoute) navigate("/"); }} />
-          <button
-            className="theme-toggle"
-            data-touch-hint={theme === "dark" ? "Нажми, чтобы включить светлую тему" : "Нажми, чтобы включить тёмную тему"}
-            type="button"
-            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
-            aria-label={theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему"}
-            title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
-            aria-pressed={theme === "dark"}
-          >
-            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
-            <span className="theme-toggle-label">{theme === "dark" ? "Светлая" : "Тёмная"}</span>
-          </button>
         </div>
       </header>
 
@@ -1795,14 +1770,6 @@ export default function App() {
             <button className="alifly-settings-close" type="button" onClick={() => setShowSettings(false)} aria-label="Закрыть настройки">×</button>
             <span className="section-label">ПЕРСОНАЛЬНЫЕ ПАРАМЕТРЫ</span>
             <h2 id="alifly-settings-title">Настройки</h2>
-            <div className="settings-group">
-              <h3>Внешний вид</h3>
-              <p>Выбери удобную тему оформления.</p>
-              <div className="settings-choice-row" role="group" aria-label="Тема оформления">
-                <button type="button" className={theme === "light" ? "settings-choice is-active" : "settings-choice"} aria-pressed={theme === "light"} onClick={() => setTheme("light")}>☀ Светлая</button>
-                <button type="button" className={theme === "dark" ? "settings-choice is-active" : "settings-choice"} aria-pressed={theme === "dark"} onClick={() => setTheme("dark")}>☾ Тёмная</button>
-              </div>
-            </div>
             <div className="settings-group">
               <h3>Миссия дня</h3>
               <p>Сколько уроков ты хочешь проходить ежедневно?</p>
