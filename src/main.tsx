@@ -11,6 +11,7 @@ import "./level-placement.css";
 import "./premium-interaction.css";
 import "./expanded-hero.css";
 import "./lesson-experience-polish.css";
+import "./classic-monochrome.css";
 import MotionEnhancements from "./MotionEnhancements";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
