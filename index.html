@@ -8,6 +8,14 @@
     <meta name="color-scheme" content="dark" />
 
     <script>
+      // ALIFLY has one permanent theme. Set it before React and styles load.
+      (function () {
+        try { localStorage.removeItem("alifly-theme"); } catch (_) {}
+        document.documentElement.setAttribute("data-theme", "dark");
+        document.documentElement.style.colorScheme = "dark";
+      })();
+    </script>
+    <script>
       (function () {
         var base = "/alifly/";
         var params = new URLSearchParams(window.location.search);
