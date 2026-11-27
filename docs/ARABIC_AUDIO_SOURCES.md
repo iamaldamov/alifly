@@ -33,12 +33,15 @@ All generated samples are synthetic speech, not human recordings. They must be l
 
 The build script:
 - validates exactly 28 letter-name entries and 9 syllable entries;
-- preserves each supplied Arabic string, including its diacritics;
+- preserves each supplied Arabic string, including its diacritics (SILMA's default final-word normalizer is bypassed for these isolated samples because it otherwise changes a final short-vowel mark to sukūn);
 - verifies the pinned reference audio hash before synthesis;
 - checks WAV format, sample rate, mono channel count, bit depth, duration, and non-silent output;
+- rejects clipped samples (peak at or above 0.98), near-silent clips (RMS below 0.02), leading silence above 0.20 s, trailing silence above 0.35 s, or clips with less than 35% active 10 ms frames;
 - uploads a short-lived artifact for human listening review.
 
-These technical checks do not establish correct makhraj, phonetic accuracy, or teaching quality. A qualified Arabic teacher must review the clips before publication.
+The successful artifact from [GitHub Actions run 45896582648](https://github.com/iamaldamov/alifly/actions/runs/45896582648) contains all 37 expected files. An offline metadata/signal check found 24 kHz mono files, durations from approximately 0.21 to 0.59 seconds, peak levels below 0.84, and no empty or silent files.
+
+These are technical signal checks only. They do not establish correct makhraj, phonetic accuracy, correct letter-name pronunciation, or teaching quality. A qualified Arabic teacher must review the clips before publication.
 
 ## Whole alphabet reference (human recording)
 
