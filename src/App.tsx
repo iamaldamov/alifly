@@ -2110,13 +2110,14 @@ export default function App() {
                           <div
                             key={letter.character}
                             className={`letter-flashcard letter-flashcard-swipe-${letterSwipeDirection}`}
-                            onTouchStart={(event) => { letterTouchStartX.current = event.touches[0]?.clientX ?? null; }}
-                            onTouchEnd={(event) => {
+                            onPointerDown={(event) => { letterTouchStartX.current = event.clientX; }}
+                            onPointerUp={(event) => {
                               if (letterTouchStartX.current === null) return;
-                              const delta = event.changedTouches[0].clientX - letterTouchStartX.current;
+                              const delta = event.clientX - letterTouchStartX.current;
                               if (Math.abs(delta) > 45) moveLetter(delta < 0 ? 1 : -1);
                               letterTouchStartX.current = null;
                             }}
+                            onPointerCancel={() => { letterTouchStartX.current = null; }}
                           >
                             <div className="letter-flashcard-top">
                               <span>БУКВА {String(activeLetterIndex + 1).padStart(2, "0")}</span>
