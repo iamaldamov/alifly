@@ -2097,7 +2097,8 @@ export default function App() {
                             <div
                               className="letter-swipe-hint"
                               role="status"
-                              onAnimationEnd={() => {
+                              onAnimationEnd={(event) => {
+                                if (event.target !== event.currentTarget) return;
                                 setShowSwipeHint(false);
                                 try { localStorage.setItem("alifly-swipe-hint-seen", "1"); } catch { /* The hint remains one-time for this session. */ }
                               }}
