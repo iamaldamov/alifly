@@ -2576,3 +2576,37 @@ html, body {
 @media (prefers-reduced-motion:reduce) {
  .pv-lips--rounded,.pv-lip-lower--active,.pv-emphasis--active { animation:none; }
 }
+
+
+/* One-time swipe guidance and directional letter transitions */
+.letter-flashcard-swipe-left { animation: letter-swipe-in-from-right 260ms cubic-bezier(.2,.75,.25,1) both; }
+.letter-flashcard-swipe-right { animation: letter-swipe-in-from-left 260ms cubic-bezier(.2,.75,.25,1) both; }
+@keyframes letter-swipe-in-from-right {
+  from { opacity: .45; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes letter-swipe-in-from-left {
+  from { opacity: .45; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.letter-swipe-hint {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  min-height:30px; color:var(--text-soft, #718076); font-size:12px; font-weight:700;
+  letter-spacing:.02em; animation: letter-hint-fade 1.8s ease both;
+}
+.letter-swipe-hand { display:inline-block; font-size:20px; animation: letter-hand-swipe 800ms ease-in-out 2; }
+@keyframes letter-hand-swipe {
+  0%, 100% { opacity:.55; transform:translateX(5px); }
+  55% { opacity:1; transform:translateX(-17px); }
+}
+@keyframes letter-hint-fade {
+  0% { opacity:0; transform:translateY(4px); }
+  15%, 75% { opacity:1; transform:translateY(0); }
+  100% { opacity:0; transform:translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .letter-flashcard-swipe-left, .letter-flashcard-swipe-right, .letter-swipe-hand {
+    animation:none !important;
+  }
+  .letter-swipe-hint { animation:letter-hint-fade 1ms linear both; }
+}

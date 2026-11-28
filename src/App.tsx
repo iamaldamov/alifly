@@ -1004,6 +1004,10 @@ export default function App() {
   const [lessonPhase, setLessonPhase] = useState<"study" | "practice">("study");
   const [showAlphabetTips, setShowAlphabetTips] = useState(false);
   const [activeLetterIndex, setActiveLetterIndex] = useState(0);
+  const [letterSwipeDirection, setLetterSwipeDirection] = useState<"left" | "right">("left");
+  const [showSwipeHint, setShowSwipeHint] = useState(() => {
+    try { return localStorage.getItem("alifly-swipe-hint-seen") !== "1"; } catch { return true; }
+  });
   const letterTouchStartX = useRef<number | null>(null);
   const letterAudioRef = useRef<HTMLAudioElement | null>(null);
   const audioRequestIdRef = useRef(0);
@@ -2083,13 +2087,29 @@ export default function App() {
                         if (audioUrl) playAudioSample(audioUrl, "letter");
                       };
                       const moveLetter = (direction: -1 | 1) => {
+                        setLetterSwipeDirection(direction > 0 ? "left" : "right");
                         stopLetterAudio();
                         setActiveLetterIndex((current) => Math.max(0, Math.min(selectedLesson.letters.length - 1, current + direction)));
                       };
                       return (
                         <div className="alphabet-flashcards">
+                          {showSwipeHint && (
+                            <div
+                              className="letter-swipe-hint"
+                              role="status"
+                              onAnimationEnd={(event) => {
+                                if (event.target !== event.currentTarget) return;
+                                setShowSwipeHint(false);
+                                try { localStorage.setItem("alifly-swipe-hint-seen", "1"); } catch { /* The hint remains one-time for this session. */ }
+                              }}
+                            >
+                              <span>Смахните влево</span>
+                              <span className="letter-swipe-hand" aria-hidden="true">👈</span>
+                            </div>
+                          )}
                           <div
-                            className="letter-flashcard"
+                            key={letter.character}
+                            className={`letter-flashcard letter-flashcard-swipe-${letterSwipeDirection}`}
                             onTouchStart={(event) => { letterTouchStartX.current = event.touches[0]?.clientX ?? null; }}
                             onTouchEnd={(event) => {
                               if (letterTouchStartX.current === null) return;
@@ -2129,10 +2149,6 @@ export default function App() {
                               />
                             ))}
                           </div>
-                          <div className="letter-flashcard-navigation">
-                            <button type="button" className="letter-nav-button" onClick={() => moveLetter(-1)} disabled={activeLetterIndex === 0}>← Назад</button>
-                            <button type="button" className="letter-nav-button letter-nav-next" onClick={() => moveLetter(1)} disabled={activeLetterIndex === selectedLesson.letters.length - 1}>Следующая →</button>
-                          </div>
                         </div>
                       );
                     })()}
@@ -2151,11 +2167,7 @@ export default function App() {
                     </div>
                   </>
                 )}
-                {!selectedLesson.studyCards && activeLetterIndex < selectedLesson.letters.length - 1 ? (
-                  <button className="primary-button modal-button study-start" type="button" onClick={() => setActiveLetterIndex((current) => Math.min(selectedLesson.letters.length - 1, current + 1))}>
-                    Следующая буква →
-                  </button>
-                ) : (
+                {(selectedLesson.studyCards || activeLetterIndex === selectedLesson.letters.length - 1) && (
                   <button className="primary-button modal-button study-start" type="button" onClick={() => { setLessonPhase("practice"); setQuestionIndex(0); setSelectedAnswer(null); setTypedAnswer(""); }}>
                     Перейти к закреплению →
                   </button>
