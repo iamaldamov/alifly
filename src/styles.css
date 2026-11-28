@@ -2605,7 +2605,8 @@ html, body {
   100% { opacity:0; transform:translateY(-3px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .letter-flashcard-swipe-left, .letter-flashcard-swipe-right, .letter-swipe-hint, .letter-swipe-hand {
+  .letter-flashcard-swipe-left, .letter-flashcard-swipe-right, .letter-swipe-hand {
     animation:none !important;
   }
+  .letter-swipe-hint { animation:letter-hint-fade 1ms linear both; }
 }
