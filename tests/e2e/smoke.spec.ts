@@ -53,7 +53,14 @@ test("first alphabet lesson shows the new articulation diagram and updates it pe
   await expect(page.locator(".pronunciation-visual__svg")).toHaveAttribute("aria-label", /Схема речевого аппарата/);
   await expect(page.locator(".pronunciation-visual__caption strong")).toHaveText("Полость рта и горла");
 
-  await page.getByRole("button", { name: "Следующая →" }).click();
+  const letterCard = page.locator(".letter-flashcard");
+  const cardBounds = await letterCard.boundingBox();
+  if (!cardBounds) throw new Error("Letter card is not visible");
+  const centerY = cardBounds.y + cardBounds.height / 2;
+  await page.mouse.move(cardBounds.x + cardBounds.width * 0.8, centerY);
+  await page.mouse.down();
+  await page.mouse.move(cardBounds.x + cardBounds.width * 0.2, centerY, { steps: 8 });
+  await page.mouse.up();
   await expect(page.locator(".letter-flashcard-character")).toHaveText("ب");
   await expect(page.locator(".pronunciation-visual__caption strong")).toHaveText("Две сомкнутые губы");
 
